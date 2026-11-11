@@ -833,7 +833,7 @@ canvas{display:block;border-radius:10px}
     <!-- Empty state when no folder chosen -->
     <div id="music-empty-deck" style="text-align:center; padding: 22px 14px; background: var(--surf2); border: 1px solid var(--brd); border-radius: 12px; margin-bottom: 12px; display: none;">
       <div style="font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 4px;">No Music Folder Configured</div>
-      <div style="font-size: 11px; color: var(--txt2); margin-bottom: 14px; line-height: 1.5;">Select your music folder in Tone Settings (☰) or tap below to index your Poweramp-tagged collection.</div>
+      <div style="font-size: 11px; color: var(--txt2); margin-bottom: 14px; line-height: 1.5;">Select your music folder in Tone Settings menu or tap below to index your Poweramp-tagged collection.</div>
       <button type="button" class="btn-deck-action" onclick="pickMusicFolder()">Choose Music Folder</button>
     </div>
 
@@ -911,15 +911,15 @@ canvas{display:block;border-radius:10px}
         <div><div class="char-name">Pure Tone</div><div class="char-desc">Clean single whistle or ring (300 Hz – 12 kHz)</div></div>
       </div>
       <div class="char-opt" id="co-sawtooth" onclick="selectChar('sawtooth')">
-        <div class="char-icon">⚡</div>
+        <div class="char-icon" style="display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
         <div><div class="char-name">Hum / Buzz</div><div class="char-desc">Electrical buzz, motor, low drone (80 Hz – 3 kHz)</div></div>
       </div>
       <div class="char-opt" id="co-noise" onclick="selectChar('noise')">
-        <div class="char-icon">💨</div>
+        <div class="char-icon" style="display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg></div>
         <div><div class="char-name">Static / Hiss</div><div class="char-desc">Steam, air hiss, TV static (400 Hz – 10 kHz)</div></div>
       </div>
       <div class="char-opt" id="co-square" onclick="selectChar('square')">
-        <div class="char-icon">🔔</div>
+        <div class="char-icon" style="display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
         <div><div class="char-name">High Whistle</div><div class="char-desc">Piercing sharp electronic tone (1 kHz – 12 kHz)</div></div>
       </div>
     </div>
@@ -1001,7 +1001,7 @@ canvas{display:block;border-radius:10px}
 <div class="screen" id="sc-ldone">
   <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
   <div class="card" style="text-align:center;padding:2rem">
-    <div style="font-size:40px;margin-bottom:.5rem">✓</div>
+    <div style="display:flex;justify-content:center;margin-bottom:.5rem;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
     <div class="card-title">Left Ear Calibrated</div>
     <div class="fine-freq" id="ldone-freq" style="font-size:36px">7,400 Hz</div>
     <div style="font-size:13px;color:var(--txt2);margin-top:4px" id="ldone-type">Pure Tone</div>
@@ -1021,14 +1021,14 @@ canvas{display:block;border-radius:10px}
 <div class="menu-drawer" id="menu-drawer">
   <div class="menu-header">
     <div style="font-size: 16px; font-weight: 700;">Ear Profiles & Experiments</div>
-    <button type="button" onclick="closeMenu()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--txt2); line-height: 1;">✕</button>
+    <button type="button" onclick="closeMenu()" style="background: none; border: none; cursor: pointer; color: var(--txt2); padding: 4px; display: flex; align-items: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
   </div>
   <div class="menu-content">
         <!-- Calibration Options -->
     <div class="menu-section">
       <div class="menu-section-title">Calibration</div>
       <button type="button" class="menu-action-btn primary" onclick="closeMenu(); startFullRecalibration();">
-        <span style="font-size: 18px;">🎯</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
         <div style="text-align: left;">
           <div style="font-weight: 700; font-size: 13px;">Calibrate Both Ears</div>
           <div style="font-size: 11px; opacity: 0.88; margin-top: 1px;">Full test from scratch (Left then Right)</div>
@@ -1138,7 +1138,7 @@ canvas{display:block;border-radius:10px}
   <div class="modal" style="max-width: 360px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
       <h3 id="adj-title" style="margin: 0; font-size: 17px; font-weight: 700;">Nudge Tone Frequency</h3>
-      <button type="button" onclick="closeAdjustModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--txt2); line-height: 1;">✕</button>
+      <button type="button" onclick="closeAdjustModal()" style="background: none; border: none; cursor: pointer; color: var(--txt2); padding: 4px; display: flex; align-items: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     
     <div style="text-align: center; margin: 10px 0;">
@@ -2606,7 +2606,7 @@ function navToArtists(){
   if(!container) return;
 
   if(musicLibrary.length === 0){
-    container.innerHTML = '<div style="text-align:center;padding:24px 16px;font-size:12px;color:var(--txt2);">No artists loaded.<br>Select a music folder in Tone Settings (☰).</div>';
+    container.innerHTML = '<div style="text-align:center;padding:24px 16px;font-size:12px;color:var(--txt2);">No artists loaded.<br>Select a music folder in Tone Settings menu.</div>';
     return;
   }
 
@@ -2956,7 +2956,7 @@ window.addEventListener('DOMContentLoaded', () => {
         </div>
         <div style="font-size:12px; color:var(--txt2); margin-top:2px;">Whistle or hum near the mic to calibrate notch pitch</div>
       </div>
-      <button type="button" onclick="closePitchMatcher()" style="background:none; border:none; color:var(--txt2); font-size:22px; line-height:1; cursor:pointer; padding:4px;">✕</button>
+      <button type="button" onclick="closePitchMatcher()" style="background:none; border:none; color:var(--txt2); cursor:pointer; padding:4px; display:flex; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <!-- Live Microphone Detection Box -->
