@@ -1,10 +1,12 @@
 package com.simon.tinnitusrelief;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -26,11 +29,13 @@ import java.util.Map;
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_CODE_OPEN_FOLDER = 1001;
+    private static final int REQUEST_CODE_RECORD_AUDIO = 1002;
 
     private WebView webView;
     private PowerManager.WakeLock therapyWakeLock;
     private MusicIndexManager indexManager;
     private MusicIndexManager.ScanListener scanListener;
+    private PermissionRequest pendingWebPermissionRequest;
 
     @SuppressLint({"SetJavaScriptEnabled"})
     @Override
@@ -69,7 +74,33 @@ public class MainActivity extends Activity {
 
         webView.setBackgroundColor(0xFF090A0F);
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setWebChromeClient(new WebChromeClient());
+
+        // WebChromeClient with audio capture permission delegation
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(() -> {
+                    String[] resources = request.getResources();
+                    boolean hasAudio = false;
+                    for (String res : resources) {
+                        if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(res)) {
+                            hasAudio = true;
+                            break;
+                        }
+                    }
+                    if (hasAudio) {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(resources);
+                        } else {
+                            pendingWebPermissionRequest = request;
+                            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_RECORD_AUDIO);
+                        }
+                    } else {
+                        request.grant(resources);
+                    }
+                });
+            }
+        });
 
         // Stream audio from ContentResolver via custom host "tinnitus.local"
         webView.setWebViewClient(new WebViewClient() {
@@ -117,8 +148,8 @@ public class MainActivity extends Activity {
             public void onCompleted(String folderName, String json, int totalTracks, int totalArtists) {
                 runOnUiThread(() -> {
                     if (webView != null) {
-                        String safeFolder = (folderName != null ? folderName : "").replace("'", "\\'");
-                        webView.evaluateJavascript("if(typeof onMusicLibraryReady==='function') onMusicLibraryReady('" + safeFolder + "', true);", null);
+                        String safe = (folderName != null ? folderName : "").replace("'", "\\'");
+                        webView.evaluateJavascript("if(typeof onMusicLibraryReady==='function') onMusicLibraryReady('" + safe + "', true);", null);
                     }
                 });
             }
@@ -128,16 +159,20 @@ public class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     if (webView != null) {
                         String safe = (error != null ? error : "").replace("'", "\\'");
-                        webView.evaluateJavascript("if(typeof onMusicScanProgress==='function') onMusicScanProgress('" + safe + "', 0, false);", null);
+                        webView.evaluateJavascript("if(typeof onMusicScanError==='function') onMusicScanError('" + safe + "');", null);
                     }
                 });
             }
         };
-
         indexManager.addListener(scanListener);
 
-        // JavaScript interface to interact with native audio and SAF music library
+        // Native Android Bridge for JavaScript
         webView.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public void log(String msg) {
+                Log.d("WebTinnitus", msg != null ? msg : "");
+            }
+
             @JavascriptInterface
             public void setTherapyActive(boolean active) {
                 runOnUiThread(() -> {
@@ -164,20 +199,27 @@ public class MainActivity extends Activity {
 
             @JavascriptInterface
             public void rescanMusicFolder() {
-                SharedPreferences sp = getSharedPreferences(MusicIndexManager.PREF_NAME, Context.MODE_PRIVATE);
-                String savedUri = sp.getString(MusicIndexManager.KEY_FOLDER_URI, null);
-                if (savedUri != null) {
-                    indexManager.startScan(Uri.parse(savedUri), sp.getString(MusicIndexManager.KEY_FOLDER_NAME, "Music Folder"));
-                }
+                runOnUiThread(() -> {
+                    SharedPreferences sp = getSharedPreferences(MusicIndexManager.PREF_NAME, Context.MODE_PRIVATE);
+                    String savedUri = sp.getString(MusicIndexManager.KEY_FOLDER_URI, null);
+                    String savedName = sp.getString(MusicIndexManager.KEY_FOLDER_NAME, "Music Folder");
+                    if (savedUri != null) {
+                        indexManager.startScan(Uri.parse(savedUri), savedName);
+                    } else {
+                        selectMusicFolder();
+                    }
+                });
             }
 
             @JavascriptInterface
             public void checkSavedMusic() {
                 runOnUiThread(() -> {
                     if (indexManager.isScanning()) {
-                        String status = indexManager.getCurrentStatus();
+                        String safeFolder = indexManager.getActiveFolderName().replace("'", "\\'");
+                        String safeStatus = indexManager.getCurrentStatus().replace("'", "\\'");
                         int count = indexManager.getCurrentTrackCount();
-                        webView.evaluateJavascript("if(typeof onMusicScanProgress==='function') onMusicScanProgress('" + status.replace("'", "\\'") + "', " + count + ", true);", null);
+                        webView.evaluateJavascript("if(typeof onMusicFolderSelected==='function') onMusicFolderSelected('" + safeFolder + "');", null);
+                        webView.evaluateJavascript("if(typeof onMusicScanProgress==='function') onMusicScanProgress('" + safeStatus + "', " + count + ", true);", null);
                         return;
                     }
 
@@ -216,8 +258,26 @@ public class MainActivity extends Activity {
             }
 
             @JavascriptInterface
+            public boolean hasMicrophonePermission() {
+                return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+            }
+
+            @JavascriptInterface
+            public void requestMicrophonePermission() {
+                runOnUiThread(() -> {
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_RECORD_AUDIO);
+                    } else {
+                        if (webView != null) {
+                            webView.evaluateJavascript("if(typeof onMicrophonePermissionResult==='function') onMicrophonePermissionResult(true);", null);
+                        }
+                    }
+                });
+            }
+
+            @JavascriptInterface
             public String getAppVersion() {
-                return "1.0.6-pro-unlocked";
+                return "1.0.7-pro-unlocked";
             }
         }, "AndroidBridge");
 
@@ -276,6 +336,25 @@ public class MainActivity extends Activity {
 
                 // Start persistent background indexing task
                 indexManager.startScan(treeUri, folderName);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_RECORD_AUDIO) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (pendingWebPermissionRequest != null) {
+                if (granted) {
+                    pendingWebPermissionRequest.grant(pendingWebPermissionRequest.getResources());
+                } else {
+                    pendingWebPermissionRequest.deny();
+                }
+                pendingWebPermissionRequest = null;
+            }
+            if (webView != null) {
+                webView.evaluateJavascript("if(typeof onMicrophonePermissionResult==='function') onMicrophonePermissionResult(" + granted + ");", null);
             }
         }
     }

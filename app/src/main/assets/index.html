@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Tinnitus Sound Therapy</title>
 <style>
+@font-face {
+  font-family: 'HB Rustic Delight';
+  src: url('./fonts/rustic-delight.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Rustic Delight';
+  src: url('./fonts/rustic-delight.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--ac:#1D9E75;--ab:#E1F5EE;--bg:#f5f6f8;--surf:#fff;--surf2:#eef0f3;--txt:#111;--txt2:#666;--brd:#dde0e6;--ctxt:#fff;--pro:#F59E0B;--prob:#FEF3C7;}
@@ -616,7 +631,7 @@ canvas{display:block;border-radius:10px}
 
 /* ── TOP TITLE & CUSTOM CHECKBOX ── */
 .top-title {
-  font-family: 'HB Rustic Delight', 'Noto Emoji', Georgia, serif;
+  font-family: 'HB Rustic Delight', 'Rustic Delight', Georgia, serif;
   font-size: 38px;
   line-height: 1.05;
   font-weight: normal;
@@ -704,13 +719,21 @@ canvas{display:block;border-radius:10px}
     <div class="docked-ear-vols">
       <div class="docked-vol-row">
         <span class="docked-vol-lbl" style="color:var(--ac)">◀ Left</span>
-        <input type="range" min="0" max="100" value="80" id="vol-l-sl" oninput="setEarVol('left',this.value)" class="docked-slider vol-slider-l">
-        <span class="docked-vol-val" id="vol-l-val">80%</span>
+        <input type="range" min="0" max="100" value="80" id="vol-l-sl" value="100" oninput="setEarVol('left',this.value)" class="docked-slider vol-slider-l">
+        <span class="docked-vol-val" id="vol-l-val">100%</span>
       </div>
-      <div class="docked-vol-row">
+            <div class="docked-vol-row">
         <span class="docked-vol-lbl" style="color:#7C66DC">Right ▶</span>
-        <input type="range" min="0" max="100" value="80" id="vol-r-sl" oninput="setEarVol('right',this.value)" class="docked-slider vol-slider-r">
-        <span class="docked-vol-val" id="vol-r-val">80%</span>
+        <input type="range" min="0" max="100" id="vol-r-sl" value="100" oninput="setEarVol('right',this.value)" class="docked-slider vol-slider-r">
+        <span class="docked-vol-val" id="vol-r-val">100%</span>
+      </div>
+
+      <!-- Quick Whistle & Tone Pitch Matcher Trigger -->
+      <div style="margin-top:8px; padding-top:6px; border-top:1px solid var(--brd);">
+        <button type="button" onclick="openPitchMatcher()" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--surf2); border:1px solid var(--brd); color:var(--txt); border-radius:8px; padding:6px 10px; font-size:11px; font-weight:600; cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+          <span>Whistle & Tone Pitch Matcher</span>
+        </button>
       </div>
     </div>
   </div>
@@ -751,6 +774,19 @@ canvas{display:block;border-radius:10px}
       <button class="snd-btn" id="snd-pink" onclick="trySound('pink')"><span class="sname">Pink Noise</span><span class="sdesc">Balanced -3dB</span></button>
       <button class="snd-btn" id="snd-brown" onclick="trySound('brown')"><span class="sname">Brown Noise</span><span class="sdesc">Deep low rumble</span></button>
       <button class="snd-btn sel" id="snd-white" onclick="trySound('white')"><span class="sname">White Noise</span><span class="sdesc">Full spectrum</span></button>
+    </div>
+
+        <!-- General Soundscape Volume Level -->
+    <div style="margin-bottom:12px; padding:10px 12px; background:var(--surf2); border-radius:10px; border:1px solid var(--brd);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Soundscape Volume</span>
+        <span id="th-vl" style="font-family:monospace; font-size:12px; font-weight:700; color:var(--ac); background:var(--ab); padding:2px 8px; border-radius:10px; border:1px solid var(--ac);">80%</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--txt2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+        <input type="range" id="th-vol-sl" min="0" max="100" step="1" value="80" oninput="onSoundscapeMasterVol(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--txt2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+      </div>
     </div>
 
     <!-- Play Sound Therapy Button -->
@@ -988,7 +1024,7 @@ canvas{display:block;border-radius:10px}
     <button type="button" onclick="closeMenu()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--txt2); line-height: 1;">✕</button>
   </div>
   <div class="menu-content">
-    <!-- Calibration Options -->
+        <!-- Calibration Options -->
     <div class="menu-section">
       <div class="menu-section-title">Calibration</div>
       <button type="button" class="menu-action-btn primary" onclick="closeMenu(); startFullRecalibration();">
@@ -996,6 +1032,14 @@ canvas{display:block;border-radius:10px}
         <div style="text-align: left;">
           <div style="font-weight: 700; font-size: 13px;">Calibrate Both Ears</div>
           <div style="font-size: 11px; opacity: 0.88; margin-top: 1px;">Full test from scratch (Left then Right)</div>
+        </div>
+      </button>
+
+      <button type="button" class="menu-action-btn" onclick="closeMenu(); openPitchMatcher();" style="margin-top: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+        <div style="text-align: left;">
+          <div style="font-weight: 700; font-size: 13px;">Whistle & Tone Matcher</div>
+          <div style="font-size: 11px; color: var(--txt2); margin-top: 1px;">Detect frequency via microphone and verify tone</div>
         </div>
       </button>
     </div>
@@ -1164,56 +1208,76 @@ let ws = {
 };
 
 let therapy = { sound: 'white', playing: false };
-let therapyGain = Math.pow(10, -35 / 20);
+let soundscapeVol = 80; // General Soundscape Master Volume (0 - 100%)
+let earVolL = 1.0, earVolR = 1.0, earVolOpen = false; // Left & Right ear volume level ratios (0.0 - 1.0)
+
 let actx = null, compNode = null, compTimer = null, curAB = null, fA = 0, fB = 0, fineNode = null;
 let thNodes = { left: null, right: null };
 let thGainL = null, thGainR = null;
+
+let masterBus = null, masterAnalyser = null, masterAnalyserBuf = null;
 let analyser = null, analyserBuf = null, drawRAF = null;
-let earVolL = 1.0, earVolR = 1.0, earVolOpen = false;
 
 function gc(){
   if(!actx || actx.state === 'closed'){
     actx = new (window.AudioContext || window.webkitAudioContext)();
   }
   if(actx.state === 'suspended'){
-    actx.resume();
+    actx.resume().catch(e => console.warn('AudioContext resume:', e));
   }
   return actx;
 }
 
-function volLabel(g){
-  if(g <= 0) return '—';
-  const db = Math.round(20 * Math.log10(g));
-  return db + ' dB';
+function ensureMasterAudioBus(){
+  const c = gc();
+  if(!masterAnalyser){
+    masterAnalyser = c.createAnalyser();
+    masterAnalyser.fftSize = 2048;
+    masterAnalyser.smoothingTimeConstant = 0.85;
+    masterAnalyserBuf = new Uint8Array(masterAnalyser.frequencyBinCount);
+    masterAnalyser.channelCount = 2;
+    masterAnalyser.channelCountMode = 'explicit';
+
+    masterBus = c.createGain();
+    masterBus.gain.value = 1.0;
+
+    masterBus.connect(masterAnalyser);
+    masterAnalyser.connect(c.destination);
+
+    analyser = masterAnalyser;
+    analyserBuf = masterAnalyserBuf;
+  }
+  if(c.state === 'suspended'){
+    c.resume().catch(e => console.warn('AudioContext resume:', e));
+  }
+  return c;
 }
 
-function thVolSlider(v){
-  therapyGain = s2g(parseInt(v));
-  const el = document.getElementById('th-vl');
-  if(el) el.textContent = volLabel(therapyGain);
-  applyThGain();
-  soundVols[therapy.sound] = parseInt(v);
-  saveSoundVols();
-  saveActiveProfileState(false);
+function calcSoundscapeGain(){
+  // Perceptual audio taper: (vol / 100)^1.8
+  // 100% -> 1.0 (full output)
+  // 80%  -> ~0.67 (rich, clean, comfortable)
+  // 50%  -> ~0.29
+  // 0%   -> 0.0
+  const norm = Math.max(0, Math.min(100, soundscapeVol)) / 100;
+  return Math.pow(norm, 1.8);
 }
 
-function stepVol(d){
-  const curDb = therapyGain > 0 ? 20 * Math.log10(therapyGain) : TH_DB_MIN;
-  const newDb = Math.max(TH_DB_MIN, Math.min(TH_DB_MAX, curDb + d));
-  therapyGain = Math.pow(10, newDb / 20);
-  const sl = document.getElementById('th-vol-sl');
-  if(sl) sl.value = g2s(therapyGain);
+function onSoundscapeMasterVol(v){
+  soundscapeVol = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
   const el = document.getElementById('th-vl');
-  if(el) el.textContent = volLabel(therapyGain);
+  if(el) el.textContent = soundscapeVol + '%';
   applyThGain();
-  soundVols[therapy.sound] = g2s(therapyGain);
-  saveSoundVols();
   saveActiveProfileState(false);
 }
 
 function applyThGain(){
-  if(thGainL) thGainL.gain.value = therapyGain * earVolL * 0.4;
-  if(thGainR) thGainR.gain.value = therapyGain * earVolR * 0.4;
+  const master = calcSoundscapeGain();
+  const gL = master * earVolL;
+  const gR = master * earVolR;
+  const now = actx ? actx.currentTime : 0;
+  if(thGainL && actx) thGainL.gain.setTargetAtTime(gL, now, 0.02);
+  if(thGainR && actx) thGainR.gain.setTargetAtTime(gR, now, 0.02);
 }
 
 // ── PROCEDURAL NOISE BUFFERS ──
@@ -1291,10 +1355,10 @@ function kn(n){
 }
 
 function playFreq(freq){
-  const c = gc(), pan = c.createStereoPanner(), gain = c.createGain();
+  const c = ensureMasterAudioBus(), pan = c.createStereoPanner(), gain = c.createGain();
   pan.pan.value = ws.ear === 'left' ? -1 : 1;
   gain.gain.value = prevGain(ws.vol) * 0.4;
-  gain.connect(pan); pan.connect(c.destination);
+  gain.connect(pan); pan.connect(masterBus);
   let n = { gain, pan };
   if(ws.type === 'noise'){
     const src = c.createBufferSource(), bp = c.createBiquadFilter();
@@ -1568,25 +1632,23 @@ function updateSndBtns(){
 }
 
 function buildTh(){
-  const c = gc();
-  analyser = c.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.85;
-  analyserBuf = new Uint8Array(analyser.frequencyBinCount);
-  analyser.channelCount = 2; analyser.channelCountMode = 'explicit';
-  analyser.connect(c.destination);
+  const c = ensureMasterAudioBus();
   thGainL = null; thGainR = null;
 
   const builders = { white: srcWhite, pink: srcPink, rain: srcRain, ocean: srcOcean, wind: srcWind, brown: srcBrown };
+  const master = calcSoundscapeGain();
+
   ['left', 'right'].forEach(s => {
     kn(thNodes[s]);
     const f = ws.confirmed[s] || 7400;
     const src = (builders[therapy.sound] || srcWhite)(c);
     const notch = c.createBiquadFilter(); notch.type = 'notch'; notch.frequency.value = f; notch.Q.value = 8;
     const evol = s === 'left' ? earVolL : earVolR;
-    const gain = c.createGain(); gain.gain.value = therapyGain * evol * 0.4;
+    const gain = c.createGain(); gain.gain.value = master * evol;
     const pan = c.createStereoPanner(); pan.pan.value = s === 'left' ? -1 : 1;
-    src.output.connect(notch); notch.connect(gain); gain.connect(pan); pan.connect(analyser);
+    src.output.connect(notch); notch.connect(gain); gain.connect(pan); pan.connect(masterBus);
     if(s === 'left') thGainL = gain; else thGainR = gain;
-    thNodes[s] = { ...src, notch, pan, _n: [...(src._n || []), notch, gain, pan] };
+    thNodes[s] = { ...src, notch, gain, pan, _n: [...(src._n || []), notch, gain, pan] };
   });
   startDrawLoop();
 }
@@ -1595,7 +1657,7 @@ function stopThAudio(){
   kn(thNodes.left); kn(thNodes.right);
   thNodes = { left: null, right: null };
   thGainL = null; thGainR = null;
-  analyser = null; analyserBuf = null;
+  // masterBus and masterAnalyser remain alive for music playback and spectrum visualisations
 }
 
 function toggleTherapy(){
@@ -1706,8 +1768,9 @@ function startTimer(){
     const fadeCb = document.getElementById('sleep-fade');
     if(fadeCb && fadeCb.checked && timerSecs <= 300 && timerSecs > 0){
       const fadeFrac = timerSecs / 300;
-      if(thGainL && actx) thGainL.gain.setTargetAtTime(therapyGain * earVolL * 0.4 * fadeFrac, actx.currentTime, 0.5);
-      if(thGainR && actx) thGainR.gain.setTargetAtTime(therapyGain * earVolR * 0.4 * fadeFrac, actx.currentTime, 0.5);
+      const master = calcSoundscapeGain();
+      if(thGainL && actx) thGainL.gain.setTargetAtTime(master * earVolL * fadeFrac, actx.currentTime, 0.5);
+      if(thGainR && actx) thGainR.gain.setTargetAtTime(master * earVolR * fadeFrac, actx.currentTime, 0.5);
     }
 
     if(timerSecs <= 0){
@@ -1829,15 +1892,15 @@ function toggleEarVol(){
 }
 
 function setEarVol(side, v){
-  const val = parseInt(v) / 100;
+  const val = Math.max(0, Math.min(100, parseInt(v, 10) || 0)) / 100;
   if(side === 'left'){
     earVolL = val;
-    const l = document.getElementById('vol-l-val'); if(l) l.textContent = v + '%';
-    if(musicGainL) musicGainL.gain.value = earVolL;
+    const l = document.getElementById('vol-l-val'); if(l) l.textContent = Math.round(val * 100) + '%';
+    if(musicGainL && actx) musicGainL.gain.setTargetAtTime(earVolL, actx.currentTime, 0.02);
   } else {
     earVolR = val;
-    const r = document.getElementById('vol-r-val'); if(r) r.textContent = v + '%';
-    if(musicGainR) musicGainR.gain.value = earVolR;
+    const r = document.getElementById('vol-r-val'); if(r) r.textContent = Math.round(val * 100) + '%';
+    if(musicGainR && actx) musicGainR.gain.setTargetAtTime(earVolR, actx.currentTime, 0.02);
   }
   applyThGain();
   saveActiveProfileState(false);
@@ -1907,7 +1970,7 @@ function saveActiveProfileState(){
   try{
     localStorage.setItem('tr_therapy_settings_v5', JSON.stringify({
       sound: therapy.sound,
-      vol: g2s(therapyGain),
+      soundscapeVol: soundscapeVol,
       earVolL: earVolL,
       earVolR: earVolR
     }));
@@ -1920,11 +1983,22 @@ function loadTherapySettings(){
     if(raw){
       const s = JSON.parse(raw);
       if(s.sound) therapy.sound = s.sound;
-      if(s.vol !== undefined) therapyGain = s2g(s.vol);
-      if(s.earVolL !== undefined) earVolL = s.earVolL;
-      if(s.earVolR !== undefined) earVolR = s.earVolR;
+      if(s.soundscapeVol !== undefined && s.soundscapeVol !== null){
+        soundscapeVol = Math.max(0, Math.min(100, parseInt(s.soundscapeVol, 10)));
+      } else if(s.vol !== undefined){
+        soundscapeVol = Math.max(40, Math.min(100, parseInt(s.vol, 10)));
+      }
+      if(s.earVolL !== undefined) earVolL = Math.max(0, Math.min(1, parseFloat(s.earVolL)));
+      if(s.earVolR !== undefined) earVolR = Math.max(0, Math.min(1, parseFloat(s.earVolR)));
     }
   }catch(e){}
+
+  const tvs = document.getElementById('th-vol-sl'); if(tvs) tvs.value = soundscapeVol;
+  const tvl = document.getElementById('th-vl'); if(tvl) tvl.textContent = soundscapeVol + '%';
+  const vls = document.getElementById('vol-l-sl'); if(vls) vls.value = Math.round(earVolL * 100);
+  const vlv = document.getElementById('vol-l-val'); if(vlv) vlv.textContent = Math.round(earVolL * 100) + '%';
+  const vrs = document.getElementById('vol-r-sl'); if(vrs) vrs.value = Math.round(earVolR * 100);
+  const vrv = document.getElementById('vol-r-val'); if(vrv) vrv.textContent = Math.round(earVolR * 100) + '%';
 }
 
 const KEY_PROFS_L = 'tr_ear_profiles_left_v5';
@@ -2338,7 +2412,7 @@ let musicPanR = null;
 
 function initMusicAudioGraph(){
   if(musicSrcNode) return;
-  const c = gc();
+  const c = ensureMasterAudioBus();
   musicAudioEl = document.getElementById('music-audio');
   if(!musicAudioEl){
     musicAudioEl = document.createElement('audio');
@@ -2374,17 +2448,17 @@ function initMusicAudioGraph(){
   musicPanR = c.createStereoPanner();
   musicPanR.pan.value = 1;
 
-  // Connect left: src -> notchL -> gainL -> panL -> analyser -> destination
+  // Connect left: src -> notchL -> gainL -> panL -> masterBus
   musicSrcNode.connect(musicNotchL);
   musicNotchL.connect(musicGainL);
   musicGainL.connect(musicPanL);
-  musicPanL.connect(analyser);
+  musicPanL.connect(masterBus);
 
-  // Connect right: src -> notchR -> gainR -> panR -> analyser -> destination
+  // Connect right: src -> notchR -> gainR -> panR -> masterBus
   musicSrcNode.connect(musicNotchR);
   musicNotchR.connect(musicGainR);
   musicGainR.connect(musicPanR);
-  musicPanR.connect(analyser);
+  musicPanR.connect(masterBus);
 
   musicAudioEl.addEventListener('timeupdate', onMusicTimeUpdate);
   musicAudioEl.addEventListener('ended', onMusicEnded);
@@ -2868,5 +2942,99 @@ window.addEventListener('DOMContentLoaded', () => {
   try{ if(window.AndroidBridge && window.AndroidBridge.checkSavedMusic) window.AndroidBridge.checkSavedMusic(); }catch(e){}
 });
 </script>
+
+<!-- WHISTLE & TONE PITCH MATCHER MODAL -->
+<div id="pm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--surf); border:1px solid var(--brd); border-radius:16px; width:100%; max-width:440px; max-height:92vh; overflow-y:auto; padding:20px; box-shadow:0 12px 36px rgba(0,0,0,0.6); position:relative;">
+    
+    <!-- Modal Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div>
+        <div style="font-size:18px; font-weight:700; color:var(--txt); display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+          <span>Whistle & Tone Matcher</span>
+        </div>
+        <div style="font-size:12px; color:var(--txt2); margin-top:2px;">Whistle or hum near the mic to calibrate notch pitch</div>
+      </div>
+      <button type="button" onclick="closePitchMatcher()" style="background:none; border:none; color:var(--txt2); font-size:22px; line-height:1; cursor:pointer; padding:4px;">✕</button>
+    </div>
+
+    <!-- Live Microphone Detection Box -->
+    <div style="background:var(--surf2); border:1px solid var(--brd); border-radius:12px; padding:16px; text-align:center; margin-bottom:14px;">
+      <div style="display:inline-flex; align-items:center; gap:6px; background:var(--ab); color:var(--ac); font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px; margin-bottom:10px;" id="pm-badge">
+        <span style="width:7px; height:7px; border-radius:50%; background:var(--ac); display:inline-block;" id="pm-dot"></span>
+        <span id="pm-status-txt">Ready</span>
+      </div>
+
+      <!-- Frequency Display -->
+      <div id="pm-freq-disp" style="font-size:42px; font-weight:800; font-family:monospace; color:var(--ac); letter-spacing:-1px; line-height:1.1;">---- Hz</div>
+      <div id="pm-note-disp" style="font-size:13px; font-family:monospace; color:var(--txt2); margin-top:4px;">Musical Note: —</div>
+
+      <!-- Stability / Confidence Bar -->
+      <div style="margin-top:14px; text-align:left;">
+        <div style="display:flex; justify-content:space-between; font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--txt2); font-weight:700; margin-bottom:4px;">
+          <span>Signal Strength & Lock</span>
+          <span id="pm-stability-val">0%</span>
+        </div>
+        <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
+          <div id="pm-stability-bar" style="height:100%; width:0%; background:var(--ac); transition:width 0.12s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Microphone Start/Stop Button -->
+      <button type="button" id="pm-mic-btn" onclick="togglePitchListening()" class="btn-main" style="margin-top:16px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+        <span id="pm-mic-btn-txt">Start Listening (Microphone)</span>
+      </button>
+    </div>
+
+    <!-- Auditory Match: Hear Matched Tone -->
+    <div style="background:var(--surf2); border:1px solid var(--brd); border-radius:12px; padding:14px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; color:var(--txt2);">Auditory Match (Verify Tone)</span>
+        <span id="pm-tone-vol-disp" style="font-size:11px; font-family:monospace; color:var(--txt2);">40%</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <button type="button" id="pm-tone-btn" onclick="toggleMatchedTonePlayback()" style="flex:1; background:var(--surf); border:1px solid var(--brd); color:var(--txt); border-radius:8px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span id="pm-tone-btn-txt">▶ Hear Matched Tone</span>
+        </button>
+        <div style="display:flex; align-items:center; gap:6px; min-width:85px;">
+          <input type="range" id="pm-tone-vol" min="5" max="100" value="40" oninput="setMatchedToneVol(this.value)" style="flex:1; accent-color:var(--ac); height:5px;">
+        </div>
+      </div>
+
+      <!-- Fine-Tuning Nudge Buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:4px;">
+        <button type="button" onclick="nudgeMatchedPitch(-100)" class="nudge-btn" style="flex:1; padding:6px 2px; font-size:10px; font-weight:700; background:var(--surf); border:1px solid var(--brd); border-radius:6px; color:var(--txt); cursor:pointer;">-100Hz</button>
+        <button type="button" onclick="nudgeMatchedPitch(-10)" class="nudge-btn" style="flex:1; padding:6px 2px; font-size:10px; font-weight:700; background:var(--surf); border:1px solid var(--brd); border-radius:6px; color:var(--txt); cursor:pointer;">-10Hz</button>
+        <span id="pm-nudge-val" style="font-size:12px; font-family:monospace; color:var(--ac); font-weight:800; min-width:70px; text-align:center;">---- Hz</span>
+        <button type="button" onclick="nudgeMatchedPitch(10)" class="nudge-btn" style="flex:1; padding:6px 2px; font-size:10px; font-weight:700; background:var(--surf); border:1px solid var(--brd); border-radius:6px; color:var(--txt); cursor:pointer;">+10Hz</button>
+        <button type="button" onclick="nudgeMatchedPitch(100)" class="nudge-btn" style="flex:1; padding:6px 2px; font-size:10px; font-weight:700; background:var(--surf); border:1px solid var(--brd); border-radius:6px; color:var(--txt); cursor:pointer;">+100Hz</button>
+      </div>
+    </div>
+
+    <!-- Calibration Assignment Actions -->
+    <div>
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; color:var(--txt2); margin-bottom:8px;">
+        Calibrate Ears
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+        <button type="button" onclick="applyMatchedFreqToEar('left')" id="pm-apply-l" class="btn-main" style="background:#1D9E75; font-size:12px; padding:10px 8px;">
+          Set Left Ear
+        </button>
+        <button type="button" onclick="applyMatchedFreqToEar('right')" id="pm-apply-r" class="btn-main" style="background:#7C66DC; font-size:12px; padding:10px 8px;">
+          Set Right Ear
+        </button>
+      </div>
+      <button type="button" onclick="applyMatchedFreqToEar('both')" id="pm-apply-both" class="btn-main" style="width:100%; font-size:12px; padding:10px 8px; background:var(--surf2); border:1px solid var(--brd); color:var(--txt);">
+        Set Both Ears to This Pitch
+      </button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
