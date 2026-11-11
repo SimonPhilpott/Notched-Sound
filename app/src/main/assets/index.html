@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Tinnitus Sound Therapy</title>
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ac:#1D9E75;--ab:#E1F5EE;--bg:#f5f6f8;--surf:#fff;--surf2:#eef0f3;--txt:#111;--txt2:#666;--brd:#dde0e6;--ctxt:#fff;--pro:#F59E0B;--prob:#FEF3C7;}
+@media(prefers-color-scheme:dark){:root{--ac:#5DCAA5;--ab:#04342C;--bg:#0d1117;--surf:#161b22;--surf2:#21262d;--txt:#e6edf3;--txt2:#8b949e;--brd:#30363d;--ctxt:#0a0a0a;--pro:#FBBF24;--prob:#2D2000;}}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 60px}
+.wrap{width:100%;max-width:480px}
+.screen{display:none}.screen.active{display:block}
+.ey{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ac);text-align:center;margin-bottom:6px}
+.badge{display:inline-flex;align-items:center;background:var(--ab);color:var(--ac);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;margin-bottom:1rem}
+.prog-bar{height:3px;background:var(--surf2);border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
+.prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .5s}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:16px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:18px;font-weight:500;margin-bottom:.4rem}
+.card-sub{font-size:13px;color:var(--txt2);line-height:1.55;margin-bottom:1.25rem}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.char-opt{padding:14px 12px;border-radius:12px;border:1px solid var(--brd);background:var(--surf2);cursor:pointer;text-align:left;font-family:inherit;transition:all .15s}
+.char-opt:hover{border-color:var(--ac)}.char-opt.sel{background:var(--ab);border-color:var(--ac)}
+.cname{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:3px}.cdesc{font-size:11px;color:var(--txt2);line-height:1.3}
+.char-opt.sel .cname{color:var(--ac)}.char-opt.sel .cdesc{color:var(--ac);opacity:.75}
+.rdots{display:flex;gap:5px;justify-content:center;margin-bottom:1.5rem}
+.rdot{width:9px;height:9px;border-radius:50%;background:var(--brd);transition:all .3s}
+.rdot.done{background:var(--ac)}.rdot.cur{background:var(--ac);transform:scale(1.25)}
+.now-pl{text-align:center;font-size:13px;color:var(--txt2);margin-bottom:1rem;height:20px}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1rem}
+.ab-btn{padding:28px 12px 16px;border-radius:16px;border:2px solid var(--brd);background:var(--surf2);cursor:pointer;font-family:inherit;text-align:center;transition:all .2s}
+.ab-l{font-size:36px;font-weight:800;color:var(--txt2);line-height:1;margin-bottom:8px}
+.ab-hz{font-size:11px;font-family:monospace;color:var(--txt2)}
+.ab-btn.on{border-color:var(--ac);background:var(--ab)}.ab-btn.on .ab-l,.ab-btn.on .ab-hz{color:var(--ac)}
+@keyframes throb{0%,100%{opacity:1}50%{opacity:.68}}.ab-btn.on{animation:throb 1.4s ease-in-out infinite}
+.same-btn{width:100%;padding:10px;border-radius:10px;border:1px solid var(--brd);background:transparent;color:var(--txt2);cursor:pointer;font-size:13px;font-family:inherit;margin-bottom:1rem}
+.fine-freq{font-family:monospace;font-size:44px;font-weight:800;color:var(--ac);text-align:center;margin:1rem 0;letter-spacing:-1px}
+.slmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--txt2);margin-bottom:4px}
+input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer}
+.plbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--brd);background:var(--surf2);color:var(--txt);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;margin:1rem auto;transition:all .2s}
+.plbtn.on{background:var(--ab);color:var(--ac);border-color:var(--ac)}
+.btn-main{width:100%;padding:14px;border-radius:12px;background:var(--ac);color:var(--ctxt);border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+.btn-main:disabled{opacity:.35;cursor:not-allowed}
+.btn-sec{width:100%;padding:11px;border-radius:12px;border:1px solid var(--brd);background:transparent;color:var(--txt2);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.snd-btn{padding:10px 8px;border-radius:10px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt2);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s;position:relative;text-align:left}
+.snd-btn.sel{border-color:var(--ac);background:var(--ab);color:var(--ac)}
+.snd-btn .sname{font-weight:500;display:block;margin-bottom:2px}
+.snd-btn .sdesc{font-size:10px;opacity:.7;display:block}
+.snd-btn .lock{position:absolute;top:7px;right:8px;font-size:12px}
+.snd-btn.pro-locked{opacity:.6}
+.pro-tag{display:inline-block;background:var(--pro);color:#fff;border-radius:4px;font-size:10px;font-weight:700;padding:1px 5px;vertical-align:middle;margin-left:4px}
+.pro-badge{display:none;background:var(--pro);color:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;text-align:center;margin-bottom:1rem}
+/* Timer */
+.tim-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tbtn{padding:7px 14px;border-radius:8px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt2);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.tbtn.sel{border-color:var(--ac);background:var(--ab);color:var(--ac);font-weight:600}
+.tbtn.locked{opacity:.55}
+.timer-disp{font-family:monospace;font-size:38px;font-weight:800;color:var(--ac);text-align:center;letter-spacing:2px}
+/* Sessions */
+.sess-item{display:flex;align-items:center;justify-content:space-between;background:var(--surf2);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:10px}
+.sess-info{flex:1;min-width:0}
+.sess-date{font-size:11px;color:var(--txt2);margin-bottom:2px}
+.sess-freqs{font-size:13px;font-weight:500;font-family:monospace}
+.sess-btns{display:flex;gap:6px;flex-shrink:0}
+.s-load{padding:6px 12px;border-radius:7px;border:none;background:var(--ac);color:var(--ctxt);font-size:12px;font-family:inherit;cursor:pointer;font-weight:500}
+.s-del{padding:6px 9px;border-radius:7px;border:1px solid var(--brd);background:transparent;color:var(--txt2);font-size:12px;cursor:pointer}
+/* Summary */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.sum-card{background:var(--surf2);border-radius:10px;padding:12px 14px}
+.sum-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt2);margin-bottom:6px}
+.sum-freq{font-family:monospace;font-size:22px;font-weight:700;margin:2px 0}
+.fl{color:var(--ac)}.fr{color:#7C66DC}
+@media(prefers-color-scheme:dark){.fr{color:#AFA9EC}}
+.sum-info{font-size:11px;color:var(--txt2)}
+/* Tips */
+.tip{background:var(--surf2);border-radius:12px;padding:12px 14px;margin-bottom:1rem}
+.tip-head{font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.tip-body{font-size:12px;color:var(--txt2);line-height:1.65;margin-top:8px}
+.tip-body strong{color:var(--txt)}
+.tip-arr{font-size:10px;transition:transform .2s}
+/* Noise table */
+.noise-table{width:100%;border-collapse:collapse;font-size:11px;margin:8px 0}
+.noise-table th{background:var(--surf);padding:5px 8px;text-align:left;font-weight:600;border-bottom:1px solid var(--brd)}
+.noise-table td{padding:5px 8px;border-bottom:1px solid var(--brd);color:var(--txt2);vertical-align:top}
+.noise-table tr:last-child td{border-bottom:none}
+.tag-w{background:#E8F4FD;color:#1a6fa0;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600}
+.tag-p{background:#FEF3E2;color:#8a5a00;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:600}
+@media(prefers-color-scheme:dark){.tag-w{background:#0d2a3d;color:#5aabdb}.tag-p{background:#2d1f00;color:#d4a03a}}
+/* Stats */
+.stat-row{display:flex;gap:8px;margin-bottom:1rem}
+.stat-box{flex:1;background:var(--surf2);border-radius:12px;padding:10px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;color:var(--ac);font-family:monospace;line-height:1.1}
+.stat-lbl{font-size:10px;color:var(--txt2);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+/* Journal */
+.j-bar-wrap{display:flex;align-items:flex-end;gap:3px;height:64px;margin-top:10px}
+.j-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.j-bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s}
+.j-day-lbl{font-size:9px;color:var(--txt2)}
+.lbtn{min-width:30px;height:30px;border-radius:6px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt2);cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:all .15s;padding:0 6px}
+.lbtn.sel{border-color:var(--ac);background:var(--ab);color:var(--ac)}
+.mbtn{font-size:22px;background:none;border:2px solid transparent;border-radius:8px;cursor:pointer;padding:2px 4px;transition:all .15s}
+.mbtn.sel{border-color:var(--ac);background:var(--ab)}
+/* Spectrum */
+.notch-legend{display:flex;gap:20px;margin-top:8px;font-size:11px}
+canvas{display:block;border-radius:10px}
+/* PRO MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--surf);border-radius:24px;padding:28px 24px;max-width:360px;width:100%;animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-star{font-size:44px;text-align:center;margin-bottom:.5rem}
+.modal-title{font-size:22px;font-weight:600;text-align:center;margin-bottom:.25rem}
+.modal-sub{font-size:13px;color:var(--txt2);text-align:center;margin-bottom:1.25rem}
+.feat-list{margin-bottom:1.25rem}
+.feat-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--brd);font-size:13px}
+.feat-row:last-child{border-bottom:none}
+.feat-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.btn-pro{width:100%;padding:15px;border-radius:14px;background:var(--pro);color:#fff;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+.btn-dev{width:100%;padding:8px;border-radius:10px;background:var(--surf2);color:var(--txt2);border:1px solid var(--brd);font-size:11px;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+/* Volume step buttons */
+.vol-step{width:32px;height:32px;border-radius:8px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;line-height:1}
+/* Onboarding */
+.ob-slide{animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ob-icon{text-align:center;margin:1.5rem 0;font-size:72px;line-height:1}
+.ob-title{font-size:24px;font-weight:600;text-align:center;margin-bottom:.75rem;line-height:1.3}
+.ob-text{font-size:14px;color:var(--txt2);line-height:1.75;text-align:center}
+.ob-text strong{color:var(--txt)}
+.ob-dots{display:flex;gap:8px;justify-content:center;margin:1.75rem 0 1.25rem}
+.ob-dot{height:8px;border-radius:4px;background:var(--brd);transition:all .35s}
+.ob-dot.act{background:var(--ac);width:28px}
+.ob-dot.done{background:var(--ac);opacity:.4;width:8px}
+
+/* Per-ear volume */
+.ear-vol-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ear-vol-lbl{font-size:11px;color:var(--txt2);min-width:24px;font-weight:500}
+.ear-vol-val{font-size:11px;color:var(--txt2);font-family:monospace;min-width:34px;text-align:right}
+.ear-expand-btn{width:100%;padding:7px 10px;border-radius:8px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt2);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;margin-top:8px}
+/* Research consent & survey */
+.consent-icon{font-size:56px;text-align:center;margin:1.5rem 0 1rem}
+.survey-q{font-size:14px;font-weight:500;margin-bottom:10px;color:var(--txt)}
+.survey-opts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem}
+.sopt{padding:8px 14px;border-radius:20px;border:1px solid var(--brd);background:var(--surf2);
+  color:var(--txt2);cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s}
+.sopt.sel{border-color:var(--ac);background:var(--ab);color:var(--ac);font-weight:600}
+.sopt-full{width:100%;text-align:left;border-radius:10px}
+.privacy-note{font-size:11px;color:var(--txt2);line-height:1.6;padding:10px 12px;
+  background:var(--surf2);border-radius:8px;margin-bottom:1rem}
+.privacy-note strong{color:var(--txt)}
+.research-badge{display:inline-flex;align-items:center;gap:6px;background:#E8F4FD;
+  color:#1a6fa0;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;margin-bottom:1rem}
+@media(prefers-color-scheme:dark){.research-badge{background:#0d2a3d;color:#5aabdb}}
+
+
+
+
+/* ── OVERRIDES & CLEAN STYLING ── */
+.screen { display: none; }
+.screen.active { display: block; }
+.pro-tag, .pro-badge, .lock { display: none !important; }
+.snd-btn.pro-locked { opacity: 1 !important; }
+
+/* Profile Card */
+.profile-card { background: var(--surf); border: 1px solid var(--brd); border-radius: 16px; padding: 14px 16px; margin-bottom: 1.25rem; }
+.profile-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.profile-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--txt2); font-weight: 700; }
+.profile-btns { display: flex; gap: 6px; }
+.p-btn { background: var(--surf2); border: 1px solid var(--brd); color: var(--txt); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.p-btn:active { transform: scale(0.97); }
+.p-btn:hover { border-color: var(--ac); }
+.p-select { width: 100%; height: 42px; border-radius: 10px; background: var(--surf2); border: 1px solid var(--brd); color: var(--txt); font-size: 14px; font-weight: 600; padding: 0 10px; outline: none; }
+
+/* Ear Action Buttons */
+.ear-btns { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.e-btn { width: 100%; box-sizing: border-box; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 9px 8px; border-radius: 8px; border: 1px solid var(--brd); background: var(--surf2); color: var(--txt); cursor: pointer; text-align: center; transition: all 0.18s ease; }
+.e-btn:hover { border-color: var(--ac); color: var(--ac); }
+.e-btn:active { background: var(--ab); border-color: var(--ac); color: var(--ac); transform: scale(0.98); }
+.e-btn-play.playing { background: #ef4444; border-color: #ef4444; color: #fff; }
+.card-prof-sel { width: 100%; box-sizing: border-box; font-size: 12px; font-weight: 600; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--brd); background: var(--surf); color: var(--ac); outline: none; cursor: pointer; text-overflow: ellipsis; margin-bottom: 8px; }
+.menu-clone-btn { background: var(--ab); color: var(--ac); border: 1px solid var(--ac); font-weight: 700; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s; }
+.menu-clone-btn:active { background: var(--ac); color: #fff; }
+
+/* Quick Nudge Modal */
+.saved-toast { font-size: 11px; color: var(--ac); font-weight: 600; display: inline-block; margin-left: 6px; opacity: 0; transition: opacity .3s; }
+.saved-toast.show { opacity: 1; }
+.char-pills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0; }
+.char-pill { font-size: 11px; font-weight: 600; padding: 8px 2px; border-radius: 8px; border: 1px solid var(--brd); background: var(--surf2); color: var(--txt2); cursor: pointer; text-align: center; }
+.char-pill.sel { border-color: var(--ac); background: var(--ac); color: #fff; }
+
+.top-nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+.hamburger-btn { border: 1px solid var(--brd); background: var(--surf2); border-radius: 8px; width: 42px; height: 42px; font-size: 22px; color: var(--txt); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.hamburger-btn:active { background: var(--surf); }
+.hdr-profile-chip { font-size: 11px; padding: 3px 8px; border-radius: 12px; background: var(--ab); color: var(--ac); border: 1px solid var(--ac); cursor: pointer; font-weight: 600; vertical-align: middle; }
+.menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s; z-index: 1100; backdrop-filter: blur(2px); }
+.menu-overlay.open { opacity: 1; visibility: visible; }
+.menu-drawer { position: fixed; top: 0; left: 0; width: 310px; max-width: 86vw; height: 100%; background: var(--surf); border-right: 1px solid var(--brd); z-index: 1200; box-shadow: 6px 0 28px rgba(0,0,0,0.4); display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+.menu-drawer.open { transform: translateX(0); }
+.menu-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--brd); }
+.menu-content { padding: 16px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.menu-section { background: var(--surf2); border: 1px solid var(--brd); border-radius: 12px; padding: 14px; }
+.menu-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--txt2); margin-bottom: 10px; }
+.menu-action-btn { width: 100%; border: none; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; text-decoration: none; }
+.menu-action-btn.primary { background: var(--ac); color: var(--ctxt); }
+.profile-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+
+
+/* ── DOCKED TOP BOX: SPECTRUM + EAR VOLUMES ── */
+.docked-top-box {
+  position: sticky;
+  top: 0;
+  z-index: 800;
+  background: var(--surf);
+  border: 1px solid var(--brd);
+  border-radius: 12px;
+  padding: 10px 12px 10px 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+.docked-top-box canvas {
+  display: block;
+}
+.docked-ear-vols {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--brd);
+}
+.docked-vol-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.docked-vol-lbl {
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 44px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.docked-vol-val {
+  font-size: 11px;
+  font-family: monospace;
+  font-weight: 700;
+  min-width: 34px;
+  text-align: right;
+  color: var(--txt);
+}
+.docked-slider {
+  flex: 1;
+  height: 6px;
+}
+.vol-slider-l {
+  accent-color: var(--ac);
+}
+.vol-slider-r {
+  accent-color: #7C66DC;
+}
+
+/* ── NOTCHED MUSIC PLAYER ── */
+/* ── CONSISTENT PREMIUM BUTTONS & TRANSPORT SVGs ── */
+.btn-primary-action, .btn-deck-action {
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--ac);
+  color: var(--ctxt);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.btn-primary-action:active, .btn-deck-action:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+.btn-menu-action {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-menu-action.primary {
+  background: var(--ac);
+  color: var(--ctxt);
+  border: none;
+}
+.btn-menu-action.secondary {
+  background: var(--surf);
+  color: var(--txt);
+  border: 1px solid var(--brd);
+}
+.btn-menu-action:active {
+  transform: scale(0.98);
+}
+.music-play-header-btn {
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--surf);
+  color: var(--ac);
+  border: 1px solid var(--ac);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.music-play-header-btn:active {
+  background: var(--ab);
+}
+@keyframes scanPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.music-scan-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ac);
+  animation: pulseDot 1s infinite alternate;
+}
+@keyframes pulseDot {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+
+/* ── NOTCHED MUSIC PLAYER ── */
+.music-now-card {
+  background: var(--surf2);
+  border: 1px solid var(--brd);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.music-track-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--txt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-track-sub {
+  font-size: 12px;
+  color: var(--txt2);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-notch-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: var(--ab);
+  color: var(--ac);
+  border: 1px solid var(--ac);
+}
+.music-scrub-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+.music-scrub-time {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--txt2);
+  min-width: 36px;
+}
+.music-scrub-slider {
+  flex: 1;
+  accent-color: var(--ac);
+  cursor: pointer;
+}
+.music-transport-btns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+.music-ctrl-btn {
+  background: var(--surf);
+  border: 1px solid var(--brd);
+  color: var(--txt);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.music-ctrl-btn:active {
+  transform: scale(0.94);
+  background: var(--surf2);
+}
+.music-ctrl-btn.active-toggle {
+  border-color: var(--ac);
+  color: var(--ac);
+  background: var(--ab);
+}
+.music-play-main {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ac);
+  color: var(--ctxt);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(29, 158, 117, 0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.music-play-main:active {
+  transform: scale(0.94);
+}
+.music-browser-box {
+  background: var(--surf2);
+  border: 1px solid var(--brd);
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+.music-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--txt2);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--brd);
+  overflow-x: auto;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.music-bc-item {
+  color: var(--ac);
+  cursor: pointer;
+}
+.music-bc-item:hover {
+  text-decoration: underline;
+}
+.music-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.music-item-row:hover {
+  background: var(--surf);
+}
+.music-item-row.playing {
+  background: var(--ab);
+  border-left: 3px solid var(--ac);
+}
+.music-item-main {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt);
+}
+.music-item-sub {
+  font-size: 11px;
+  color: var(--txt2);
+  margin-top: 2px;
+}
+.music-item-dur {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--txt2);
+  margin-left: 8px;
+  font-weight: 500;
+}
+.music-play-header-btn {
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--surf);
+  color: var(--ac);
+  border: 1px solid var(--ac);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.music-play-header-btn:active {
+  background: var(--ab);
+}
+.btn-deck-action {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--ac);
+  color: var(--ctxt);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+.btn-deck-action:active {
+  transform: scale(0.98);
+}
+.btn-menu-action {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-menu-action.primary {
+  background: var(--ac);
+  color: var(--ctxt);
+  border: none;
+}
+.btn-menu-action.secondary {
+  background: var(--surf);
+  color: var(--txt);
+  border: 1px solid var(--brd);
+}
+.btn-menu-action:active {
+  transform: scale(0.98);
+}
+@keyframes scanPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.music-scan-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ac);
+  animation: pulseDot 1s infinite alternate;
+}
+@keyframes pulseDot {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+/* ── TOP TITLE & CUSTOM CHECKBOX ── */
+.top-title {
+  font-family: 'HB Rustic Delight', 'Noto Emoji', Georgia, serif;
+  font-size: 38px;
+  line-height: 1.05;
+  font-weight: normal;
+  color: var(--txt);
+  letter-spacing: -0.5px;
+}
+.custom-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--txt2);
+  cursor: pointer;
+  user-select: none;
+}
+.custom-check-row input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.custom-check-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--surf2);
+  border: 1.5px solid var(--brd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.custom-check-row input[type="checkbox"]:checked + .custom-check-box {
+  background: var(--ac);
+  border-color: var(--ac);
+}
+.custom-check-row input[type="checkbox"]:checked + .custom-check-box::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: solid var(--ctxt);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-0.5px, -1px);
+}
+.custom-check-text {
+  font-size: 12px;
+  color: var(--txt2);
+  line-height: 1.4;
+}
+.custom-check-row:hover .custom-check-box {
+  border-color: var(--ac);
+}
+</style>
+</head>
+<body>
+
+<!-- ── SCREEN 1: THERAPY (DEFAULT MAIN SCREEN) ── -->
+<div class="screen active" id="sc-therapy">
+  <div class="top-nav-bar" style="display:flex; align-items:center; gap: 14px; margin-bottom: 1.25rem;">
+    <button type="button" class="hamburger-btn" onclick="openMenu()" aria-label="Open Tone Settings" title="Tone Settings & Library" style="flex-shrink:0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <div style="flex: 1; min-width: 0;">
+      <div class="ey" style="margin: 0; line-height: 1.2; text-align: left;">Tinnitus Relief</div>
+      <h1 class="top-title">Notched Sound</h1>
+    </div>
+  </div>
+
+  <!-- ── DOCKED TOP BOX: FREQUENCY NOTCH SPECTRUM + INDEPENDENT EAR VOLUMES ── -->
+  <div class="docked-top-box" id="docked-top-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+      <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Frequency Notch Spectrum</span>
+      <span id="spectrum-source-badge" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--ab);color:var(--ac);text-transform:uppercase;">Idle</span>
+    </div>
+    
+    <canvas id="spec-canvas" height="85" style="width:100%;background:var(--surf2);border-radius:8px"></canvas>
+    
+    <div class="notch-legend" style="margin-top:5px; margin-bottom:8px;">
+      <span><svg width="12" height="2" style="vertical-align:middle"><line x1="0" y1="1" x2="12" y2="1" stroke="#1D9E75" stroke-width="2" stroke-dasharray="3,2"/></svg> Left: <strong id="spec-lf" style="color:var(--ac)">7,400 Hz</strong></span>
+      <span><svg width="12" height="2" style="vertical-align:middle"><line x1="0" y1="1" x2="12" y2="1" stroke="#7C66DC" stroke-width="2" stroke-dasharray="3,2"/></svg> Right: <strong id="spec-rf" style="color:#7C66DC">7,400 Hz</strong></span>
+    </div>
+
+    <!-- Independent Left & Right Ear Volume Sliders -->
+    <div class="docked-ear-vols">
+      <div class="docked-vol-row">
+        <span class="docked-vol-lbl" style="color:var(--ac)">◀ Left</span>
+        <input type="range" min="0" max="100" value="80" id="vol-l-sl" oninput="setEarVol('left',this.value)" class="docked-slider vol-slider-l">
+        <span class="docked-vol-val" id="vol-l-val">80%</span>
+      </div>
+      <div class="docked-vol-row">
+        <span class="docked-vol-lbl" style="color:#7C66DC">Right ▶</span>
+        <input type="range" min="0" max="100" value="80" id="vol-r-sl" oninput="setEarVol('right',this.value)" class="docked-slider vol-slider-r">
+        <span class="docked-vol-val" id="vol-r-val">80%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left & Right Ear Frequency Cards (Beneath the Docked Box) -->
+  <div class="sum-grid">
+    <div class="sum-card">
+      <div class="sum-lbl">Left Ear</div>
+      <select id="ear-sel-left" class="card-prof-sel" onchange="switchEarProfile('left', this.value)"></select>
+      <div class="sum-freq fl" id="th-lf">7,400 Hz</div>
+      <div class="sum-info" id="th-li">Pure Tone</div>
+      <div class="ear-btns">
+        <button type="button" class="e-btn e-btn-play" id="btn-play-left" onclick="toggleEarTone('left')">Play Tone</button>
+        <button type="button" class="e-btn" onclick="openAdjustModal('left')">Nudge Hz</button>
+        <button type="button" class="e-btn" onclick="startSingleEarMatch('left')">Re-Match</button>
+      </div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-lbl">Right Ear</div>
+      <select id="ear-sel-right" class="card-prof-sel" onchange="switchEarProfile('right', this.value)"></select>
+      <div class="sum-freq fr" id="th-rf">7,400 Hz</div>
+      <div class="sum-info" id="th-ri">Pure Tone</div>
+      <div class="ear-btns">
+        <button type="button" class="e-btn e-btn-play" id="btn-play-right" onclick="toggleEarTone('right')">Play Tone</button>
+        <button type="button" class="e-btn" onclick="openAdjustModal('right')">Nudge Hz</button>
+        <button type="button" class="e-btn" onclick="startSingleEarMatch('right')">Re-Match</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Backdrop Soundscape Box -->
+  <div class="card" id="th-card">
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;margin-bottom:10px">Backdrop Soundscapes</div>
+    <div class="snd-grid" style="grid-template-columns:1fr 1fr; margin-bottom:12px;">
+      <button class="snd-btn" id="snd-rain" onclick="trySound('rain')"><span class="sname">Rainfall</span><span class="sdesc">Gentle drops</span></button>
+      <button class="snd-btn" id="snd-ocean" onclick="trySound('ocean')"><span class="sname">Ocean Surf</span><span class="sdesc">Slow waves</span></button>
+      <button class="snd-btn" id="snd-wind" onclick="trySound('wind')"><span class="sname">Wind</span><span class="sdesc">Soft breeze</span></button>
+      <button class="snd-btn" id="snd-pink" onclick="trySound('pink')"><span class="sname">Pink Noise</span><span class="sdesc">Balanced -3dB</span></button>
+      <button class="snd-btn" id="snd-brown" onclick="trySound('brown')"><span class="sname">Brown Noise</span><span class="sdesc">Deep low rumble</span></button>
+      <button class="snd-btn sel" id="snd-white" onclick="trySound('white')"><span class="sname">White Noise</span><span class="sdesc">Full spectrum</span></button>
+    </div>
+
+    <!-- Play Sound Therapy Button -->
+    <button class="btn-main" id="th-btn" onclick="toggleTherapy()">▶ Start Sound Therapy</button>
+
+    <!-- Session Duration Slider & Fade Control (0 to 12 hours) -->
+    <div class="therapy-timer-section" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--brd);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+        <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Session Duration</span>
+        <span id="session-timer-disp" style="font-family:monospace; font-size:12px; font-weight:700; color:var(--ac); background:var(--ab); padding:2px 8px; border-radius:10px; border:1px solid var(--ac);">Continuous (∞)</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:18px;">∞</span>
+        <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:32px; text-align:right;">12h</span>
+      </div>
+
+      <!-- Active Countdown Block -->
+      <div id="timer-block" style="display:none; text-align:center; padding: 10px 0 4px;">
+        <div class="timer-disp" id="timer-cd" style="font-size:32px; font-weight:800; color:var(--ac); font-family:monospace;">30:00</div>
+        <div style="font-size:11px; color:var(--txt2); margin-top:2px;">remaining</div>
+      </div>
+
+      <!-- Custom-styled Sleep Fade Toggle Checkbox -->
+      <label class="custom-check-row" style="margin-top: 10px;">
+        <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
+        <span class="custom-check-box"></span>
+        <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
+      </label>
+    </div>
+  </div>
+
+    <!-- ── NOTCHED MUSIC PLAYER CARD ── -->
+  <div class="card" id="music-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div>
+        <span style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Notched Music Player</span>
+        <div id="music-card-folder-sub" style="font-size:11px;color:var(--txt2);margin-top:2px;">Poweramp Tag Engine</div>
+      </div>
+      <span class="music-notch-pill" id="music-active-pill">Notch Active</span>
+    </div>
+
+    <!-- Empty state when no folder chosen -->
+    <div id="music-empty-deck" style="text-align:center; padding: 22px 14px; background: var(--surf2); border: 1px solid var(--brd); border-radius: 12px; margin-bottom: 12px; display: none;">
+      <div style="font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 4px;">No Music Folder Configured</div>
+      <div style="font-size: 11px; color: var(--txt2); margin-bottom: 14px; line-height: 1.5;">Select your music folder in Tone Settings (☰) or tap below to index your Poweramp-tagged collection.</div>
+      <button type="button" class="btn-deck-action" onclick="pickMusicFolder()">Choose Music Folder</button>
+    </div>
+
+    <!-- Scanning status banner -->
+    <div id="music-scan-banner" style="display: none; align-items: center; justify-content: space-between; background: var(--ab); border: 1px solid var(--ac); border-radius: 8px; padding: 7px 12px; margin-bottom: 10px; font-size: 11px; color: var(--ac); font-weight: 600;">
+      <span id="music-banner-text">Indexing tags in background...</span>
+      <span class="music-scan-pulse"></span>
+    </div>
+
+    <!-- Now Playing Deck -->
+    <div class="music-now-card" id="music-now-deck">
+      <div class="music-track-title" id="now-track-title">No Track Selected</div>
+      <div class="music-track-sub" id="now-track-sub">Select an artist or album below to begin</div>
+
+      <!-- Scrubber -->
+      <div class="music-scrub-row">
+        <span class="music-scrub-time" id="music-time-cur">00:00</span>
+        <input type="range" id="music-scrubber" min="0" max="100" value="0" oninput="onMusicSeek(this.value)" class="music-scrub-slider">
+        <span class="music-scrub-time" id="music-time-dur" style="text-align:right">00:00</span>
+      </div>
+
+      <!-- Transport Controls (Crisp SVG Icons, NO EMOJIS) -->
+      <div class="music-transport-btns">
+        <button type="button" class="music-ctrl-btn" id="btn-shuffle" onclick="toggleShuffle()" title="Shuffle" aria-label="Shuffle">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+        </button>
+        <button type="button" class="music-ctrl-btn" onclick="prevMusicTrack()" title="Previous Track" aria-label="Previous Track">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
+        </button>
+        <button type="button" class="music-play-main" id="btn-music-play" onclick="toggleMusicPlay()" title="Play / Pause" aria-label="Play / Pause">
+          <svg id="svg-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          <svg id="svg-pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+        </button>
+        <button type="button" class="music-ctrl-btn" onclick="nextMusicTrack()" title="Next Track" aria-label="Next Track">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
+        </button>
+        <button type="button" class="music-ctrl-btn" id="btn-repeat" onclick="toggleRepeat()" title="Repeat" aria-label="Repeat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Poweramp Tag Browser (Artist -> Album -> Tracks) -->
+    <div class="music-browser-box">
+      <div class="music-breadcrumb" id="music-breadcrumb">
+        <span class="music-bc-item" onclick="navToArtists()">All Artists</span>
+      </div>
+      <div id="music-browser-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+<!-- Hidden HTML5 Audio element for Music Playback -->
+<audio id="music-audio" crossorigin="anonymous" preload="auto"></audio>
+
+<!-- ── SCREEN 2: TONE CHARACTER SELECTION ── -->
+<div class="screen" id="sc-char">
+  <div class="prog-bar"><div class="prog-fill" id="char-prog" style="width:10%"></div></div>
+  <div class="ey">Step 1 of 3</div>
+  <div class="badge" id="char-badge">◀ Left Ear</div>
+  
+  <div class="card">
+    <div class="card-title">Choose Tinnitus Character</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.5;margin-bottom:12px">
+      Pick the sound that feels closest to your ringing texture. Tap to audition.
+    </div>
+
+    <div class="char-grid">
+      <div class="char-opt" id="co-sine" onclick="selectChar('sine')">
+        <div class="char-icon">〰️</div>
+        <div><div class="char-name">Pure Tone</div><div class="char-desc">Clean single whistle or ring (300 Hz – 12 kHz)</div></div>
+      </div>
+      <div class="char-opt" id="co-sawtooth" onclick="selectChar('sawtooth')">
+        <div class="char-icon">⚡</div>
+        <div><div class="char-name">Hum / Buzz</div><div class="char-desc">Electrical buzz, motor, low drone (80 Hz – 3 kHz)</div></div>
+      </div>
+      <div class="char-opt" id="co-noise" onclick="selectChar('noise')">
+        <div class="char-icon">💨</div>
+        <div><div class="char-name">Static / Hiss</div><div class="char-desc">Steam, air hiss, TV static (400 Hz – 10 kHz)</div></div>
+      </div>
+      <div class="char-opt" id="co-square" onclick="selectChar('square')">
+        <div class="char-icon">🔔</div>
+        <div><div class="char-name">High Whistle</div><div class="char-desc">Piercing sharp electronic tone (1 kHz – 12 kHz)</div></div>
+      </div>
+    </div>
+
+    <!-- Volume adjustment during character pick -->
+    <div style="margin-top: 14px;">
+      <div class="slmeta"><span>Test Volume</span><span id="char-vl">-18 dB</span></div>
+      <input type="range" min="5" max="80" value="40" oninput="setVol(this.value)" style="width:100%;accent-color:var(--ac)">
+    </div>
+  </div>
+
+  <button class="btn-main" id="char-next" onclick="goCompare()" disabled>Next: Compare Pitches →</button>
+  <button class="btn-sec" onclick="show('sc-therapy')" style="margin-top: 8px;">Cancel</button>
+</div>
+
+<!-- ── SCREEN 3: A/B COMPARISON TEST ── -->
+<div class="screen" id="sc-compare">
+  <div class="prog-bar"><div class="prog-fill" id="cmp-prog" style="width:25%"></div></div>
+  <div class="ey">Step 2 of 3 — Round <span id="cmp-rn">1</span> / 6</div>
+  <div class="badge" id="cmp-badge">◀ Left Ear</div>
+
+  <div class="card" style="text-align:center">
+    <div style="font-size:13px;color:var(--txt2);margin-bottom:10px">Which pitch is closer to your tinnitus?</div>
+    
+    <div class="ab-grid">
+      <button class="ab-btn on" id="btn-A" onclick="pick('A')">
+        <div class="ab-lbl">Tone A</div>
+        <div class="ab-hz" id="hz-A">2.5 kHz</div>
+      </button>
+      <button class="ab-btn" id="btn-B" onclick="pick('B')">
+        <div class="ab-lbl">Tone B</div>
+        <div class="ab-hz" id="hz-B">7.0 kHz</div>
+      </button>
+    </div>
+
+    <div class="now-playing" id="now-pl">▶ Now playing: A</div>
+    <div class="round-dots" id="rdots"></div>
+
+    <div style="margin-top: 14px;">
+      <div class="slmeta"><span>Test Volume</span><span id="cmp-vl">-18 dB</span></div>
+      <input type="range" min="5" max="80" value="40" oninput="setVol(this.value)" style="width:100%;accent-color:var(--ac)">
+    </div>
+  </div>
+
+  <button class="btn-sec" onclick="pick('same')" style="margin-top:8px">Both sound similar / Fine-tune →</button>
+  <button class="btn-sec" onclick="restartEar()" style="margin-top:4px">Restart comparison</button>
+</div>
+
+<!-- ── SCREEN 4: FINE FREQUENCY ADJUSTMENT ── -->
+<div class="screen" id="sc-fine">
+  <div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div>
+  <div class="ey">Step 3 of 3 — Fine Tuning</div>
+  <div class="badge" id="fine-badge">◀ Left Ear</div>
+
+  <div class="card" style="text-align:center">
+    <div style="font-size:13px;color:var(--txt2);margin-bottom:8px">Adjust the slider until the pitch matches your ringing:</div>
+    <div class="fine-freq" id="fine-disp">7,400 Hz</div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:1.5rem 0 1rem">
+      <span class="fine-edge" id="fine-lo">3.0 kHz</span>
+      <input type="range" min="0" max="100" value="50" class="fine-sl" id="fine-sl" oninput="fineMove(this.value)" style="flex:1">
+      <span class="fine-edge" id="fine-hi">12.0 kHz</span>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin-bottom:1rem">
+      <button class="plbtn" id="fine-pb" onclick="toggleFine()">▶ Play Tone</button>
+    </div>
+
+    <div>
+      <div class="slmeta"><span>Tone Volume</span><span id="fine-vl">-18 dB</span></div>
+      <input type="range" min="5" max="80" value="40" oninput="setVol(this.value)" style="width:100%;accent-color:var(--ac)">
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="confirmEar()">Confirm Frequency ✓</button>
+</div>
+
+<!-- ── SCREEN 5: LEFT EAR MATCHED / PROCEED TO RIGHT ── -->
+<div class="screen" id="sc-ldone">
+  <div class="prog-bar"><div class="prog-fill" style="width:50%"></div></div>
+  <div class="card" style="text-align:center;padding:2rem">
+    <div style="font-size:40px;margin-bottom:.5rem">✓</div>
+    <div class="card-title">Left Ear Calibrated</div>
+    <div class="fine-freq" id="ldone-freq" style="font-size:36px">7,400 Hz</div>
+    <div style="font-size:13px;color:var(--txt2);margin-top:4px" id="ldone-type">Pure Tone</div>
+    <div style="background:var(--surf2);border-radius:10px;padding:12px;margin-top:1.5rem;font-size:13px;color:var(--txt2);text-align:left;line-height:1.55">
+      Now calibrate the <strong>Right Ear</strong>. If your tinnitus is identical in both ears, you can clone it directly.
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn-main" onclick="startEar('right')">Calibrate Right Ear →</button>
+    <button class="btn-sec" onclick="sameAsLeft()">Right Ear is the Same</button>
+  </div>
+</div>
+
+<!-- ── HAMBURGER MENU / TONE PROFILE DRAWER ── -->
+<div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menu-drawer">
+  <div class="menu-header">
+    <div style="font-size: 16px; font-weight: 700;">Ear Profiles & Experiments</div>
+    <button type="button" onclick="closeMenu()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--txt2); line-height: 1;">✕</button>
+  </div>
+  <div class="menu-content">
+    <!-- Calibration Options -->
+    <div class="menu-section">
+      <div class="menu-section-title">Calibration</div>
+      <button type="button" class="menu-action-btn primary" onclick="closeMenu(); startFullRecalibration();">
+        <span style="font-size: 18px;">🎯</span>
+        <div style="text-align: left;">
+          <div style="font-weight: 700; font-size: 13px;">Calibrate Both Ears</div>
+          <div style="font-size: 11px; opacity: 0.88; margin-top: 1px;">Full test from scratch (Left then Right)</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Left Ear Profiles Section -->
+    <div class="menu-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="menu-section-title" style="margin: 0; color: #1D9E75;">Left Ear Profiles</span>
+        <span class="saved-toast" id="prof-toast-l" style="margin: 0;">✓ Saved</span>
+      </div>
+      
+      <label style="font-size: 11px; color: var(--txt2); margin-bottom: 4px; display: block;">Active Left Profile:</label>
+      <select id="menu-sel-left" class="p-select" onchange="switchEarProfile('left', this.value)" style="margin-bottom: 8px;">
+      </select>
+
+      <button type="button" class="menu-clone-btn" onclick="duplicateEarProfile('left')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Clone Active Left Profile</button>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+        <button type="button" class="e-btn e-btn-play" id="menu-play-left" onclick="toggleEarTone('left')">Play</button>
+        <button type="button" class="e-btn" onclick="closeMenu(); openAdjustModal('left')">Nudge</button>
+        <button type="button" class="e-btn" onclick="closeMenu(); startSingleEarMatch('left')">Re-Match</button>
+      </div>
+
+      <div class="profile-actions-grid" style="margin-top: 4px;">
+        <button type="button" class="p-btn" onclick="newEarProfilePrompt('left')">+ New</button>
+        <button type="button" class="p-btn" onclick="renameEarProfile('left')">Rename</button>
+        <button type="button" class="p-btn" id="btn-del-left" onclick="deleteEarProfile('left')" style="color: #ef4444;">Delete</button>
+      </div>
+    </div>
+
+    <!-- Right Ear Profiles Section -->
+    <div class="menu-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="menu-section-title" style="margin: 0; color: #7C66DC;">Right Ear Profiles</span>
+        <span class="saved-toast" id="prof-toast-r" style="margin: 0;">✓ Saved</span>
+      </div>
+      
+      <label style="font-size: 11px; color: var(--txt2); margin-bottom: 4px; display: block;">Active Right Profile:</label>
+      <select id="menu-sel-right" class="p-select" onchange="switchEarProfile('right', this.value)" style="margin-bottom: 8px;">
+      </select>
+
+      <button type="button" class="menu-clone-btn" onclick="duplicateEarProfile('right')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Clone Active Right Profile</button>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+        <button type="button" class="e-btn e-btn-play" id="menu-play-right" onclick="toggleEarTone('right')">Play</button>
+        <button type="button" class="e-btn" onclick="closeMenu(); openAdjustModal('right')">Nudge</button>
+        <button type="button" class="e-btn" onclick="closeMenu(); startSingleEarMatch('right')">Re-Match</button>
+      </div>
+
+      <div class="profile-actions-grid" style="margin-top: 4px;">
+        <button type="button" class="p-btn" onclick="newEarProfilePrompt('right')">+ New</button>
+        <button type="button" class="p-btn" onclick="renameEarProfile('right')">Rename</button>
+        <button type="button" class="p-btn" id="btn-del-right" onclick="deleteEarProfile('right')" style="color: #ef4444;">Delete</button>
+      </div>
+    
+    <!-- Music Library & Folder Section -->
+    <div class="menu-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="menu-section-title" style="margin: 0;">Music Library & Tags</span>
+        <span class="saved-toast" id="music-scan-badge" style="margin: 0; display: none;">Indexed</span>
+      </div>
+      
+      <div style="background: var(--surf); border: 1px solid var(--brd); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt2); font-weight: 700;">Active Folder</div>
+        <div id="menu-music-folder-name" style="font-size: 13px; font-weight: 600; color: var(--ac); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No Folder Selected</div>
+        <div id="menu-music-stats" style="font-size: 11px; color: var(--txt2); margin-top: 4px;">Select your music folder to index Poweramp tags.</div>
+        
+        <!-- Live scan progress bar -->
+        <div id="menu-scan-bar-wrap" style="display: none; margin-top: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--txt2); margin-bottom: 4px;">
+            <span id="menu-scan-status-text">Indexing tags...</span>
+            <span id="menu-scan-count-text">0 tracks</span>
+          </div>
+          <div style="height: 4px; background: var(--surf2); border-radius: 2px; overflow: hidden; position: relative;">
+            <div id="menu-scan-progress-bar" style="height: 100%; width: 35%; background: var(--ac); border-radius: 2px; animation: scanPulse 1.2s infinite ease-in-out;"></div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-menu-action primary" onclick="pickMusicFolder()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        Choose Music Folder
+      </button>
+
+      <button type="button" class="btn-menu-action secondary" onclick="rescanMusicFolder()" style="margin-top: 6px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        Rescan Library Tags
+      </button>
+    </div>
+</div>
+  </div>
+</div>
+
+<!-- ── QUICK FREQUENCY ADJUST MODAL ── -->
+<div class="modal-bg" id="adjust-modal">
+  <div class="modal" style="max-width: 360px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 id="adj-title" style="margin: 0; font-size: 17px; font-weight: 700;">Nudge Tone Frequency</h3>
+      <button type="button" onclick="closeAdjustModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--txt2); line-height: 1;">✕</button>
+    </div>
+    
+    <div style="text-align: center; margin: 10px 0;">
+      <div id="adj-freq-disp" style="font-size: 38px; font-weight: 800; color: var(--ac); font-family: monospace;">7,400 Hz</div>
+      <div id="adj-type-disp" style="font-size: 13px; color: var(--txt2); margin-top: 2px;">Pure Tone</div>
+    </div>
+
+    <!-- Character selector -->
+    <div class="char-pills">
+      <div class="char-pill sel" id="adj-ch-sine" onclick="setAdjChar('sine')">Tone</div>
+      <div class="char-pill" id="adj-ch-sawtooth" onclick="setAdjChar('sawtooth')">Hum</div>
+      <div class="char-pill" id="adj-ch-noise" onclick="setAdjChar('noise')">Noise</div>
+      <div class="char-pill" id="adj-ch-square" onclick="setAdjChar('square')">Whistle</div>
+    </div>
+    
+    <!-- Step buttons -->
+    <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 12px;">
+      <button type="button" class="p-btn" style="flex: 1;" onclick="stepAdjFreq(-100)">-100</button>
+      <button type="button" class="p-btn" style="flex: 1;" onclick="stepAdjFreq(-10)">-10</button>
+      <button type="button" class="p-btn" style="flex: 1;" onclick="stepAdjFreq(10)">+10</button>
+      <button type="button" class="p-btn" style="flex: 1;" onclick="stepAdjFreq(100)">+100</button>
+    </div>
+    
+    <input type="range" id="adj-slider" min="100" max="14000" step="10" oninput="onAdjSlider(this.value)" style="width: 100%; accent-color: var(--ac); margin-bottom: 14px;">
+    
+    <button type="button" id="adj-test-btn" class="btn-sec" style="width: 100%; padding: 10px; margin-bottom: 10px;" onclick="toggleAdjTestAudio()">▶ Test Live Tone</button>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button type="button" class="btn-main" style="padding: 11px;" onclick="saveAdjustedFreqToProfile()">Save Changes to Profile</button>
+      <button type="button" class="btn-sec" style="padding: 9px; font-size: 12px;" onclick="saveAdjustedFreqAsNew()">⎘ Save as New Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── AUDIO ENGINE & DSP CONSTANTS ──
+function fmtF(f){
+  if(!f) return '—';
+  if(f>=10000) return (Math.round(f/100)/10) + ' kHz';
+  if(f>=1000) return (f/1000).toFixed(1) + ' kHz';
+  return Math.round(f) + ' Hz';
+}
+const geo = (a, b) => Math.round(Math.sqrt(a * b));
+const TNAMES = { sine: 'Pure Tone', sawtooth: 'Hum / Buzz', square: 'High Whistle', noise: 'Static / Hiss' };
+const RANGES = { sine: [300, 12000], sawtooth: [80, 3000], noise: [400, 10000], square: [1000, 12000] };
+const isDark = () => window.matchMedia('(prefers-color-scheme:dark)').matches;
+
+const TH_DB_MIN = -70, TH_DB_MAX = -3;
+const PREV_DB_MIN = -30, PREV_DB_MAX = -6;
+function s2g(v){ const db = TH_DB_MIN + (Math.max(0, Math.min(100, v)) / 100) * (TH_DB_MAX - TH_DB_MIN); return Math.pow(10, db / 20); }
+function g2s(g){ if(g <= 0) return 0; const db = 20 * Math.log10(g); return Math.round((db - TH_DB_MIN) / (TH_DB_MAX - TH_DB_MIN) * 100); }
+function prevGain(v){ const vv = Math.max(5, Math.min(80, v)); const db = PREV_DB_MIN + ((vv - 5) / 75) * (PREV_DB_MAX - PREV_DB_MIN); return Math.pow(10, db / 20); }
+
+// ── STATE ──
+let ws = {
+  ear: 'left',
+  type: 'sine',
+  vol: 40,
+  lo: 300,
+  hi: 12000,
+  round: 0,
+  maxR: 6,
+  fineFreq: 7400,
+  finePlaying: false,
+  confirmed: { left: 7400, right: 7400 },
+  types: { left: 'sine', right: 'sine' }
+};
+
+let therapy = { sound: 'white', playing: false };
+let therapyGain = Math.pow(10, -35 / 20);
+let actx = null, compNode = null, compTimer = null, curAB = null, fA = 0, fB = 0, fineNode = null;
+let thNodes = { left: null, right: null };
+let thGainL = null, thGainR = null;
+let analyser = null, analyserBuf = null, drawRAF = null;
+let earVolL = 1.0, earVolR = 1.0, earVolOpen = false;
+
+function gc(){
+  if(!actx || actx.state === 'closed'){
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(actx.state === 'suspended'){
+    actx.resume();
+  }
+  return actx;
+}
+
+function volLabel(g){
+  if(g <= 0) return '—';
+  const db = Math.round(20 * Math.log10(g));
+  return db + ' dB';
+}
+
+function thVolSlider(v){
+  therapyGain = s2g(parseInt(v));
+  const el = document.getElementById('th-vl');
+  if(el) el.textContent = volLabel(therapyGain);
+  applyThGain();
+  soundVols[therapy.sound] = parseInt(v);
+  saveSoundVols();
+  saveActiveProfileState(false);
+}
+
+function stepVol(d){
+  const curDb = therapyGain > 0 ? 20 * Math.log10(therapyGain) : TH_DB_MIN;
+  const newDb = Math.max(TH_DB_MIN, Math.min(TH_DB_MAX, curDb + d));
+  therapyGain = Math.pow(10, newDb / 20);
+  const sl = document.getElementById('th-vol-sl');
+  if(sl) sl.value = g2s(therapyGain);
+  const el = document.getElementById('th-vl');
+  if(el) el.textContent = volLabel(therapyGain);
+  applyThGain();
+  soundVols[therapy.sound] = g2s(therapyGain);
+  saveSoundVols();
+  saveActiveProfileState(false);
+}
+
+function applyThGain(){
+  if(thGainL) thGainL.gain.value = therapyGain * earVolL * 0.4;
+  if(thGainR) thGainR.gain.value = therapyGain * earVolR * 0.4;
+}
+
+// ── PROCEDURAL NOISE BUFFERS ──
+function mkNoise(pink){
+  const c = gc(), sz = c.sampleRate * 4, buf = c.createBuffer(1, sz, c.sampleRate), d = buf.getChannelData(0);
+  if(!pink){ for(let i = 0; i < sz; i++) d[i] = Math.random() * 2 - 1; }
+  else {
+    let p0=0, p1=0, p2=0, p3=0, p4=0, p5=0, p6=0;
+    for(let i = 0; i < sz; i++){
+      const w = Math.random() * 2 - 1;
+      p0 = .99886*p0 + w*.0555179;
+      p1 = .99332*p1 + w*.0750759;
+      p2 = .969*p2 + w*.153852;
+      p3 = .8665*p3 + w*.3104856;
+      p4 = .55*p4 + w*.5329522;
+      p5 = -.7616*p5 - w*.016898;
+      d[i] = (p0+p1+p2+p3+p4+p5+p6 + w*.5362) * .11;
+      p6 = w*.115926;
+    }
+  }
+  return buf;
+}
+
+// ── PROCEDURAL AUDIO SOURCES ──
+function srcWhite(c){ const src = c.createBufferSource(), out = c.createGain(); out.gain.value = 0.22; src.buffer = mkNoise(false); src.loop = true; src.connect(out); src.start(); return { _n: [src, out], output: out }; }
+function srcPink(c){ const src = c.createBufferSource(), out = c.createGain(); out.gain.value = 0.65; src.buffer = mkNoise(true); src.loop = true; src.connect(out); src.start(); return { _n: [src, out], output: out }; }
+function srcRain(c){
+  const out = c.createGain(); out.gain.value = 0.55; const ns = [];
+  [[2500,0.7,1.0,false],[700,1.2,0.35,false],[5500,0,0.12,true]].forEach(([f,Q,v,hp])=>{
+    const src = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = mkNoise(false); src.loop = true; fl.type = hp ? 'highpass' : 'bandpass'; fl.frequency.value = f; fl.Q.value = Q; g.gain.value = v;
+    src.connect(fl); fl.connect(g); g.connect(out); src.start(); ns.push(src, fl, g);
+  });
+  return { _n: [out, ...ns], output: out };
+}
+function srcOcean(c){
+  const out = c.createGain(); out.gain.value = 2.4; const ns = [];
+  [[0.12,0.5,0.45,500],[0.07,0.3,0.28,220]].forEach(([lf,dc,dep,lpF])=>{
+    const src = c.createBufferSource(), lpf = c.createBiquadFilter(), wg = c.createGain(), lfo = c.createOscillator(), la = c.createGain();
+    src.buffer = mkNoise(true); src.loop = true; lpf.type = 'lowpass'; lpf.frequency.value = lpF; wg.gain.value = dc;
+    lfo.type = 'sine'; lfo.frequency.value = lf; la.gain.value = dep; lfo.connect(la); la.connect(wg.gain);
+    src.connect(lpf); lpf.connect(wg); wg.connect(out); src.start(); lfo.start(); ns.push(src, lpf, wg, lfo, la);
+  });
+  return { _n: [out, ...ns], output: out };
+}
+function srcWind(c){
+  const out = c.createGain(); out.gain.value = 1.0; const ns = [out];
+  const src = c.createBufferSource(); src.buffer = mkNoise(true); src.loop = true;
+  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 350;
+  const wg = c.createGain(); wg.gain.value = 0.55;
+  const lfo = c.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.45;
+  const la = c.createGain(); la.gain.value = 0.42;
+  lfo.connect(la); la.connect(wg.gain);
+  src.connect(hp); hp.connect(wg); wg.connect(out); src.start(); lfo.start();
+  ns.push(src, hp, wg, lfo, la);
+  return { _n: ns, output: out };
+}
+function srcBrown(c){
+  const sz = c.sampleRate * 4, buf = c.createBuffer(1, sz, c.sampleRate), d = buf.getChannelData(0);
+  let last = 0;
+  for(let i = 0; i < sz; i++){ const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+  const src = c.createBufferSource(), out = c.createGain();
+  out.gain.value = 0.80;
+  src.buffer = buf; src.loop = true; src.connect(out); src.start();
+  return { _n: [src, out], output: out };
+}
+
+function kn(n){
+  if(!n) return;
+  (n._n || Object.values(n)).forEach(x => {
+    if(!x || typeof x !== 'object') return;
+    try{ x.stop && x.stop(); }catch(e){}
+    try{ x.disconnect && x.disconnect(); }catch(e){}
+  });
+}
+
+function playFreq(freq){
+  const c = gc(), pan = c.createStereoPanner(), gain = c.createGain();
+  pan.pan.value = ws.ear === 'left' ? -1 : 1;
+  gain.gain.value = prevGain(ws.vol) * 0.4;
+  gain.connect(pan); pan.connect(c.destination);
+  let n = { gain, pan };
+  if(ws.type === 'noise'){
+    const src = c.createBufferSource(), bp = c.createBiquadFilter();
+    src.buffer = mkNoise(false); src.loop = true; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 3;
+    src.connect(bp); bp.connect(gain); src.start(); n = { ...n, src, bp };
+  } else {
+    const osc = c.createOscillator(); osc.type = ws.type; osc.frequency.value = freq; osc.connect(gain); osc.start(); n = { ...n, osc };
+  }
+  return n;
+}
+
+// ── UI NAVIGATION ──
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if(target) target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function setVol(v){
+  ws.vol = parseInt(v);
+  const g = prevGain(ws.vol) * 0.4;
+  const db = Math.round(20 * Math.log10(prevGain(ws.vol)));
+  ['char-vl', 'cmp-vl', 'fine-vl'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = db + ' dB';
+  });
+  if(compNode?.gain) compNode.gain.gain.value = g;
+  if(fineNode?.gain) fineNode.gain.gain.value = g;
+}
+
+// ── CHARACTER SELECTION ──
+let prevNode = null;
+function selectChar(type){
+  ws.type = type;
+  ['sine', 'sawtooth', 'noise', 'square'].forEach(t => {
+    const el = document.getElementById('co-' + t);
+    if(el) el.className = 'char-opt' + (t === type ? ' sel' : '');
+  });
+  const nextBtn = document.getElementById('char-next');
+  if(nextBtn) nextBtn.disabled = false;
+  kn(prevNode);
+  const r = RANGES[type];
+  prevNode = playFreq(geo(r[0], r[1]));
+  setTimeout(() => { kn(prevNode); prevNode = null; }, 1800);
+}
+
+function goCompare(){
+  kn(prevNode); prevNode = null;
+  const r = RANGES[ws.type];
+  ws.lo = r[0]; ws.hi = r[1]; ws.round = 0;
+  const b = document.getElementById('cmp-badge');
+  if(b) b.textContent = ws.ear === 'right' ? 'Right Ear ▶' : '◀ Left Ear';
+  show('sc-compare');
+  doRound();
+}
+
+function doRound(){
+  const rn = document.getElementById('cmp-rn'); if(rn) rn.textContent = ws.round + 1;
+  const prog = document.getElementById('cmp-prog'); if(prog) prog.style.width = (20 + ws.round * 12) + '%';
+  const dc = document.getElementById('rdots');
+  if(dc){
+    dc.innerHTML = '';
+    for(let i = 0; i < ws.maxR; i++){
+      const d = document.createElement('div');
+      d.className = 'rdot' + (i < ws.round ? ' done' : i === ws.round ? ' cur' : '');
+      dc.appendChild(d);
+    }
+  }
+  const pivot = geo(ws.lo, ws.hi);
+  fA = geo(ws.lo, pivot);
+  fB = geo(pivot, ws.hi);
+  const hzA = document.getElementById('hz-A'); if(hzA) hzA.textContent = fmtF(fA);
+  const hzB = document.getElementById('hz-B'); if(hzB) hzB.textContent = fmtF(fB);
+  clearInterval(compTimer);
+  kn(compNode);
+  curAB = 'A';
+  compNode = playFreq(fA);
+  syncAB();
+  compTimer = setInterval(() => {
+    curAB = curAB === 'A' ? 'B' : 'A';
+    kn(compNode);
+    compNode = playFreq(curAB === 'A' ? fA : fB);
+    syncAB();
+  }, 2500);
+}
+
+function syncAB(){
+  const bA = document.getElementById('btn-A'); if(bA) bA.className = 'ab-btn' + (curAB === 'A' ? ' on' : '');
+  const bB = document.getElementById('btn-B'); if(bB) bB.className = 'ab-btn' + (curAB === 'B' ? ' on' : '');
+  const np = document.getElementById('now-pl'); if(np) np.textContent = '▶ Now playing: ' + curAB;
+}
+
+function pick(choice){
+  clearInterval(compTimer); kn(compNode); compNode = null;
+  const pivot = geo(ws.lo, ws.hi);
+  if(choice === 'A') ws.hi = pivot;
+  else if(choice === 'B') ws.lo = pivot;
+  ws.round++;
+  if(ws.round >= ws.maxR || choice === 'same'){
+    ws.fineFreq = geo(ws.lo, ws.hi);
+    initFine();
+  } else {
+    doRound();
+  }
+}
+
+// ── FINE TUNING ──
+function initFine(){
+  const b = document.getElementById('fine-badge'); if(b) b.textContent = ws.ear === 'right' ? 'Right Ear ▶' : '◀ Left Ear';
+  const fd = document.getElementById('fine-disp'); if(fd) fd.textContent = fmtF(ws.fineFreq);
+  const fl = document.getElementById('fine-lo'); if(fl) fl.textContent = fmtF(ws.lo);
+  const fh = document.getElementById('fine-hi'); if(fh) fh.textContent = fmtF(ws.hi);
+  const sl = document.getElementById('fine-sl'); if(sl) sl.value = '50';
+  ws.finePlaying = false; kn(fineNode); fineNode = null;
+  const pb = document.getElementById('fine-pb');
+  if(pb){ pb.textContent = '▶ Play Tone'; pb.className = 'plbtn'; }
+  show('sc-fine');
+}
+
+function fineMove(v){
+  const f = Math.round(ws.lo * Math.pow(ws.hi / ws.lo, v / 100));
+  ws.fineFreq = f;
+  const fd = document.getElementById('fine-disp'); if(fd) fd.textContent = fmtF(f);
+  if(fineNode){
+    if(fineNode.osc) fineNode.osc.frequency.value = f;
+    if(fineNode.bp) fineNode.bp.frequency.value = f;
+  }
+}
+
+function toggleFine(){
+  ws.finePlaying = !ws.finePlaying;
+  const pb = document.getElementById('fine-pb');
+  if(ws.finePlaying){
+    kn(fineNode);
+    fineNode = playFreq(ws.fineFreq);
+    if(pb){ pb.textContent = '■ Pause'; pb.className = 'plbtn on'; }
+  } else {
+    kn(fineNode); fineNode = null;
+    if(pb){ pb.textContent = '▶ Play Tone'; pb.className = 'plbtn'; }
+  }
+}
+
+function confirmEar(){
+  kn(fineNode); fineNode = null; ws.finePlaying = false;
+  const ear = ws.ear;
+  const freq = ws.fineFreq;
+  const type = ws.type;
+  ws.confirmed[ear] = freq;
+  ws.types[ear] = type;
+
+  if(ws.isSingleEar){
+    updateActiveEarProfile(ear, p => {
+      p.freq = freq;
+      p.type = type;
+      p.date = new Date().toLocaleDateString();
+    });
+    openTherapy();
+    return;
+  }
+
+  // If bilateral calibration sequence, save/update left profile and proceed to right
+  updateActiveEarProfile(ear, p => {
+    p.freq = freq;
+    p.type = type;
+    p.date = new Date().toLocaleDateString();
+  });
+
+  // Bilateral calibration sequence
+  if(ear === 'left'){
+    const lf = document.getElementById('ldone-freq'); if(lf) lf.textContent = fmtF(freq);
+    const lt = document.getElementById('ldone-type'); if(lt) lt.textContent = TNAMES[type];
+    show('sc-ldone');
+  } else {
+    openTherapy();
+  }
+}
+
+function sameAsLeft(){
+  const curL = getActiveEarProfile('left');
+  const arrR = getEarProfiles('right');
+  const newR = {
+    id: 'prof_right_' + Date.now(),
+    name: 'Right (Same as Left)',
+    ear: 'right',
+    freq: curL.freq,
+    type: curL.type,
+    date: new Date().toLocaleDateString()
+  };
+  arrR.push(newR);
+  saveEarProfiles('right', arrR);
+  setActiveEarProfileId('right', newR.id);
+  applyEarProfile('right', newR);
+  openTherapy();
+}
+
+function startEar(ear){
+  ws.ear = ear; ws.type = 'sine'; ws.round = 0; ws.finePlaying = false;
+  kn(fineNode); fineNode = null; kn(compNode); compNode = null; clearInterval(compTimer); kn(prevNode); prevNode = null;
+  const b = document.getElementById('char-badge');
+  if(b) b.textContent = ear === 'right' ? 'Right Ear ▶' : '◀ Left Ear';
+  const nb = document.getElementById('char-next'); if(nb) nb.disabled = true;
+  ['sine', 'sawtooth', 'noise', 'square'].forEach(t => {
+    const el = document.getElementById('co-' + t);
+    if(el) el.className = 'char-opt';
+  });
+  show('sc-char');
+}
+
+function restartEar(){
+  clearInterval(compTimer); kn(compNode); compNode = null; kn(fineNode); fineNode = null;
+  ws.finePlaying = false;
+  startEar(ws.ear);
+}
+
+// ── THERAPY COCKPIT ──
+function openTherapy(){
+  const curL = getActiveEarProfile('left');
+  const curR = getActiveEarProfile('right');
+  ws.confirmed.left = curL.freq;
+  ws.confirmed.right = curR.freq;
+  ws.types.left = curL.type;
+  ws.types.right = curR.type;
+
+  const tlf = document.getElementById('th-lf'); if(tlf) tlf.textContent = fmtF(curL.freq);
+  const trf = document.getElementById('th-rf'); if(trf) trf.textContent = fmtF(curR.freq);
+  const tli = document.getElementById('th-li'); if(tli) tli.textContent = TNAMES[curL.type];
+  const tri = document.getElementById('th-ri'); if(tri) tri.textContent = TNAMES[curR.type];
+  const slf = document.getElementById('spec-lf'); if(slf) slf.textContent = fmtF(curL.freq);
+  const srf = document.getElementById('spec-rf'); if(srf) srf.textContent = fmtF(curR.freq);
+  const tvs = document.getElementById('th-vol-sl'); if(tvs) tvs.value = g2s(therapyGain);
+  const tvl = document.getElementById('th-vl'); if(tvl) tvl.textContent = volLabel(therapyGain);
+  
+  updateSndBtns();
+  setTimerOpt(0);
+  show('sc-therapy');
+  drawStaticSpectrum();
+  renderProfilesUI();
+}
+
+let soundVols = { white: 50, pink: 50, rain: 50, ocean: 50, wind: 50, brown: 50 };
+function loadSoundVols(){
+  try{ const v = localStorage.getItem('tr_svols_v3'); if(v) soundVols = { ...soundVols, ...JSON.parse(v) }; }catch(e){}
+}
+function saveSoundVols(){
+  try{ localStorage.setItem('tr_svols_v3', JSON.stringify(soundVols)); }catch(e){}
+}
+
+function trySound(type){
+  setSound(type);
+  saveActiveProfileState(false);
+}
+
+function setSound(type){
+  therapy.sound = type;
+  updateSndBtns();
+  if(therapy.playing){
+    stopThAudio();
+    stopDrawLoop();
+    buildTh();
+  }
+}
+
+function updateSoundVolHints(){}
+
+function updateSndBtns(){
+  ['white', 'pink', 'rain', 'ocean', 'wind', 'brown'].forEach(s => {
+    const el = document.getElementById('snd-' + s);
+    if(el) el.className = 'snd-btn' + (s === therapy.sound ? ' sel' : '');
+  });
+}
+
+function buildTh(){
+  const c = gc();
+  analyser = c.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.85;
+  analyserBuf = new Uint8Array(analyser.frequencyBinCount);
+  analyser.channelCount = 2; analyser.channelCountMode = 'explicit';
+  analyser.connect(c.destination);
+  thGainL = null; thGainR = null;
+
+  const builders = { white: srcWhite, pink: srcPink, rain: srcRain, ocean: srcOcean, wind: srcWind, brown: srcBrown };
+  ['left', 'right'].forEach(s => {
+    kn(thNodes[s]);
+    const f = ws.confirmed[s] || 7400;
+    const src = (builders[therapy.sound] || srcWhite)(c);
+    const notch = c.createBiquadFilter(); notch.type = 'notch'; notch.frequency.value = f; notch.Q.value = 8;
+    const evol = s === 'left' ? earVolL : earVolR;
+    const gain = c.createGain(); gain.gain.value = therapyGain * evol * 0.4;
+    const pan = c.createStereoPanner(); pan.pan.value = s === 'left' ? -1 : 1;
+    src.output.connect(notch); notch.connect(gain); gain.connect(pan); pan.connect(analyser);
+    if(s === 'left') thGainL = gain; else thGainR = gain;
+    thNodes[s] = { ...src, notch, pan, _n: [...(src._n || []), notch, gain, pan] };
+  });
+  startDrawLoop();
+}
+
+function stopThAudio(){
+  kn(thNodes.left); kn(thNodes.right);
+  thNodes = { left: null, right: null };
+  thGainL = null; thGainR = null;
+  analyser = null; analyserBuf = null;
+}
+
+function toggleTherapy(){
+  stopEarTone();
+  if(isMusicPlaying && musicAudioEl){
+    musicAudioEl.pause();
+    isMusicPlaying = false;
+    updatePlayBtnState();
+  }
+  therapy.playing = !therapy.playing;
+  const badge = document.getElementById('spectrum-source-badge');
+  if(badge){
+    if(therapy.playing){
+      badge.textContent = 'Therapy Soundscape';
+      badge.style.background = 'var(--ab)';
+      badge.style.color = 'var(--ac)';
+    } else {
+      badge.textContent = 'Idle';
+      badge.style.background = 'var(--surf2)';
+      badge.style.color = 'var(--txt2)';
+    }
+  }
+  try{ if(window.AndroidBridge && window.AndroidBridge.setTherapyActive) window.AndroidBridge.setTherapyActive(therapy.playing); }catch(e){}
+
+  const tb = document.getElementById('th-btn');
+  const tc = document.getElementById('th-card');
+
+  if(therapy.playing){
+    buildTh();
+    startTimer();
+    if(tc) tc.style.borderColor = 'var(--ac)';
+    if(tb) tb.textContent = '■ Stop Sound Therapy';
+  } else {
+    stopThAudio();
+    stopDrawLoop();
+    stopTimer();
+    drawStaticSpectrum();
+    if(tc) tc.style.borderColor = 'var(--brd)';
+    if(tb) tb.textContent = '▶ Start Sound Therapy';
+  }
+}
+
+// ── TIMERS (SLIDER 0 - 12 HOURS) ──
+let timerMins = 0, timerSecs = 0, timerInterval = null;
+
+function fmtTimerDuration(mins){
+  mins = parseInt(mins, 10) || 0;
+  if(mins === 0) return 'Continuous (∞)';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if(h === 0) return m + ' min' + (m === 1 ? '' : 's');
+  if(m === 0) return h + ' hr' + (h === 1 ? '' : 's');
+  return h + ' hr ' + m + ' min';
+}
+
+function onSessionTimerSlider(val){
+  const mins = parseInt(val, 10);
+  timerMins = mins;
+  const disp = document.getElementById('session-timer-disp');
+  if(disp) disp.textContent = fmtTimerDuration(mins);
+
+  const blk = document.getElementById('timer-block');
+  if(therapy.playing){
+    if(mins > 0){
+      startTimer();
+    } else {
+      stopTimer();
+      if(blk) blk.style.display = 'none';
+    }
+  } else {
+    if(blk) blk.style.display = 'none';
+  }
+}
+
+function setTimerOpt(m){
+  const slider = document.getElementById('session-timer-slider');
+  if(slider) slider.value = m;
+  onSessionTimerSlider(m);
+}
+
+function fmtTimer(s){
+  s = Math.max(0, Math.floor(s));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if(h > 0){
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function checkSleepFade(cb){}
+
+function startTimer(){
+  stopTimer();
+  if(!timerMins || timerMins <= 0) return;
+  timerSecs = timerMins * 60;
+  const blk = document.getElementById('timer-block');
+  if(blk) blk.style.display = 'block';
+  const cd = document.getElementById('timer-cd');
+  if(cd) cd.textContent = fmtTimer(timerSecs);
+
+  timerInterval = setInterval(() => {
+    timerSecs--;
+    if(cd) cd.textContent = fmtTimer(timerSecs);
+
+    // Fade out during last 5 minutes (300s) if checked
+    const fadeCb = document.getElementById('sleep-fade');
+    if(fadeCb && fadeCb.checked && timerSecs <= 300 && timerSecs > 0){
+      const fadeFrac = timerSecs / 300;
+      if(thGainL && actx) thGainL.gain.setTargetAtTime(therapyGain * earVolL * 0.4 * fadeFrac, actx.currentTime, 0.5);
+      if(thGainR && actx) thGainR.gain.setTargetAtTime(therapyGain * earVolR * 0.4 * fadeFrac, actx.currentTime, 0.5);
+    }
+
+    if(timerSecs <= 0){
+      stopTimer();
+      if(therapy.playing) toggleTherapy();
+    }
+  }, 1000);
+}
+
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+}
+
+function resetAll(){
+  stopThAudio(); stopDrawLoop(); stopTimer();
+  therapy.playing = false;
+  const tb = document.getElementById('th-btn'); if(tb) tb.textContent = '▶ Start Sound Therapy';
+  ws.confirmed = { left: 7400, right: 7400 };
+  ws.types = { left: 'sine', right: 'sine' };
+  openTherapy(true);
+}
+
+// ── SPECTRUM CANVAS ──
+const MF = 80, XF = 14000;
+const f2x = (f, W) => (Math.log10(f / MF) / Math.log10(XF / MF)) * W;
+function getCanv(){
+  const el = document.getElementById('spec-canvas');
+  if(!el) return null;
+  const dpr = window.devicePixelRatio || 1, w = el.offsetWidth || 420;
+  if(!el.dataset.init){
+    el.width = w * dpr; el.height = 120 * dpr;
+    el.getContext('2d').scale(dpr, dpr);
+    el.dataset.init = '1';
+  }
+  return el;
+}
+
+function drawAxes(ctx, W, H, dk){
+  const gc = [100, 200, 500, 1000, 2000, 5000, 10000];
+  gc.forEach(f => {
+    const x = f2x(f, W);
+    ctx.strokeStyle = dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H - 14); ctx.stroke();
+    ctx.fillStyle = dk ? '#5A6270' : '#bbb'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(f >= 1000 ? f / 1000 + 'k' : f, x, H - 3);
+  });
+}
+
+function drawNt(ctx, W, H, dk, alpha){
+  [[ws.confirmed.left, '#1D9E75'], [ws.confirmed.right, '#7C66DC']].forEach(([f, col]) => {
+    if(!f) return;
+    const x = f2x(f, W);
+    ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H - 16); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = col; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'left';
+    ctx.fillText(fmtF(f), Math.min(x + 3, W - 52), 12); ctx.restore();
+  });
+}
+
+function drawStaticSpectrum(){
+  const el = getCanv(); if(!el) return;
+  const W = el.offsetWidth || 420, H = 120, ctx = el.getContext('2d'), dk = isDark();
+  ctx.clearRect(0, 0, W, H);
+  const lc = dk ? 'rgba(93,202,165,0.25)' : 'rgba(29,158,117,0.2)';
+  const fc = dk ? 'rgba(93,202,165,0.06)' : 'rgba(29,158,117,0.06)';
+  ctx.beginPath();
+  for(let x = 0; x < W; x++){
+    const y = H * 0.3 + Math.sin(x * .14) * 2 + Math.sin(x * .38) * 1.5;
+    if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = lc; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.lineTo(W, H - 14); ctx.lineTo(0, H - 14); ctx.closePath();
+  ctx.fillStyle = fc; ctx.fill();
+  drawAxes(ctx, W, H, dk);
+  drawNt(ctx, W, H, dk, 0.5);
+}
+
+function startDrawLoop(){
+  stopDrawLoop();
+  function frame(){
+    if(!analyser || !analyserBuf) return;
+    analyser.getByteFrequencyData(analyserBuf);
+    drawLive();
+    drawRAF = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function stopDrawLoop(){
+  if(drawRAF){ cancelAnimationFrame(drawRAF); drawRAF = null; }
+}
+
+function drawLive(){
+  const el = getCanv(); if(!el) return;
+  const W = el.offsetWidth || 420, H = 120, ctx = el.getContext('2d'), dk = isDark();
+  ctx.clearRect(0, 0, W, H);
+  drawAxes(ctx, W, H, dk);
+  const sr = actx.sampleRate, bins = analyserBuf.length, bHz = sr / (bins * 2);
+  const lc = dk ? '#5DCAA5' : '#1D9E75';
+  const fc = dk ? 'rgba(93,202,165,0.18)' : 'rgba(29,158,117,0.14)';
+  ctx.beginPath();
+  let go = false;
+  for(let x = 0; x < W; x++){
+    const f = MF * Math.pow(XF / MF, x / W), bin = Math.min(Math.round(f / bHz), bins - 1);
+    const amp = analyserBuf[bin] / 255, y = H - 16 - amp * (H - 24) * 0.92;
+    if(!go){ ctx.moveTo(x, y); go = true; } else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = lc; ctx.lineWidth = 2; ctx.stroke();
+  ctx.lineTo(W, H - 16); ctx.lineTo(0, H - 16); ctx.closePath();
+  ctx.fillStyle = fc; ctx.fill();
+  drawNt(ctx, W, H, dk, 0.9);
+}
+
+// ── PER-EAR VOLUME ──
+function toggleEarVol(){
+  earVolOpen = !earVolOpen;
+  const wrap = document.getElementById('ear-vol-wrap');
+  if(wrap) wrap.style.display = earVolOpen ? 'block' : 'none';
+}
+
+function setEarVol(side, v){
+  const val = parseInt(v) / 100;
+  if(side === 'left'){
+    earVolL = val;
+    const l = document.getElementById('vol-l-val'); if(l) l.textContent = v + '%';
+    if(musicGainL) musicGainL.gain.value = earVolL;
+  } else {
+    earVolR = val;
+    const r = document.getElementById('vol-r-val'); if(r) r.textContent = v + '%';
+    if(musicGainR) musicGainR.gain.value = earVolR;
+  }
+  applyThGain();
+  saveActiveProfileState(false);
+}
+
+function testStereo(){
+  const c = gc();
+  const msg = document.getElementById('stereo-test-msg');
+  const btn = document.getElementById('stereo-test-btn');
+  if(btn) btn.disabled = true;
+  if(msg) msg.style.display = 'block';
+
+  const phases = [
+    { ear: 'left', label: '▶ Left ear (should play only on the left)' },
+    { ear: 'right', label: '▶ Right ear (should play only on the right)' },
+    { ear: 'both', label: '✓ Test complete' }
+  ];
+
+  let pIdx = 0;
+  function runP(){
+    if(pIdx >= phases.length){
+      if(msg) msg.style.display = 'none';
+      if(btn) btn.disabled = false;
+      return;
+    }
+    const item = phases[pIdx++];
+    if(msg) msg.textContent = item.label;
+    if(item.ear === 'both'){ setTimeout(runP, 1500); return; }
+    
+    const pan = c.createStereoPanner(), g = c.createGain(), osc = c.createOscillator();
+    pan.pan.value = item.ear === 'left' ? -1 : 1;
+    g.gain.value = 0.08;
+    osc.type = 'sine'; osc.frequency.value = 440;
+    osc.connect(g); g.connect(pan); pan.connect(c.destination);
+    osc.start();
+    setTimeout(() => {
+      try{ osc.stop(); osc.disconnect(); }catch(e){}
+      runP();
+    }, 1200);
+  }
+  runP();
+}
+
+// ── HAMBURGER MENU DRAWER CONTROLS ──
+function openMenu(){
+  const ov = document.getElementById('menu-overlay');
+  const dw = document.getElementById('menu-drawer');
+  if(ov) ov.classList.add('open');
+  if(dw) dw.classList.add('open');
+}
+
+function closeMenu(){
+  const ov = document.getElementById('menu-overlay');
+  const dw = document.getElementById('menu-drawer');
+  if(ov) ov.classList.remove('open');
+  if(dw) dw.classList.remove('open');
+}
+
+function toggleMenu(){
+  const dw = document.getElementById('menu-drawer');
+  if(dw && dw.classList.contains('open')) closeMenu();
+  else openMenu();
+}
+
+// ── SEPARATE PER-EAR PROFILES & PERSISTENCE ENGINE ──
+function saveActiveProfileState(){
+  try{
+    localStorage.setItem('tr_therapy_settings_v5', JSON.stringify({
+      sound: therapy.sound,
+      vol: g2s(therapyGain),
+      earVolL: earVolL,
+      earVolR: earVolR
+    }));
+  }catch(e){}
+}
+
+function loadTherapySettings(){
+  try{
+    const raw = localStorage.getItem('tr_therapy_settings_v5');
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s.sound) therapy.sound = s.sound;
+      if(s.vol !== undefined) therapyGain = s2g(s.vol);
+      if(s.earVolL !== undefined) earVolL = s.earVolL;
+      if(s.earVolR !== undefined) earVolR = s.earVolR;
+    }
+  }catch(e){}
+}
+
+const KEY_PROFS_L = 'tr_ear_profiles_left_v5';
+const KEY_PROFS_R = 'tr_ear_profiles_right_v5';
+const KEY_ACT_L = 'tr_active_left_id_v5';
+const KEY_ACT_R = 'tr_active_right_id_v5';
+
+function getDefaultEarProfiles(ear){
+  const side = ear === 'left' ? 'Left' : 'Right';
+  return [
+    {
+      id: 'prof_' + ear + '_default',
+      name: side + ' Primary',
+      ear: ear,
+      freq: 7400,
+      type: 'sine',
+      date: new Date().toLocaleDateString()
+    }
+  ];
+}
+
+function getEarProfiles(ear){
+  const k = ear === 'left' ? KEY_PROFS_L : KEY_PROFS_R;
+  try{
+    const raw = localStorage.getItem(k);
+    if(raw){
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr) && arr.length > 0) return arr;
+    }
+  }catch(e){}
+  return getDefaultEarProfiles(ear);
+}
+
+function saveEarProfiles(ear, arr){
+  const k = ear === 'left' ? KEY_PROFS_L : KEY_PROFS_R;
+  try{ localStorage.setItem(k, JSON.stringify(arr)); }catch(e){}
+}
+
+function getActiveEarProfileId(ear){
+  const arr = getEarProfiles(ear);
+  const k = ear === 'left' ? KEY_ACT_L : KEY_ACT_R;
+  const saved = localStorage.getItem(k);
+  if(saved && arr.some(p => p.id === saved)) return saved;
+  return arr[0].id;
+}
+
+function setActiveEarProfileId(ear, id){
+  const k = ear === 'left' ? KEY_ACT_L : KEY_ACT_R;
+  try{ localStorage.setItem(k, id); }catch(e){}
+}
+
+function updateActiveEarProfile(ear, updater){
+  const arr = getEarProfiles(ear);
+  const activeId = getActiveEarProfileId(ear);
+  const idx = arr.findIndex(p => p.id === activeId);
+  if(idx === -1) return null;
+  updater(arr[idx]);
+  saveEarProfiles(ear, arr);
+  applyEarProfile(ear, arr[idx]);
+  return arr[idx];
+}
+
+function getActiveEarProfile(ear){
+  const arr = getEarProfiles(ear);
+  const id = getActiveEarProfileId(ear);
+  return arr.find(p => p.id === id) || arr[0];
+}
+
+function switchEarProfile(ear, id){
+  const arr = getEarProfiles(ear);
+  const target = arr.find(p => p.id === id);
+  if(!target) return;
+  stopEarTone();
+  setActiveEarProfileId(ear, id);
+  applyEarProfile(ear, target);
+}
+
+function applyEarProfile(ear, p){
+  ws.confirmed[ear] = p.freq || 7400;
+  ws.types[ear] = p.type || 'sine';
+  
+  if(ear === 'left'){
+    const lf = document.getElementById('th-lf'); if(lf) lf.textContent = fmtF(p.freq);
+    const li = document.getElementById('th-li'); if(li) li.textContent = TNAMES[p.type];
+    const slf = document.getElementById('spec-lf'); if(slf) slf.textContent = fmtF(p.freq);
+    if(thNodes.left && thNodes.left.notch) thNodes.left.notch.frequency.value = p.freq;
+  } else {
+    const rf = document.getElementById('th-rf'); if(rf) rf.textContent = fmtF(p.freq);
+    const ri = document.getElementById('th-ri'); if(ri) ri.textContent = TNAMES[p.type];
+    const srf = document.getElementById('spec-rf'); if(srf) srf.textContent = fmtF(p.freq);
+    if(thNodes.right && thNodes.right.notch) thNodes.right.notch.frequency.value = p.freq;
+  }
+  updateMusicNotches();
+  drawStaticSpectrum();
+  renderProfilesUI();
+}
+
+function duplicateEarProfile(ear){
+  const arr = getEarProfiles(ear);
+  const cur = getActiveEarProfile(ear);
+  const newName = prompt('Enter name for duplicate ' + (ear === 'left' ? 'Left' : 'Right') + ' profile:', cur.name + ' (Copy)');
+  if(!newName || !newName.trim()) return;
+
+  const newP = {
+    id: 'prof_' + ear + '_' + Date.now(),
+    name: newName.trim(),
+    ear: ear,
+    freq: cur.freq,
+    type: cur.type,
+    date: new Date().toLocaleDateString()
+  };
+  arr.push(newP);
+  saveEarProfiles(ear, arr);
+  setActiveEarProfileId(ear, newP.id);
+  applyEarProfile(ear, newP);
+}
+
+function newEarProfilePrompt(ear){
+  const name = prompt('Name for new ' + (ear === 'left' ? 'Left' : 'Right') + ' profile:', (ear === 'left' ? 'Left' : 'Right') + ' Tone ' + (getEarProfiles(ear).length + 1));
+  if(!name || !name.trim()) return;
+  window._pendingSingleEarName = name.trim();
+  closeMenu();
+  startSingleEarMatch(ear);
+}
+
+function renameEarProfile(ear){
+  const cur = getActiveEarProfile(ear);
+  const newName = prompt('Rename profile:', cur.name);
+  if(!newName || !newName.trim() || newName.trim() === cur.name) return;
+  updateActiveEarProfile(ear, p => {
+    p.name = newName.trim();
+  });
+}
+
+function deleteEarProfile(ear){
+  let arr = getEarProfiles(ear);
+  if(arr.length <= 1){
+    alert('You must have at least one profile for each ear.');
+    return;
+  }
+  const cur = getActiveEarProfile(ear);
+  if(!confirm('Delete ' + cur.name + '?')) return;
+  arr = arr.filter(p => p.id !== cur.id);
+  saveEarProfiles(ear, arr);
+  setActiveEarProfileId(ear, arr[0].id);
+  applyEarProfile(ear, arr[0]);
+}
+
+function renderProfilesUI(){
+  ['left', 'right'].forEach(ear => {
+    const arr = getEarProfiles(ear);
+    const activeId = getActiveEarProfileId(ear);
+    const cardSel = document.getElementById('ear-sel-' + ear);
+    const menuSel = document.getElementById('menu-sel-' + ear);
+    const delBtn = document.getElementById('btn-del-' + ear);
+    
+    const opts = arr.map(p =>
+      '<option value="' + p.id + '"' + (p.id === activeId ? ' selected' : '') + '>' +
+      p.name + ' (' + fmtF(p.freq) + ')' +
+      '</option>'
+    ).join('');
+
+    if(cardSel) cardSel.innerHTML = opts;
+    if(menuSel) menuSel.innerHTML = opts;
+    if(delBtn) delBtn.style.display = arr.length > 1 ? 'block' : 'none';
+  });
+
+  const curL = getActiveEarProfile('left');
+  const curR = getActiveEarProfile('right');
+  const chip = document.getElementById('hdr-profile-chip');
+  if(chip) chip.textContent = (curL.name.length > 10 ? fmtF(curL.freq) : curL.name) + ' / ' + (curR.name.length > 10 ? fmtF(curR.freq) : curR.name) + ' ▾';
+}
+
+// ── PLAY / AUDITION EAR TONE DIRECTLY ──
+let cardToneNode = null;
+let cardTonePlayingEar = null;
+
+function stopEarTone(){
+  if(cardToneNode){
+    kn(cardToneNode);
+    cardToneNode = null;
+  }
+  cardTonePlayingEar = null;
+  ['left', 'right'].forEach(side => {
+    const b = document.getElementById('btn-play-' + side);
+    if(b){ b.textContent = 'Play Tone'; b.classList.remove('playing'); }
+    const mb = document.getElementById('menu-play-' + side);
+    if(mb){ mb.textContent = 'Play'; mb.classList.remove('playing'); }
+  });
+}
+
+function toggleEarTone(ear){
+  if(cardTonePlayingEar === ear){
+    stopEarTone();
+    return;
+  }
+  // Stop therapy if currently playing so they can hear the pure tone clearly
+  if(therapy.playing){
+    toggleTherapy();
+  }
+  stopEarTone();
+
+  const p = getActiveEarProfile(ear);
+  const freq = p.freq || ws.confirmed[ear] || 7400;
+  const type = p.type || ws.types[ear] || 'sine';
+
+  const c = gc();
+  const pan = c.createStereoPanner();
+  pan.pan.value = ear === 'left' ? -1 : 1;
+  const gain = c.createGain();
+  gain.gain.value = 0.25;
+  gain.connect(pan);
+  pan.connect(c.destination);
+
+  let n = { gain, pan };
+  if(type === 'noise'){
+    const src = c.createBufferSource();
+    const bp = c.createBiquadFilter();
+    src.buffer = mkNoise(false);
+    src.loop = true;
+    bp.type = 'bandpass';
+    bp.frequency.value = freq;
+    bp.Q.value = 3;
+    src.connect(bp);
+    bp.connect(gain);
+    src.start();
+    n = { ...n, src, bp, _n: [src, bp, gain, pan] };
+  } else {
+    const osc = c.createOscillator();
+    osc.type = type;
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    osc.start();
+    n = { ...n, osc, _n: [osc, gain, pan] };
+  }
+
+  cardToneNode = n;
+  cardTonePlayingEar = ear;
+
+  const b = document.getElementById('btn-play-' + ear);
+  if(b){ b.textContent = 'Stop Tone'; b.classList.add('playing'); }
+  const mb = document.getElementById('menu-play-' + ear);
+  if(mb){ mb.textContent = 'Stop'; mb.classList.add('playing'); }
+}
+
+// ── CALIBRATION LAUNCHERS ──
+function startSingleEarMatch(ear){
+  stopEarTone();
+  ws.isSingleEar = true;
+  startEar(ear);
+}
+
+function startFullRecalibration(){
+  stopEarTone();
+  ws.isSingleEar = false;
+  startEar('left');
+}
+
+// ── QUICK NUDGE / FREQUENCY ADJUST MODAL ──
+let adjEar = 'left';
+let adjFreq = 7400;
+let adjChar = 'sine';
+let adjNode = null;
+let adjPlaying = false;
+
+function openAdjustModal(ear){
+  stopEarTone();
+  adjEar = ear;
+  const cur = getActiveEarProfile(ear);
+  adjFreq = cur.freq || ws.confirmed[ear] || 7400;
+  adjChar = cur.type || ws.types[ear] || 'sine';
+  adjPlaying = false;
+  kn(adjNode); adjNode = null;
+
+  const title = document.getElementById('adj-title');
+  if(title) title.textContent = (ear === 'left' ? 'Left Ear' : 'Right Ear') + ' Tone Nudge';
+  const disp = document.getElementById('adj-freq-disp');
+  if(disp) disp.textContent = fmtF(adjFreq);
+  const typeDisp = document.getElementById('adj-type-disp');
+  if(typeDisp) typeDisp.textContent = TNAMES[adjChar];
+  const slider = document.getElementById('adj-slider');
+  if(slider) slider.value = adjFreq;
+  const testBtn = document.getElementById('adj-test-btn');
+  if(testBtn){ testBtn.textContent = '▶ Test Live Tone'; testBtn.style.color = 'inherit'; }
+
+  ['sine', 'sawtooth', 'noise', 'square'].forEach(k => {
+    const el = document.getElementById('adj-ch-' + k);
+    if(el) el.className = 'char-pill' + (k === adjChar ? ' sel' : '');
+  });
+
+  const m = document.getElementById('adjust-modal');
+  if(m) m.classList.add('open');
+}
+
+function setAdjChar(ch){
+  adjChar = ch;
+  ['sine', 'sawtooth', 'noise', 'square'].forEach(k => {
+    const el = document.getElementById('adj-ch-' + k);
+    if(el) el.className = 'char-pill' + (k === ch ? ' sel' : '');
+  });
+  const typeDisp = document.getElementById('adj-type-disp');
+  if(typeDisp) typeDisp.textContent = TNAMES[ch];
+  if(adjPlaying){
+    kn(adjNode);
+    playAdjAudio();
+  }
+}
+
+function closeAdjustModal(){
+  kn(adjNode); adjNode = null; adjPlaying = false;
+  const m = document.getElementById('adjust-modal');
+  if(m) m.classList.remove('open');
+}
+
+function onAdjSlider(v){
+  adjFreq = parseInt(v);
+  const disp = document.getElementById('adj-freq-disp');
+  if(disp) disp.textContent = fmtF(adjFreq);
+  if(adjNode){
+    if(adjNode.osc) adjNode.osc.frequency.value = adjFreq;
+    if(adjNode.bp) adjNode.bp.frequency.value = adjFreq;
+  }
+}
+
+function stepAdjFreq(delta){
+  adjFreq = Math.max(100, Math.min(14000, adjFreq + delta));
+  const disp = document.getElementById('adj-freq-disp');
+  if(disp) disp.textContent = fmtF(adjFreq);
+  const slider = document.getElementById('adj-slider');
+  if(slider) slider.value = adjFreq;
+  if(adjNode){
+    if(adjNode.osc) adjNode.osc.frequency.value = adjFreq;
+    if(adjNode.bp) adjNode.bp.frequency.value = adjFreq;
+  }
+}
+
+function playAdjAudio(){
+  const prevEar = ws.ear;
+  const prevType = ws.type;
+  ws.ear = adjEar;
+  ws.type = adjChar;
+  adjNode = playFreq(adjFreq);
+  ws.ear = prevEar;
+  ws.type = prevType;
+}
+
+function toggleAdjTestAudio(){
+  adjPlaying = !adjPlaying;
+  const btn = document.getElementById('adj-test-btn');
+  if(adjPlaying){
+    kn(adjNode);
+    playAdjAudio();
+    if(btn){ btn.textContent = '■ Stop Live Tone'; btn.style.color = '#ef4444'; }
+  } else {
+    kn(adjNode); adjNode = null;
+    if(btn){ btn.textContent = '▶ Test Live Tone'; btn.style.color = 'inherit'; }
+  }
+}
+
+function saveAdjustedFreqToProfile(){
+  const ear = adjEar;
+  updateActiveEarProfile(ear, p => {
+    p.freq = adjFreq;
+    p.type = adjChar;
+    p.date = new Date().toLocaleDateString();
+  });
+  closeAdjustModal();
+}
+
+function saveAdjustedFreqAsNew(){
+  const ear = adjEar;
+  const side = ear === 'left' ? 'Left' : 'Right';
+  const name = prompt('Name for new ' + side + ' profile:', side + ' ' + fmtF(adjFreq));
+  if(!name || !name.trim()) return;
+
+  const arr = getEarProfiles(ear);
+  const newP = {
+    id: 'prof_' + ear + '_' + Date.now(),
+    name: name.trim(),
+    ear: ear,
+    freq: adjFreq,
+    type: adjChar,
+    date: new Date().toLocaleDateString()
+  };
+  arr.push(newP);
+  saveEarProfiles(ear, arr);
+  setActiveEarProfileId(ear, newP.id);
+  closeAdjustModal();
+  applyEarProfile(ear, newP);
+}
+
+// ── NOTCHED MUSIC PLAYER ENGINE & POWERAMP TAG INTEGRATION ──
+let musicLibrary = [];
+let currentArtistIndex = -1;
+let currentAlbumIndex = -1;
+let musicQueue = [];
+let currentQueueIndex = -1;
+let isMusicPlaying = false;
+let isShuffle = false;
+let isRepeat = false;
+
+// Web Audio nodes for Music Player
+let musicAudioEl = null;
+let musicSrcNode = null;
+let musicNotchL = null;
+let musicNotchR = null;
+let musicGainL = null;
+let musicGainR = null;
+let musicPanL = null;
+let musicPanR = null;
+
+function initMusicAudioGraph(){
+  if(musicSrcNode) return;
+  const c = gc();
+  musicAudioEl = document.getElementById('music-audio');
+  if(!musicAudioEl){
+    musicAudioEl = document.createElement('audio');
+    musicAudioEl.id = 'music-audio';
+    musicAudioEl.crossOrigin = 'anonymous';
+    document.body.appendChild(musicAudioEl);
+  }
+
+  try {
+    musicSrcNode = c.createMediaElementSource(musicAudioEl);
+  } catch(e) {
+    console.warn('createMediaElementSource note:', e);
+    return;
+  }
+
+  // Left channel notch and gain
+  musicNotchL = c.createBiquadFilter();
+  musicNotchL.type = 'notch';
+  musicNotchL.frequency.value = ws.confirmed.left || 7400;
+  musicNotchL.Q.value = 8;
+  musicGainL = c.createGain();
+  musicGainL.gain.value = earVolL;
+  musicPanL = c.createStereoPanner();
+  musicPanL.pan.value = -1;
+
+  // Right channel notch and gain
+  musicNotchR = c.createBiquadFilter();
+  musicNotchR.type = 'notch';
+  musicNotchR.frequency.value = ws.confirmed.right || 7400;
+  musicNotchR.Q.value = 8;
+  musicGainR = c.createGain();
+  musicGainR.gain.value = earVolR;
+  musicPanR = c.createStereoPanner();
+  musicPanR.pan.value = 1;
+
+  // Connect left: src -> notchL -> gainL -> panL -> analyser -> destination
+  musicSrcNode.connect(musicNotchL);
+  musicNotchL.connect(musicGainL);
+  musicGainL.connect(musicPanL);
+  musicPanL.connect(analyser);
+
+  // Connect right: src -> notchR -> gainR -> panR -> analyser -> destination
+  musicSrcNode.connect(musicNotchR);
+  musicNotchR.connect(musicGainR);
+  musicGainR.connect(musicPanR);
+  musicPanR.connect(analyser);
+
+  musicAudioEl.addEventListener('timeupdate', onMusicTimeUpdate);
+  musicAudioEl.addEventListener('ended', onMusicEnded);
+}
+
+function updateMusicNotches(){
+  const c = actx;
+  const now = c ? c.currentTime : 0;
+  if(musicNotchL && ws.confirmed.left) musicNotchL.frequency.setTargetAtTime(ws.confirmed.left, now, 0.05);
+  if(musicNotchR && ws.confirmed.right) musicNotchR.frequency.setTargetAtTime(ws.confirmed.right, now, 0.05);
+  if(musicGainL) musicGainL.gain.setTargetAtTime(earVolL, now, 0.05);
+  if(musicGainR) musicGainR.gain.setTargetAtTime(earVolR, now, 0.05);
+}
+
+function pickMusicFolder(){
+  if(window.AndroidBridge && window.AndroidBridge.selectMusicFolder){
+    window.AndroidBridge.selectMusicFolder();
+  } else {
+    alert('Music folder selection is available on the Android APK.');
+  }
+}
+
+function rescanMusicFolder(){
+  if(window.AndroidBridge && window.AndroidBridge.rescanMusicFolder){
+    window.AndroidBridge.rescanMusicFolder();
+  }
+}
+
+// Immediately invoked when user selects a folder in SAF
+window.onMusicFolderSelected = function(folderName){
+  const fName = folderName || 'Music Folder';
+  const mDisp = document.getElementById('menu-music-folder-name');
+  if(mDisp) mDisp.textContent = fName;
+  const cardSub = document.getElementById('music-card-folder-sub');
+  if(cardSub) cardSub.textContent = fName;
+
+  const barWrap = document.getElementById('menu-scan-bar-wrap');
+  if(barWrap) barWrap.style.display = 'block';
+  const sText = document.getElementById('menu-scan-status-text');
+  if(sText) sText.textContent = 'Scanning ' + fName + '...';
+  const banner = document.getElementById('music-scan-banner');
+  if(banner) banner.style.display = 'flex';
+  const bText = document.getElementById('music-banner-text');
+  if(bText) bText.textContent = 'Scanning ' + fName + ' in background...';
+
+  const emptyDeck = document.getElementById('music-empty-deck');
+  if(emptyDeck) emptyDeck.style.display = 'none';
+  const nowDeck = document.getElementById('music-now-deck');
+  if(nowDeck) nowDeck.style.display = 'block';
+};
+
+// Dispatched during scanning progress
+window.onMusicScanProgress = function(msg, count, isScanning){
+  const sText = document.getElementById('menu-scan-status-text');
+  if(sText) sText.textContent = msg || 'Indexing tags...';
+  const cText = document.getElementById('menu-scan-count-text');
+  if(cText) cText.textContent = count ? (count + ' tracks') : '';
+
+  const barWrap = document.getElementById('menu-scan-bar-wrap');
+  if(barWrap) barWrap.style.display = isScanning ? 'block' : 'none';
+
+  const banner = document.getElementById('music-scan-banner');
+  if(banner){
+    banner.style.display = isScanning ? 'flex' : 'none';
+    const bText = document.getElementById('music-banner-text');
+    if(bText) bText.textContent = msg;
+  }
+};
+
+// Dispatched when AndroidBridge has indexed the library
+window.onMusicLibraryReady = function(folderName, isFreshScan){
+  let rawJson = '[]';
+  if(window.AndroidBridge && window.AndroidBridge.getMusicLibraryJson){
+    rawJson = window.AndroidBridge.getMusicLibraryJson();
+  }
+  try {
+    const lib = JSON.parse(rawJson);
+    onMusicLibraryLoaded(lib, folderName, isFreshScan);
+  } catch(e) {
+    console.error('Error parsing music library JSON from AndroidBridge:', e);
+  }
+};
+
+function onMusicLibraryLoaded(library, folderName, isFreshScan){
+  musicLibrary = Array.isArray(library) ? library : [];
+  const fName = folderName || (window.AndroidBridge && window.AndroidBridge.getSavedFolderName ? window.AndroidBridge.getSavedFolderName() : '') || 'Music Folder';
+
+  const mDisp = document.getElementById('menu-music-folder-name');
+  if(mDisp && fName) mDisp.textContent = fName;
+  const cardSub = document.getElementById('music-card-folder-sub');
+  if(cardSub && fName) cardSub.textContent = fName;
+
+  let totalTracks = 0;
+  let totalAlbums = 0;
+  musicLibrary.forEach(a => {
+    totalAlbums += (a.albums || []).length;
+    (a.albums || []).forEach(alb => {
+      totalTracks += (alb.tracks || []).length;
+    });
+  });
+
+  const mStats = document.getElementById('menu-music-stats');
+  if(mStats){
+    if(musicLibrary.length === 0){
+      mStats.textContent = 'No audio tracks found in selected folder.';
+    } else {
+      mStats.textContent = totalTracks + ' tracks • ' + musicLibrary.length + ' artists • ' + totalAlbums + ' albums';
+    }
+  }
+
+  const badge = document.getElementById('music-scan-badge');
+  if(badge){
+    badge.style.display = musicLibrary.length > 0 ? 'inline-block' : 'none';
+    badge.textContent = totalTracks + ' Tracks';
+  }
+
+  const emptyDeck = document.getElementById('music-empty-deck');
+  const nowDeck = document.getElementById('music-now-deck');
+  if(musicLibrary.length === 0 && (!fName || fName === 'Music Folder' || fName === 'No Folder Selected')){
+    if(emptyDeck) emptyDeck.style.display = 'block';
+    if(nowDeck) nowDeck.style.display = 'none';
+  } else {
+    if(emptyDeck) emptyDeck.style.display = 'none';
+    if(nowDeck) nowDeck.style.display = 'block';
+  }
+
+  // Dismiss scan progress indicators
+  const barWrap = document.getElementById('menu-scan-bar-wrap');
+  if(barWrap) barWrap.style.display = 'none';
+  const banner = document.getElementById('music-scan-banner');
+  if(banner) banner.style.display = 'none';
+
+  navToArtists();
+}
+
+// ── BROWSER NAVIGATION (Artists -> Albums -> Tracks) ──
+function navToArtists(){
+  currentArtistIndex = -1;
+  currentAlbumIndex = -1;
+
+  const bc = document.getElementById('music-breadcrumb');
+  if(bc) bc.innerHTML = '<span class="music-bc-item">All Artists (' + musicLibrary.length + ')</span>';
+
+  const container = document.getElementById('music-browser-content');
+  if(!container) return;
+
+  if(musicLibrary.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:24px 16px;font-size:12px;color:var(--txt2);">No artists loaded.<br>Select a music folder in Tone Settings (☰).</div>';
+    return;
+  }
+
+  container.innerHTML = musicLibrary.map((art, aIdx) => {
+    const albCount = (art.albums || []).length;
+    let trkCount = 0;
+    (art.albums || []).forEach(a => trkCount += (a.tracks || []).length);
+    return '<div class="music-item-row" onclick="navToArtist(' + aIdx + ')">' +
+      '<div class="music-item-main">' +
+        '<div class="music-item-title">' + escapeHtml(art.artist) + '</div>' +
+        '<div class="music-item-sub">' + albCount + ' album' + (albCount === 1 ? '' : 's') + ' • ' + trkCount + ' tracks</div>' +
+      '</div>' +
+      '<div style="color:var(--txt2);font-size:13px;font-weight:700;">›</div>' +
+    '</div>';
+  }).join('');
+}
+
+function navToArtist(aIdx){
+  currentArtistIndex = aIdx;
+  currentAlbumIndex = -1;
+  const art = musicLibrary[aIdx];
+  if(!art) return;
+
+  const bc = document.getElementById('music-breadcrumb');
+  if(bc){
+    bc.innerHTML = '<span class="music-bc-item" onclick="navToArtists()">Artists</span> / ' +
+      '<span>' + escapeHtml(art.artist) + '</span>';
+  }
+
+  const container = document.getElementById('music-browser-content');
+  if(!container) return;
+
+  const albums = art.albums || [];
+  let htmlStr = '<button type="button" class="music-play-header-btn" onclick="playAllArtistTracks(' + aIdx + ')">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>' +
+    'PLAY ALL ' + escapeHtml(art.artist).toUpperCase() + ' TRACKS</button>';
+
+  htmlStr += albums.map((alb, albIdx) => {
+    const trkCount = (alb.tracks || []).length;
+    return '<div class="music-item-row" onclick="navToAlbum(' + aIdx + ', ' + albIdx + ')">' +
+      '<div class="music-item-main">' +
+        '<div class="music-item-title">' + escapeHtml(alb.album) + '</div>' +
+        '<div class="music-item-sub">' + trkCount + ' track' + (trkCount === 1 ? '' : 's') + '</div>' +
+      '</div>' +
+      '<div style="color:var(--txt2);font-size:13px;font-weight:700;">›</div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = htmlStr;
+}
+
+function navToAlbum(aIdx, albIdx){
+  currentArtistIndex = aIdx;
+  currentAlbumIndex = albIdx;
+  const art = musicLibrary[aIdx];
+  if(!art) return;
+  const alb = (art.albums || [])[albIdx];
+  if(!alb) return;
+
+  const bc = document.getElementById('music-breadcrumb');
+  if(bc){
+    bc.innerHTML = '<span class="music-bc-item" onclick="navToArtists()">Artists</span> / ' +
+      '<span class="music-bc-item" onclick="navToArtist(' + aIdx + ')">' + escapeHtml(art.artist) + '</span> / ' +
+      '<span>' + escapeHtml(alb.album) + '</span>';
+  }
+
+  const container = document.getElementById('music-browser-content');
+  if(!container) return;
+
+  const tracks = alb.tracks || [];
+  let htmlStr = '<button type="button" class="music-play-header-btn" onclick="playAlbumTracks(' + aIdx + ', ' + albIdx + ')">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>' +
+    'PLAY ALBUM (' + tracks.length + ' TRACKS)</button>';
+
+  htmlStr += tracks.map((trk, tIdx) => {
+    const isCur = currentQueueIndex >= 0 && musicQueue[currentQueueIndex] && musicQueue[currentQueueIndex].id === trk.id;
+    return '<div class="music-item-row' + (isCur ? ' playing' : '') + '" onclick="playTrackFromAlbum(' + aIdx + ', ' + albIdx + ', ' + tIdx + ')">' +
+      '<div style="width:24px;font-size:11px;font-family:monospace;color:var(--txt2);">' + (trk.track > 0 ? trk.track : (tIdx + 1)) + '</div>' +
+      '<div class="music-item-main">' +
+        '<div class="music-item-title"' + (isCur ? ' style="color:var(--ac);font-weight:700;"' : '') + '>' + escapeHtml(trk.title) + '</div>' +
+        '<div class="music-item-sub">' + escapeHtml(trk.artist) + '</div>' +
+      '</div>' +
+      '<div class="music-item-dur">' + fmtDuration(trk.duration) + '</div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = htmlStr;
+}
+
+// ── PLAYBACK TRIGGERING ──
+function playAllArtistTracks(aIdx){
+  const art = musicLibrary[aIdx];
+  if(!art) return;
+  const list = [];
+  (art.albums || []).forEach(alb => {
+    (alb.tracks || []).forEach(t => list.push(t));
+  });
+  if(list.length === 0) return;
+  musicQueue = list;
+  startPlayingQueueIndex(0);
+}
+
+function playAlbumTracks(aIdx, albIdx){
+  const art = musicLibrary[aIdx];
+  if(!art) return;
+  const alb = (art.albums || [])[albIdx];
+  if(!alb || !alb.tracks || alb.tracks.length === 0) return;
+  musicQueue = [...alb.tracks];
+  startPlayingQueueIndex(0);
+}
+
+function playTrackFromAlbum(aIdx, albIdx, tIdx){
+  const art = musicLibrary[aIdx];
+  if(!art) return;
+  const alb = (art.albums || [])[albIdx];
+  if(!alb || !alb.tracks) return;
+  musicQueue = [...alb.tracks];
+  startPlayingQueueIndex(tIdx);
+}
+
+function startPlayingQueueIndex(idx){
+  if(idx < 0 || idx >= musicQueue.length) return;
+  currentQueueIndex = idx;
+  const track = musicQueue[currentQueueIndex];
+  if(!track) return;
+
+  initMusicAudioGraph();
+  const c = gc();
+  if(c && c.state === 'suspended') c.resume();
+
+  // If therapy is active, stop it so music takes focus
+  if(isTherapyActive){
+    toggleTherapy();
+  }
+
+  const tTitle = document.getElementById('now-track-title');
+  if(tTitle) tTitle.textContent = track.title || 'Unknown Title';
+
+  const tSub = document.getElementById('now-track-sub');
+  if(tSub) tSub.textContent = (track.artist || 'Unknown Artist') + ' • ' + (track.album || 'Unknown Album');
+
+  // Stream local content URI through WebView interceptor
+  const streamUrl = 'https://tinnitus.local/music_stream?uri=' + encodeURIComponent(track.id);
+  musicAudioEl.src = streamUrl;
+  musicAudioEl.load();
+
+  musicAudioEl.play().then(() => {
+    isMusicPlaying = true;
+    updateMusicPlayButton(true);
+    startDrawLoop();
+    updateSpectrumBadge('Music (Notched)');
+    if(window.AndroidBridge && window.AndroidBridge.setTherapyActive){
+      window.AndroidBridge.setTherapyActive(true);
+    }
+  }).catch(e => {
+    console.warn('Audio play failed:', e);
+    isMusicPlaying = false;
+    updateMusicPlayButton(false);
+  });
+
+  refreshTrackHighlight();
+}
+
+function toggleMusicPlay(){
+  if(!musicAudioEl || !musicAudioEl.src){
+    if(musicQueue.length > 0){
+      startPlayingQueueIndex(0);
+    } else if(musicLibrary.length > 0 && musicLibrary[0].albums && musicLibrary[0].albums[0] && musicLibrary[0].albums[0].tracks && musicLibrary[0].albums[0].tracks.length > 0){
+      musicQueue = [...musicLibrary[0].albums[0].tracks];
+      startPlayingQueueIndex(0);
+    } else {
+      openMenu();
+    }
+    return;
+  }
+
+  initMusicAudioGraph();
+  const c = gc();
+  if(c && c.state === 'suspended') c.resume();
+
+  if(isMusicPlaying){
+    musicAudioEl.pause();
+    isMusicPlaying = false;
+    updateMusicPlayButton(false);
+    if(window.AndroidBridge && window.AndroidBridge.setTherapyActive){
+      window.AndroidBridge.setTherapyActive(false);
+    }
+    if(!isTherapyActive) {
+      stopDrawLoop();
+      drawStaticSpectrum();
+      updateSpectrumBadge('Idle');
+    }
+  } else {
+    musicAudioEl.play().then(() => {
+      isMusicPlaying = true;
+      updateMusicPlayButton(true);
+      startDrawLoop();
+      updateSpectrumBadge('Music (Notched)');
+      if(window.AndroidBridge && window.AndroidBridge.setTherapyActive){
+        window.AndroidBridge.setTherapyActive(true);
+      }
+    }).catch(e => console.warn(e));
+  }
+}
+
+function updateMusicPlayButton(playing){
+  const playSvg = document.getElementById('svg-play-icon');
+  const pauseSvg = document.getElementById('svg-pause-icon');
+  if(playSvg && pauseSvg){
+    playSvg.style.display = playing ? 'none' : 'block';
+    pauseSvg.style.display = playing ? 'block' : 'none';
+  }
+}
+
+function prevMusicTrack(){
+  if(musicQueue.length === 0) return;
+  if(musicAudioEl && musicAudioEl.currentTime > 3){
+    musicAudioEl.currentTime = 0;
+    return;
+  }
+  let nextIdx = currentQueueIndex - 1;
+  if(nextIdx < 0) nextIdx = musicQueue.length - 1;
+  startPlayingQueueIndex(nextIdx);
+}
+
+function nextMusicTrack(){
+  if(musicQueue.length === 0) return;
+  let nextIdx;
+  if(isShuffle){
+    nextIdx = Math.floor(Math.random() * musicQueue.length);
+  } else {
+    nextIdx = currentQueueIndex + 1;
+    if(nextIdx >= musicQueue.length){
+      if(isRepeat){
+        nextIdx = 0;
+      } else {
+        isMusicPlaying = false;
+        updateMusicPlayButton(false);
+        return;
+      }
+    }
+  }
+  startPlayingQueueIndex(nextIdx);
+}
+
+function toggleShuffle(){
+  isShuffle = !isShuffle;
+  const btn = document.getElementById('btn-shuffle');
+  if(btn){
+    if(isShuffle) btn.classList.add('active-toggle');
+    else btn.classList.remove('active-toggle');
+  }
+}
+
+function toggleRepeat(){
+  isRepeat = !isRepeat;
+  const btn = document.getElementById('btn-repeat');
+  if(btn){
+    if(isRepeat) btn.classList.add('active-toggle');
+    else btn.classList.remove('active-toggle');
+  }
+}
+
+function onMusicTimeUpdate(){
+  if(!musicAudioEl) return;
+  const cur = musicAudioEl.currentTime || 0;
+  const dur = musicAudioEl.duration || 0;
+
+  const curDisp = document.getElementById('music-time-cur');
+  if(curDisp) curDisp.textContent = fmtDuration(cur);
+
+  const durDisp = document.getElementById('music-time-dur');
+  if(durDisp && dur > 0) durDisp.textContent = fmtDuration(dur);
+
+  const scrubber = document.getElementById('music-scrubber');
+  if(scrubber && dur > 0){
+    scrubber.value = Math.floor((cur / dur) * 100);
+  }
+}
+
+function onMusicSeek(percent){
+  if(!musicAudioEl || !musicAudioEl.duration) return;
+  const target = (percent / 100) * musicAudioEl.duration;
+  musicAudioEl.currentTime = target;
+}
+
+function onMusicEnded(){
+  if(isRepeat && !isShuffle){
+    if(musicAudioEl){
+      musicAudioEl.currentTime = 0;
+      musicAudioEl.play();
+    }
+  } else {
+    nextMusicTrack();
+  }
+}
+
+function refreshTrackHighlight(){
+  const rows = document.querySelectorAll('.music-item-row');
+  rows.forEach(r => r.classList.remove('playing'));
+  if(currentArtistIndex >= 0 && currentAlbumIndex >= 0){
+    navToAlbum(currentArtistIndex, currentAlbumIndex);
+  }
+}
+
+function fmtDuration(val){
+  if(!val || isNaN(val)) return '00:00';
+  const num = Number(val);
+  const s = Math.floor(num > 10000 ? (num / 1000) : num);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return String(m).padStart(2, '0') + ':' + String(rem).padStart(2, '0');
+}
+
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+
+// ── BOOTSTRAP: INITIALIZE DIRECTLY ON THERAPY COCKPIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  loadSoundVols();
+  loadTherapySettings();
+  const curL = getActiveEarProfile('left');
+  const curR = getActiveEarProfile('right');
+  ws.confirmed.left = curL.freq;
+  ws.confirmed.right = curR.freq;
+  ws.types.left = curL.type;
+  ws.types.right = curR.type;
+  renderProfilesUI();
+  openTherapy();
+  try{ if(window.AndroidBridge && window.AndroidBridge.checkSavedMusic) window.AndroidBridge.checkSavedMusic(); }catch(e){}
+});
+</script>
+</body>
+</html>

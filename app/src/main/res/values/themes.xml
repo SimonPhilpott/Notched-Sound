@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.TinnitusRelief" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">#090A0F</item>
+        <item name="android:navigationBarColor">#090A0F</item>
+    </style>
+</resources>
+
