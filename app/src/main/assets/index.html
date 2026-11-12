@@ -86,7 +86,7 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 }
 #sc-therapy {
   min-height: 100vh;
-  padding-bottom: 75vh;
+  padding-bottom: 16px;
 }
 #th-card {
   position: sticky;
@@ -113,15 +113,6 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
   cursor: pointer;
   transition: background .18s, color .18s;
   -webkit-tap-highlight-color: transparent;
-}
-.therapy-source-tab + .therapy-source-tab::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: var(--brd);
 }
 .therapy-source-tab svg { flex: 0 0 auto; }
 .therapy-source-tab.active {
@@ -674,12 +665,11 @@ body.tool-modal-open{overflow:hidden}
   z-index: 750;
   background: var(--surf);
   margin: -1.25rem -1.25rem 0 -1.25rem;
-  padding: 8px 1.25rem 10px 1.25rem;
+  padding: 8px 1.25rem 4px 1.25rem;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  border-bottom: 1px solid var(--brd);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  transition: top .15s ease;
+  border-bottom: none;
+  box-shadow: none;
 }
 .music-header-row {
   display: flex;
@@ -801,7 +791,7 @@ body.tool-modal-open{overflow:hidden}
 }
 .music-browser-box {
   background: var(--surf2);
-  border: 1px solid var(--brd);
+  border: none;
   border-radius: 12px;
   padding: 12px;
   max-height: 290px;
@@ -1190,15 +1180,18 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 .music-browser-box {
   position: relative;
   padding: 0;
-  overflow: visible;
+  border: none !important;
+  overflow: hidden;
   max-height: none;
 }
 .music-browser-scroll {
   position: relative;
-  max-height: none;
-  overflow: visible;
+  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 18px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 0 12px 24px;
   border-radius: 12px;
+  border: none;
   --music-breadcrumb-sticky-height: 31px;
 }
 .music-browser-box.show-index .music-browser-scroll { padding-right: 34px; }
@@ -1207,12 +1200,12 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 .alphanumeric-index {
   display: none;
   position: fixed;
-  top: calc(var(--therapy-dock-height, 195px) + 8px);
+  top: calc(var(--therapy-dock-height, 195px) + var(--music-deck-height, 140px) + 4px);
   right: 5px;
   bottom: 8px;
   width: 26px;
   height: auto;
-  max-height: calc(100vh - var(--therapy-dock-height, 195px) - 18px);
+  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 18px);
   padding: 10px 2px;
   z-index: 850;
   flex-direction: column;
@@ -2029,6 +2022,36 @@ function onTherapyScroll(){
     }
 
     const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+    // Strict scroll boundary clamping:
+    // 1. Ambient soundscapes: clamp scroll so content never scrolls under tabs (Screenshot 1)
+    // 2. Music player: clamp scroll so player deck docks flush under tabs and never scrolls under (Screenshot 2)
+    if(therapySourceTab === 'ambient'){
+      const wrap = document.getElementById('therapy-sticky-dock-wrap');
+      const card = document.getElementById('th-card');
+      if(wrap && card){
+        const wrapBottom = wrap.getBoundingClientRect().bottom;
+        const cardTop = card.getBoundingClientRect().top;
+        const diff = cardTop - wrapBottom;
+        const maxScroll = Math.max(0, scrollY + diff - 8);
+        if(scrollY > maxScroll + 1){
+          window.scrollTo({ top: maxScroll, behavior: 'auto' });
+        }
+      }
+    } else if(therapySourceTab === 'music'){
+      const wrap = document.getElementById('therapy-sticky-dock-wrap');
+      const deck = document.getElementById('music-now-deck');
+      if(wrap && deck){
+        const wrapBottom = wrap.getBoundingClientRect().bottom;
+        const deckTop = deck.getBoundingClientRect().top;
+        const diff = deckTop - wrapBottom;
+        const maxScroll = Math.max(0, scrollY + diff);
+        if(scrollY > maxScroll + 1){
+          window.scrollTo({ top: maxScroll, behavior: 'auto' });
+        }
+      }
+    }
+
     const isComp = scrollY > 8;
     dock.classList.toggle('is-compressed', isComp);
     dock.style.setProperty('--dock-scroll-p', isComp ? '1' : '0');
@@ -4685,24 +4708,37 @@ function jumpToAlphaGroup(letter, preview, duration){
   const sec = document.getElementById(secId) || document.getElementById(alphaHeaderId(target));
   if(!sec) return;
 
-  const dockH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-box-height')) || 220;
-  const tabsH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--therapy-tabs-height')) || 48;
-  const deckH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--music-deck-height')) || 140;
-  const totalDocked = dockH + tabsH + deckH + 16;
-
-  const currentScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-  const targetScroll = Math.max(0, currentScrollY + sec.getBoundingClientRect().top - totalDocked);
+  const scroll = document.getElementById('music-browser-scroll');
   const runFor = duration === 0 ? 0 : (duration || 260);
 
   alphaSelectionLockLetter = target;
   alphaSelectedLetter = target;
   alphaSelectionLockUntil = performance.now() + Math.max(90, runFor) + 110;
   setAlphaActive(target, preview);
-  if(runFor === 0){
-    stopAlphaScrollAnimation();
-    window.scrollTo({ top: targetScroll, behavior: 'auto' });
+
+  if(scroll){
+    const secRect = sec.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    const targetScroll = Math.max(0, scroll.scrollTop + (secRect.top - scrollRect.top));
+    if(runFor === 0){
+      stopAlphaScrollAnimation();
+      scroll.scrollTop = targetScroll;
+    } else {
+      smoothScrollMusicBrowserTo(targetScroll, runFor);
+    }
   } else {
-    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    const dockH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-box-height')) || 220;
+    const tabsH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--therapy-tabs-height')) || 48;
+    const deckH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--music-deck-height')) || 140;
+    const totalDocked = dockH + tabsH + deckH + 16;
+    const currentScrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    const targetScroll = Math.max(0, currentScrollY + sec.getBoundingClientRect().top - totalDocked);
+    if(runFor === 0){
+      stopAlphaScrollAnimation();
+      window.scrollTo({ top: targetScroll, behavior: 'auto' });
+    } else {
+      window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+    }
   }
   scheduleAlphaSelectionResync(Math.max(140, runFor + 110));
 }
@@ -4749,18 +4785,17 @@ function syncAlphaHighlightFromScroll(){
   alphaScrollRAF = requestAnimationFrame(() => {
     alphaScrollRAF = null;
     const box = document.getElementById('music-browser-box');
-    if(!box || !box.classList.contains('show-index')) return;
+    const scroll = document.getElementById('music-browser-scroll');
+    if(!box || !scroll || !box.classList.contains('show-index')) return;
     if(performance.now() < alphaSelectionLockUntil){
       if(alphaSelectionLockLetter) setAlphaActive(alphaSelectionLockLetter, false);
       return;
     }
-    const dockH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-box-height')) || 220;
-    const tabsH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--therapy-tabs-height')) || 48;
-    const deckH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--music-deck-height')) || 140;
-    const threshold = dockH + tabsH + deckH + 20;
 
     const headers = document.querySelectorAll('.alpha-group-header');
     if(!headers.length) return;
+    const threshold = scroll.getBoundingClientRect().top + 32;
+
     let visible = alphaGroupOrder[0] || '#';
     for(let i = 0; i < headers.length; i++){
       if(headers[i].getBoundingClientRect().top <= threshold + 24){
