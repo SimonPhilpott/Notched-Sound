@@ -661,11 +661,11 @@ body.tool-modal-open{overflow:hidden}
 /* ── NOTCHED MUSIC PLAYER ── */
 .music-sticky-header-dock {
   position: sticky;
-  top: var(--therapy-dock-height, 195px);
+  top: calc(var(--therapy-dock-height, 195px) + 8px);
   z-index: 750;
   background: var(--surf);
-  margin: -1.25rem -1.25rem 0 -1.25rem;
-  padding: 8px 1.25rem 4px 1.25rem;
+  margin: 0 -1.25rem 0 -1.25rem;
+  padding: 4px 1.25rem 4px 1.25rem;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   border-bottom: none;
@@ -1186,7 +1186,7 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 }
 .music-browser-scroll {
   position: relative;
-  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 18px);
+  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 24px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0 12px 24px;
@@ -1200,12 +1200,12 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 .alphanumeric-index {
   display: none;
   position: fixed;
-  top: calc(var(--therapy-dock-height, 195px) + var(--music-deck-height, 140px) + 4px);
+  top: calc(var(--therapy-dock-height, 195px) + var(--music-deck-height, 140px) + 12px);
   right: 5px;
   bottom: 8px;
   width: 26px;
   height: auto;
-  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 18px);
+  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 24px);
   padding: 10px 2px;
   z-index: 850;
   flex-direction: column;
@@ -2010,22 +2010,27 @@ function onTherapyScroll(){
     const scTherapy = document.getElementById('sc-therapy');
     if(!scTherapy || !scTherapy.classList.contains('active')) return;
 
+    const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
     if(therapyDockCollapsed){
       dock.style.setProperty('--dock-scroll-p', '1');
       dock.classList.add('collapsed');
       dock.classList.add('is-compressed');
       const musicCard = document.getElementById('music-card');
       if(musicCard) musicCard.classList.add('is-compressed');
-      updateStickyOffsets();
-      syncAlphaHighlightFromScroll();
-      return;
+    } else {
+      const isComp = scrollY > 8;
+      dock.classList.toggle('is-compressed', isComp);
+      dock.style.setProperty('--dock-scroll-p', isComp ? '1' : '0');
+      const musicCard = document.getElementById('music-card');
+      if(musicCard){
+        musicCard.classList.toggle('is-compressed', isComp);
+      }
     }
-
-    const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
     // Strict scroll boundary clamping:
     // 1. Ambient soundscapes: clamp scroll so content never scrolls under tabs (Screenshot 1)
-    // 2. Music player: clamp scroll so player deck docks flush under tabs and never scrolls under (Screenshot 2)
+    // 2. Music player: clamp scroll so player deck docks flush under tabs with an 8px gap (Screenshot 2)
     if(therapySourceTab === 'ambient'){
       const wrap = document.getElementById('therapy-sticky-dock-wrap');
       const card = document.getElementById('th-card');
@@ -2044,21 +2049,15 @@ function onTherapyScroll(){
       if(wrap && deck){
         const wrapBottom = wrap.getBoundingClientRect().bottom;
         const deckTop = deck.getBoundingClientRect().top;
+        const targetGap = 8;
         const diff = deckTop - wrapBottom;
-        const maxScroll = Math.max(0, scrollY + diff);
+        const maxScroll = Math.max(0, scrollY + diff - targetGap);
         if(scrollY > maxScroll + 1){
           window.scrollTo({ top: maxScroll, behavior: 'auto' });
         }
       }
     }
 
-    const isComp = scrollY > 8;
-    dock.classList.toggle('is-compressed', isComp);
-    dock.style.setProperty('--dock-scroll-p', isComp ? '1' : '0');
-    const musicCard = document.getElementById('music-card');
-    if(musicCard){
-      musicCard.classList.toggle('is-compressed', isComp);
-    }
     updateStickyOffsets();
     syncAlphaHighlightFromScroll();
 
@@ -2260,7 +2259,9 @@ let actx = null, compNode = null, compTimer = null, curAB = null, fA = 0, fB = 0
 let thNodes = { left: null, right: null };
 let thGainL = null, thGainR = null;
 
-let masterBus = null, masterCompressor = null, masterAnalyser = null, masterAnalyserBuf = null;
+let masterBus = null, masterCompressor = null, masterSplitter = null;
+let analyserL = null, analyserR = null, analyserBufL = null, analyserBufR = null;
+let masterAnalyser = null, masterAnalyserBuf = null;
 let analyser = null, analyserBuf = null, drawRAF = null;
 
 function gc(){
@@ -2275,16 +2276,24 @@ function gc(){
 
 function ensureMasterAudioBus(){
   const c = gc();
-  if(!masterAnalyser){
-    masterAnalyser = c.createAnalyser();
-    masterAnalyser.fftSize = 2048;
-    masterAnalyser.smoothingTimeConstant = 0.85;
-    masterAnalyserBuf = new Uint8Array(masterAnalyser.frequencyBinCount);
-    masterAnalyser.channelCount = 2;
-    masterAnalyser.channelCountMode = 'explicit';
+  if(!analyserL){
+    analyserL = c.createAnalyser();
+    analyserL.fftSize = 2048;
+    analyserL.smoothingTimeConstant = 0.85;
+    analyserBufL = new Uint8Array(analyserL.frequencyBinCount);
+
+    analyserR = c.createAnalyser();
+    analyserR.fftSize = 2048;
+    analyserR.smoothingTimeConstant = 0.85;
+    analyserBufR = new Uint8Array(analyserR.frequencyBinCount);
 
     masterBus = c.createGain();
     masterBus.gain.value = 1.0;
+
+    masterSplitter = c.createChannelSplitter(2);
+    masterBus.connect(masterSplitter);
+    masterSplitter.connect(analyserL, 0);
+    masterSplitter.connect(analyserR, 1);
 
     // The high end of the volume range drives the mix harder, so a limiter
     // protects the output while keeping normal listening levels clean.
@@ -2296,11 +2305,12 @@ function ensureMasterAudioBus(){
     masterCompressor.release.value = 0.25;
 
     masterBus.connect(masterCompressor);
-    masterCompressor.connect(masterAnalyser);
-    masterAnalyser.connect(c.destination);
+    masterCompressor.connect(c.destination);
 
-    analyser = masterAnalyser;
-    analyserBuf = masterAnalyserBuf;
+    masterAnalyser = analyserL;
+    masterAnalyserBuf = analyserBufL;
+    analyser = analyserL;
+    analyserBuf = analyserBufL;
   }
   if(c.state === 'suspended'){
     c.resume().catch(e => console.warn('AudioContext resume:', e));
@@ -3299,32 +3309,46 @@ function drawStaticSpectrum(){
   ctx.clearRect(0, 0, W, H);
   drawAxes(ctx, W, H, dk);
 
-  const [lc, fc] = spectrumTraceColors(dk);
+  const colors = themeEarColors();
   const top = 14, bottom = H - 18;
   const usable = bottom - top;
   const volNorm = Math.max(0, Math.min(100, playbackVol)) / 100;
   const baseAmp = usable * 0.78 * Math.pow(volNorm, 0.7);
 
-  ctx.beginPath();
-  let first = true;
-  for(let x = 0; x < W; x++){
-    const freq = MF * Math.pow(XF / MF, x / W);
-    let notchDb = 0;
-    if(ws.confirmed.left){
-      notchDb = Math.min(notchDb, calculateCombinedNotchDb(freq, ws.confirmed.left, notchBandwidth));
+  const ears = [
+    { freq: ws.confirmed.left, col: colors[0], volRatio: earVolL, phase: 0 },
+    { freq: ws.confirmed.right, col: colors[1], volRatio: earVolR, phase: 1.5 }
+  ];
+
+  ears.forEach(({ freq, col, volRatio, phase }) => {
+    ctx.save();
+    ctx.beginPath();
+    let first = true;
+    for(let x = 0; x < W; x++){
+      const f = MF * Math.pow(XF / MF, x / W);
+      let notchDb = 0;
+      if(freq){
+        notchDb = calculateCombinedNotchDb(f, freq, notchBandwidth);
+      }
+      const notchAtten = Math.pow(10, Math.max(-48, notchDb) / 48);
+      const wave = (Math.sin(x * 0.14 + phase) * 2.2 + Math.sin(x * 0.38 + phase) * 1.6) * notchAtten;
+      const currentAmp = Math.max(0, baseAmp * volRatio * (0.86 * notchAtten + 0.14 * (wave / 3.8)));
+      const y = Math.max(top, Math.min(bottom, bottom - currentAmp));
+      if(first){ ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
     }
-    if(ws.confirmed.right){
-      notchDb = Math.min(notchDb, calculateCombinedNotchDb(freq, ws.confirmed.right, notchBandwidth));
-    }
-    const notchAtten = Math.pow(10, Math.max(-48, notchDb) / 48);
-    const wave = (Math.sin(x * 0.14) * 2.2 + Math.sin(x * 0.38) * 1.6) * notchAtten;
-    const currentAmp = Math.max(0, baseAmp * (0.86 * notchAtten + 0.14 * (wave / 3.8)));
-    const y = Math.max(top, Math.min(bottom, bottom - currentAmp));
-    if(first){ ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
-  }
-  ctx.strokeStyle = lc; ctx.lineWidth = 1.6; ctx.stroke();
-  ctx.lineTo(W, bottom); ctx.lineTo(0, bottom); ctx.closePath();
-  ctx.fillStyle = fc; ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.7;
+    ctx.globalAlpha = 0.88;
+    ctx.stroke();
+
+    ctx.lineTo(W, bottom);
+    ctx.lineTo(0, bottom);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.globalAlpha = 0.08;
+    ctx.fill();
+    ctx.restore();
+  });
 
   drawNt(ctx, W, H, dk, 0.6);
   drawVolumeLines(ctx, W, H, dk);
@@ -3345,7 +3369,7 @@ function startDrawLoop(){
   stopDrawLoop();
   if(document.hidden) return; // Do not animate canvas when display is off or app is hidden
   function frame(timestamp){
-    if(!analyser || !analyserBuf){
+    if((!analyserL || !analyserBufL) && (!analyser || !analyserBuf)){
       stopDrawLoop();
       return;
     }
@@ -3359,7 +3383,9 @@ function startDrawLoop(){
       return;
     }
     lastSpectrumDrawMs = timestamp || performance.now();
-    analyser.getByteFrequencyData(analyserBuf);
+    if(analyserL && analyserBufL) analyserL.getByteFrequencyData(analyserBufL);
+    if(analyserR && analyserBufR) analyserR.getByteFrequencyData(analyserBufR);
+    else if(analyser && analyserBuf) analyser.getByteFrequencyData(analyserBuf);
     drawLive();
   }
   drawRAF = requestAnimationFrame(frame);
@@ -3374,18 +3400,64 @@ function drawLive(){
   const W = el.offsetWidth || 420, H = 120, ctx = el.getContext('2d'), dk = isDark();
   ctx.clearRect(0, 0, W, H);
   drawAxes(ctx, W, H, dk);
-  const sr = actx.sampleRate, bins = analyserBuf.length, bHz = sr / (bins * 2);
-  const [lc, fc] = spectrumTraceColors(dk);
-  ctx.beginPath();
-  let go = false;
-  for(let x = 0; x < W; x++){
-    const f = MF * Math.pow(XF / MF, x / W), bin = Math.min(Math.round(f / bHz), bins - 1);
-    const amp = analyserBuf[bin] / 255, y = H - 18 - amp * (H - 26) * 0.94;
-    if(!go){ ctx.moveTo(x, y); go = true; } else ctx.lineTo(x, y);
+  const sr = actx ? actx.sampleRate : 48000;
+  const colors = themeEarColors();
+
+  if(analyserBufL && analyserBufR){
+    const bins = analyserBufL.length;
+    const bHz = sr / (bins * 2);
+    const channels = [
+      { buf: analyserBufL, col: colors[0] },
+      { buf: analyserBufR, col: colors[1] }
+    ];
+
+    channels.forEach(({ buf, col }) => {
+      ctx.save();
+      ctx.beginPath();
+      let go = false;
+      for(let x = 0; x < W; x++){
+        const f = MF * Math.pow(XF / MF, x / W);
+        const bin = Math.min(Math.round(f / bHz), bins - 1);
+        const amp = buf[bin] / 255;
+        const y = H - 18 - amp * (H - 26) * 0.94;
+        if(!go){ ctx.moveTo(x, y); go = true; } else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 0.88;
+      ctx.stroke();
+
+      ctx.lineTo(W, H - 18);
+      ctx.lineTo(0, H - 18);
+      ctx.closePath();
+      ctx.fillStyle = col;
+      ctx.globalAlpha = 0.08;
+      ctx.fill();
+      ctx.restore();
+    });
+  } else if(analyser && analyserBuf){
+    const bins = analyserBuf.length;
+    const bHz = sr / (bins * 2);
+    const [lc, fc] = spectrumTraceColors(dk);
+    ctx.beginPath();
+    let go = false;
+    for(let x = 0; x < W; x++){
+      const f = MF * Math.pow(XF / MF, x / W);
+      const bin = Math.min(Math.round(f / bHz), bins - 1);
+      const amp = analyserBuf[bin] / 255;
+      const y = H - 18 - amp * (H - 26) * 0.94;
+      if(!go){ ctx.moveTo(x, y); go = true; } else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = lc;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.lineTo(W, H - 18);
+    ctx.lineTo(0, H - 18);
+    ctx.closePath();
+    ctx.fillStyle = fc;
+    ctx.fill();
   }
-  ctx.strokeStyle = lc; ctx.lineWidth = 2; ctx.stroke();
-  ctx.lineTo(W, H - 18); ctx.lineTo(0, H - 18); ctx.closePath();
-  ctx.fillStyle = fc; ctx.fill();
+
   drawNt(ctx, W, H, dk, 0.9);
   drawVolumeLines(ctx, W, H, dk);
 }
