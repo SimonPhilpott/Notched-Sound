@@ -13,3 +13,5 @@ app/build/
 *.hprof
 .cxx/
 
+
+*.log
