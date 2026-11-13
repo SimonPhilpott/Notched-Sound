@@ -2247,8 +2247,14 @@ body.music-sheet-open .m3-fab,
       <span class="fine-edge" id="fine-hi">12.0 kHz</span>
     </div>
 
-    <div style="display:flex;justify-content:center;margin-bottom:1rem">
+    <div style="display:flex;justify-content:center;margin-bottom:0.75rem">
       <button class="plbtn" id="fine-pb" onclick="toggleFine()">▶ Play Tone</button>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;">
+      <span style="font-size:11px;font-weight:700;color:var(--txt2);">Octave Check:</span>
+      <button type="button" class="btn-sec" style="width:auto;padding:6px 10px;font-size:11px;margin:0;" onclick="stepFineOctave(0.5)">½× (−1 oct)</button>
+      <button type="button" class="btn-sec" style="width:auto;padding:6px 10px;font-size:11px;margin:0;" onclick="stepFineOctave(2)">2× (+1 oct)</button>
     </div>
 
     <div style="margin-top: 14px; background:var(--surf2); border:1px solid var(--brd); border-radius:8px; padding:10px; text-align:left;">
@@ -2485,6 +2491,13 @@ function setTherapyDockCollapsed(collapsed){
   try{ localStorage.setItem('tr_dock_collapsed_v1', therapyDockCollapsed ? '1' : '0'); }catch(e){}
   updateStickyOffsets();
   positionAlphaIndex();
+  if(therapyDockCollapsed){
+    stopDrawLoop();
+  } else if(therapy.playing || (typeof isMusicAudioPlaying === 'function' && isMusicAudioPlaying())){
+    startDrawLoop();
+  } else {
+    syncAnalyserConnection();
+  }
 }
 
 function toggleTherapyDockSettings(){
@@ -2650,7 +2663,7 @@ let actx = null, compNode = null, compTimer = null, curAB = null, fA = 0, fB = 0
 let thNodes = { left: null, right: null };
 let thGainL = null, thGainR = null;
 
-let masterBus = null, masterCompressor = null, masterSplitter = null;
+let masterBus = null, masterCompressor = null, masterSplitter = null, analyserConnected = false;
 let analyserL = null, analyserR = null, analyserBufL = null, analyserBufR = null;
 let masterAnalyser = null, masterAnalyserBuf = null;
 let analyser = null, analyserBuf = null, drawRAF = null;
@@ -2665,16 +2678,33 @@ function gc(){
   return actx;
 }
 
+function syncAnalyserConnection(){
+  if(!masterBus || !masterSplitter) return;
+  const musicPlaying = typeof isMusicAudioPlaying === 'function' && isMusicAudioPlaying();
+  const shouldConnect = !document.hidden && !therapyDockCollapsed && (therapy.playing || musicPlaying) && therapySourceTab !== 'calibrate';
+  if(shouldConnect && !analyserConnected){
+    try{
+      masterBus.connect(masterSplitter);
+      analyserConnected = true;
+    }catch(e){}
+  } else if(!shouldConnect && analyserConnected){
+    try{
+      masterBus.disconnect(masterSplitter);
+      analyserConnected = false;
+    }catch(e){}
+  }
+}
+
 function ensureMasterAudioBus(){
   const c = gc();
   if(!analyserL){
     analyserL = c.createAnalyser();
-    analyserL.fftSize = 2048;
+    analyserL.fftSize = 1024;
     analyserL.smoothingTimeConstant = 0.85;
     analyserBufL = new Uint8Array(analyserL.frequencyBinCount);
 
     analyserR = c.createAnalyser();
-    analyserR.fftSize = 2048;
+    analyserR.fftSize = 1024;
     analyserR.smoothingTimeConstant = 0.85;
     analyserBufR = new Uint8Array(analyserR.frequencyBinCount);
 
@@ -2682,7 +2712,7 @@ function ensureMasterAudioBus(){
     masterBus.gain.value = 1.0;
 
     masterSplitter = c.createChannelSplitter(2);
-    masterBus.connect(masterSplitter);
+    analyserConnected = false;
     masterSplitter.connect(analyserL, 0);
     masterSplitter.connect(analyserR, 1);
 
@@ -2706,6 +2736,7 @@ function ensureMasterAudioBus(){
   if(c.state === 'suspended'){
     c.resume().catch(e => console.warn('AudioContext resume:', e));
   }
+  syncAnalyserConnection();
   return c;
 }
 
@@ -2750,69 +2781,162 @@ function currentNotchQ(){
   return notchQForBandwidth(notchBandwidth);
 }
 
-// Multi-stage cascaded notch filter cluster generator for acoustic notch therapy.
-// Cascades 3 identical biquad notch filters sharing the exact same center frequency f0.
-// This strictly guarantees mathematical monotonicity on both sides of f0 (zero bouncing/ripples)
-// while providing steep cutoff tapering and deep (>55dB) acoustic rejection.
-function createEarNotchChain(c, freq, bw){
-  const M = 3;
-  const qBase = notchQForBandwidth(bw);
-  const qStage = qBase * Math.sqrt(Math.pow(2, 1 / M) - 1);
+// Compute staggered flat-bottom stopband + flanking edge enhancement + optional HF shelf stages.
+function computeEarFilterStages(freq, bw, sampleRate, includeHighShelf){
+  const sr = sampleRate || 48000;
+  const maxF = Math.max(2000, sr * 0.47);
+  const clampF = f => Math.max(40, Math.min(maxF, f));
+  const cFreq = clampF(freq || 7400);
+  const width = Number(bw) === 0.5 ? 0.5 : 1.0;
 
-  const notch1 = c.createBiquadFilter();
-  notch1.type = 'notch';
-  notch1.frequency.value = freq;
-  notch1.Q.value = qStage;
+  // Staggered 3-notch stopband: flat >= 30 dB floor across the band + steep skirts.
+  const qStage = notchQForBandwidth(width * 0.56);
+  const stages = [
+    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, -0.28 * width)), Q: qStage, gain: 0 },
+    { type: 'notch', frequency: cFreq, Q: qStage, gain: 0 },
+    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, 0.28 * width)), Q: qStage, gain: 0 }
+  ];
 
-  const notch2 = c.createBiquadFilter();
-  notch2.type = 'notch';
-  notch2.frequency.value = freq;
-  notch2.Q.value = qStage;
+  // Flanking edge-enhancement peaking filters immediately outside the notch boundaries.
+  const fEdgeLo = clampF(cFreq * Math.pow(2, -0.60 * width));
+  const rawEdgeHi = cFreq * Math.pow(2, 0.60 * width);
+  const fEdgeHi = clampF(rawEdgeHi);
+  stages.push({ type: 'peaking', frequency: fEdgeLo, Q: 3.2, gain: 3.2 });
+  stages.push({ type: 'peaking', frequency: fEdgeHi, Q: 3.2, gain: rawEdgeHi <= maxF ? 3.2 : 0 });
 
-  const notch3 = c.createBiquadFilter();
-  notch3.type = 'notch';
-  notch3.frequency.value = freq;
-  notch3.Q.value = qStage;
+  // High-frequency spectral compensation for Music (or wide high-pitch sources).
+  if(includeHighShelf){
+    const shelfGain = cFreq >= 8000 ? 5.5 : (cFreq >= 5000 ? 3.5 : 1.5);
+    stages.push({ type: 'highshelf', frequency: 4200, Q: 0.707, gain: shelfGain });
+  }
+  return stages;
+}
 
-  notch1.connect(notch2);
-  notch2.connect(notch3);
+function createEarNotchChain(c, freq, bw, includeHighShelf){
+  const specs = computeEarFilterStages(freq, bw, c.sampleRate, includeHighShelf);
+  const filters = specs.map(spec => {
+    const f = c.createBiquadFilter();
+    f.type = spec.type;
+    f.frequency.value = spec.frequency;
+    f.Q.value = spec.Q;
+    if(spec.type === 'peaking' || spec.type === 'highshelf'){
+      f.gain.value = spec.gain;
+    }
+    return f;
+  });
+
+  for(let i = 0; i < filters.length - 1; i++){
+    filters[i].connect(filters[i + 1]);
+  }
 
   return {
-    input: notch1,
-    output: notch3,
-    filters: [notch1, notch2, notch3]
+    input: filters[0],
+    output: filters[filters.length - 1],
+    filters: filters,
+    includeHighShelf: !!includeHighShelf
   };
 }
 
 function updateNotchChainFreq(chain, freq, bw){
   if(!chain || !chain.filters) return;
-  const M = 3;
-  const qBase = notchQForBandwidth(bw);
-  const qStage = qBase * Math.sqrt(Math.pow(2, 1 / M) - 1);
+  const sr = actx ? actx.sampleRate : 48000;
+  const specs = computeEarFilterStages(freq, bw, sr, chain.includeHighShelf);
   const now = actx ? actx.currentTime : 0;
 
   const setParam = (param, val) => {
-    if(!param) return;
+    if(!param || !isFinite(val)) return;
     if(actx && actx.state !== 'closed') param.setTargetAtTime(val, now, 0.03);
     else param.value = val;
   };
 
-  chain.filters.forEach(filter => {
-    setParam(filter.frequency, freq);
-    setParam(filter.Q, qStage);
+  specs.forEach((spec, idx) => {
+    const filter = chain.filters[idx];
+    if(!filter) return;
+    setParam(filter.frequency, spec.frequency);
+    setParam(filter.Q, spec.Q);
+    if(spec.type === 'peaking' || spec.type === 'highshelf'){
+      setParam(filter.gain, spec.gain);
+    }
   });
 }
 
-function calculateCombinedNotchDb(freq, centre, bw){
-  const M = 3;
-  const qBase = notchQForBandwidth(bw);
-  const qStage = qBase * Math.sqrt(Math.pow(2, 1 / M) - 1);
-  const ratio = freq / centre;
-  const diff = 1 - ratio * ratio;
-  const damping = ratio / qStage;
-  const magStage = Math.abs(diff) / Math.max(1e-9, Math.hypot(diff, damping));
-  const magTotal = Math.pow(Math.max(1e-4, magStage), M);
-  return Math.max(-60, Math.min(0, 20 * Math.log10(magTotal)));
+let notchRespCacheKey = '';
+let notchRespDbGrid = null;
+let notchRespFreqGrid = null;
+let notchRespMagScratch = null;
+let notchRespPhaseScratch = null;
+let notchRespNodes = null;
+
+function buildDigitalNotchResponseGrid(centre, bw, includeHighShelf){
+  const sr = (actx && actx.sampleRate) ? actx.sampleRate : 48000;
+  const key = sr + '|' + Math.round(centre || 0) + '|' + bw + '|' + (includeHighShelf ? 1 : 0);
+  if(notchRespCacheKey === key && notchRespDbGrid) return;
+
+  const N = 256;
+  if(!notchRespFreqGrid){
+    notchRespFreqGrid = new Float32Array(N);
+    for(let i = 0; i < N; i++){
+      notchRespFreqGrid[i] = MF * Math.pow(XF / MF, i / (N - 1));
+    }
+    notchRespMagScratch = new Float32Array(N);
+    notchRespPhaseScratch = new Float32Array(N);
+    notchRespDbGrid = new Float32Array(N);
+  }
+
+  const specs = computeEarFilterStages(centre, bw, sr, includeHighShelf);
+  notchRespDbGrid.fill(0);
+
+  if(actx && actx.state !== 'closed'){
+    if(!notchRespNodes || notchRespNodes.length < specs.length){
+      notchRespNodes = specs.map(() => actx.createBiquadFilter());
+    }
+    const accumMag = new Float32Array(N);
+    accumMag.fill(1);
+    for(let s = 0; s < specs.length; s++){
+      const spec = specs[s];
+      const node = notchRespNodes[s];
+      node.type = spec.type;
+      node.frequency.value = spec.frequency;
+      node.Q.value = spec.Q;
+      if(spec.type === 'peaking' || spec.type === 'highshelf') node.gain.value = spec.gain;
+      node.getFrequencyResponse(notchRespFreqGrid, notchRespMagScratch, notchRespPhaseScratch);
+      for(let i = 0; i < N; i++){
+        const m = isFinite(notchRespMagScratch[i]) ? Math.max(1e-4, notchRespMagScratch[i]) : 1e-4;
+        accumMag[i] *= m;
+      }
+    }
+    for(let i = 0; i < N; i++){
+      notchRespDbGrid[i] = Math.max(-60, Math.min(6, 20 * Math.log10(Math.max(1e-4, accumMag[i]))));
+    }
+  } else {
+    for(let i = 0; i < N; i++){
+      const f = notchRespFreqGrid[i];
+      let magTotal = 1;
+      for(let s = 0; s < specs.length; s++){
+        const sp = specs[s];
+        const r = f / sp.frequency;
+        const diff = 1 - r * r;
+        const d = r / sp.Q;
+        if(sp.type === 'notch'){
+          magTotal *= Math.abs(diff) / Math.max(1e-9, Math.hypot(diff, d));
+        } else if(sp.type === 'peaking' && sp.gain !== 0){
+          const A = Math.pow(10, sp.gain / 40);
+          magTotal *= Math.hypot(diff, d * A) / Math.max(1e-9, Math.hypot(diff, d / A));
+        }
+      }
+      notchRespDbGrid[i] = Math.max(-60, Math.min(6, 20 * Math.log10(Math.max(1e-4, magTotal))));
+    }
+  }
+  notchRespCacheKey = key;
+}
+
+function calculateCombinedNotchDb(freq, centre, bw, includeHighShelf){
+  buildDigitalNotchResponseGrid(centre, bw, includeHighShelf);
+  const pos = Math.max(0, Math.min(1, Math.log10(Math.max(MF, freq) / MF) / Math.log10(XF / MF))) * (notchRespDbGrid.length - 1);
+  const lo = Math.floor(pos);
+  const hi = Math.min(notchRespDbGrid.length - 1, lo + 1);
+  const frac = pos - lo;
+  return notchRespDbGrid[lo] * (1 - frac) + notchRespDbGrid[hi] * frac;
 }
 
 function syncNotchBandwidthUI(){
@@ -2927,12 +3051,31 @@ function mkNoise(pink){
   return buf;
 }
 
+// High-frequency therapeutic shimmer layer so low-frequency nature soundscapes
+// always carry broadband energy into high-frequency (7-14 kHz) lateral-inhibition flanks.
+function addHighFreqTherapyShimmer(c, out, ns, gainLevel){
+  const src = c.createBufferSource();
+  src.buffer = mkNoise(true);
+  src.loop = true;
+  const hp = c.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 2200;
+  hp.Q.value = 0.5;
+  const g = c.createGain();
+  g.gain.value = gainLevel;
+  src.connect(hp);
+  hp.connect(g);
+  g.connect(out);
+  src.start();
+  ns.push(src, hp, g);
+}
+
 // ── PROCEDURAL AUDIO SOURCES ──
 function srcWhite(c){ const src = c.createBufferSource(), out = c.createGain(); out.gain.value = 0.22; src.buffer = mkNoise(false); src.loop = true; src.connect(out); src.start(); return { _n: [src, out], output: out }; }
 function srcPink(c){ const src = c.createBufferSource(), out = c.createGain(); out.gain.value = 0.65; src.buffer = mkNoise(true); src.loop = true; src.connect(out); src.start(); return { _n: [src, out], output: out }; }
 function srcRain(c){
   const out = c.createGain(); out.gain.value = 0.55; const ns = [];
-  [[2500,0.7,1.0,false],[700,1.2,0.35,false],[5500,0,0.12,true]].forEach(([f,Q,v,hp])=>{
+  [[2500,0.7,1.0,false],[700,1.2,0.35,false],[5500,0,0.22,true]].forEach(([f,Q,v,hp])=>{
     const src = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
     src.buffer = mkNoise(false); src.loop = true; fl.type = hp ? 'highpass' : 'bandpass'; fl.frequency.value = f; fl.Q.value = Q; g.gain.value = v;
     src.connect(fl); fl.connect(g); g.connect(out); src.start(); ns.push(src, fl, g);
@@ -2947,6 +3090,7 @@ function srcOcean(c){
     lfo.type = 'sine'; lfo.frequency.value = lf; la.gain.value = dep; lfo.connect(la); la.connect(wg.gain);
     src.connect(lpf); lpf.connect(wg); wg.connect(out); src.start(); lfo.start(); ns.push(src, lpf, wg, lfo, la);
   });
+  addHighFreqTherapyShimmer(c, out, ns, 0.14);
   return { _n: [out, ...ns], output: out };
 }
 function srcWind(c){
@@ -2959,6 +3103,7 @@ function srcWind(c){
   lfo.connect(la); la.connect(wg.gain);
   src.connect(hp); hp.connect(wg); wg.connect(out); src.start(); lfo.start();
   ns.push(src, hp, wg, lfo, la);
+  addHighFreqTherapyShimmer(c, out, ns, 0.20);
   return { _n: ns, output: out };
 }
 function srcBrown(c){
@@ -2968,7 +3113,9 @@ function srcBrown(c){
   const src = c.createBufferSource(), out = c.createGain();
   out.gain.value = 0.80;
   src.buffer = buf; src.loop = true; src.connect(out); src.start();
-  return { _n: [src, out], output: out };
+  const ns = [src, out];
+  addHighFreqTherapyShimmer(c, out, ns, 0.22);
+  return { _n: ns, output: out };
 }
 
 function kn(n){
@@ -3160,6 +3307,27 @@ function fineMove(v){
   if(fineNode){
     if(fineNode.osc) fineNode.osc.frequency.value = f;
     if(fineNode.bp) fineNode.bp.frequency.value = f;
+  }
+}
+
+function stepFineOctave(mult){
+  const base = ws.fineFreq || 7400;
+  const next = Math.max(80, Math.min(14000, Math.round(base * mult)));
+  ws.fineFreq = next;
+  ws.lo = Math.max(80, Math.round(next / 1.35));
+  ws.hi = Math.min(14000, Math.round(next * 1.35));
+  const fl = document.getElementById('fine-lo'); if(fl) fl.textContent = fmtF(ws.lo);
+  const fh = document.getElementById('fine-hi'); if(fh) fh.textContent = fmtF(ws.hi);
+  const fd = document.getElementById('fine-disp'); if(fd) fd.textContent = fmtF(next);
+  const sl = document.getElementById('fine-sl');
+  if(sl && ws.hi > ws.lo){
+    sl.value = String(Math.round(100 * Math.log(next / ws.lo) / Math.log(ws.hi / ws.lo)));
+  }
+  if(fineNode){
+    if(fineNode.osc) fineNode.osc.frequency.value = next;
+    if(fineNode.bp) fineNode.bp.frequency.value = next;
+  } else {
+    toggleFine();
   }
 }
 
@@ -3488,7 +3656,14 @@ function setTherapySourceTab(tab, persist){
       if(typeof syncMenuUI === 'function') syncMenuUI();
       if(typeof syncBatteryProtectionUI === 'function') syncBatteryProtectionUI();
     }
-    if(!drawRAF && next !== 'calibrate') drawStaticSpectrum();
+    syncAnalyserConnection();
+    if(next === 'calibrate'){
+      stopDrawLoop();
+    } else if(therapy.playing || (typeof isMusicAudioPlaying === 'function' && isMusicAudioPlaying())){
+      if(!therapyDockCollapsed && !drawRAF) startDrawLoop();
+    } else if(!drawRAF){
+      drawStaticSpectrum();
+    }
   });
 }
 
@@ -3666,7 +3841,7 @@ function toggleTherapy(){
 }
 
 // ── TIMERS (SLIDER 0 - 12 HOURS) ──
-let timerMins = 0, timerSecs = 0, timerInterval = null;
+let timerMins = 0, timerSecs = 0, timerInterval = null, timerEndMs = 0;
 
 function fmtTimerDuration(mins){
   mins = parseInt(mins, 10) || 0;
@@ -3767,15 +3942,16 @@ function startTimer(){
   stopTimer();
   if(!timerMins || timerMins <= 0 || !isAnyPlaybackActive()) return;
   timerSecs = timerMins * 60;
+  timerEndMs = Date.now() + timerSecs * 1000;
   setPlaybackFade(1);
   const blk = document.getElementById('timer-block');
   if(blk) blk.style.display = 'block';
   const cd = document.getElementById('timer-cd');
-  if(cd) cd.textContent = fmtTimer(timerSecs);
+  if(cd && !document.hidden) cd.textContent = fmtTimer(timerSecs);
 
   timerInterval = setInterval(() => {
-    timerSecs--;
-    if(cd) cd.textContent = fmtTimer(timerSecs);
+    timerSecs = Math.max(0, Math.ceil((timerEndMs - Date.now()) / 1000));
+    if(cd && !document.hidden) cd.textContent = fmtTimer(timerSecs);
 
     // Fade out during last 5 minutes (300s) if checked
     const fadeCb = document.getElementById('sleep-fade');
@@ -3794,6 +3970,7 @@ function startTimer(){
 function stopTimer(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
   timerSecs = 0;
+  timerEndMs = 0;
   const blk = document.getElementById('timer-block');
   if(blk) blk.style.display = 'none';
   setPlaybackFade(1);
@@ -3919,7 +4096,9 @@ let cachedNotchKey = '';
 function drawNt(ctx, W, H, dk, alpha){
   const colors = themeEarColors();
   const top = 11, bottom = H - 18;
-  const currentKey = W + '|' + H + '|' + (ws.confirmed.left || 0) + '|' + (ws.confirmed.right || 0) + '|' + notchBandwidth + '|' + dk + '|' + XF;
+  const isMusicMode = therapySourceTab === 'music';
+  const sr = (actx && actx.sampleRate) ? actx.sampleRate : 48000;
+  const currentKey = W + '|' + H + '|' + (ws.confirmed.left || 0) + '|' + (ws.confirmed.right || 0) + '|' + notchBandwidth + '|' + (isMusicMode ? 1 : 0) + '|' + sr + '|' + dk + '|' + XF;
 
   if(!cachedNotchCurves || cachedNotchKey !== currentKey){
     cachedNotchKey = currentKey;
@@ -3936,8 +4115,8 @@ function drawNt(ctx, W, H, dk, alpha){
       const points = [];
       for(let px = 0; px <= W; px++){
         const freq = MF * Math.pow(XF / MF, px / W);
-        const db = Math.max(-60, calculateCombinedNotchDb(freq, f, notchBandwidth));
-        const level = Math.max(0, Math.min(1, 1 + db / 60));
+        const db = Math.max(-60, Math.min(6, calculateCombinedNotchDb(freq, f, notchBandwidth, isMusicMode)));
+        const level = Math.max(0, Math.min(1.06, 1 + db / 60));
         const y = Math.max(top - 2, Math.min(bottom, bottom + curveLift - level * (bottom - top)));
         points.push({ x: px, y: y });
       }
@@ -3987,6 +4166,7 @@ function drawStaticSpectrum(){
     { freq: ws.confirmed.right, col: colors[1], volRatio: earVolR, phase: 1.5 }
   ];
 
+  const isMusicMode = therapySourceTab === 'music';
   ears.forEach(({ freq, col, volRatio, phase }) => {
     ctx.save();
     ctx.beginPath();
@@ -3995,7 +4175,7 @@ function drawStaticSpectrum(){
       const f = MF * Math.pow(XF / MF, x / W);
       let notchDb = 0;
       if(freq){
-        notchDb = calculateCombinedNotchDb(f, freq, notchBandwidth);
+        notchDb = calculateCombinedNotchDb(f, freq, notchBandwidth, isMusicMode);
       }
       const notchAtten = Math.pow(10, Math.max(-48, notchDb) / 48);
       const wave = (Math.sin(x * 0.14 + phase) * 2.2 + Math.sin(x * 0.38 + phase) * 1.6) * notchAtten;
@@ -4034,13 +4214,17 @@ function updateSpectrumBadge(text){
 let lastSpectrumDrawMs = 0;
 function startDrawLoop(){
   stopDrawLoop();
-  if(document.hidden) return; // Do not animate canvas when display is off or app is hidden
+  if(document.hidden || therapyDockCollapsed || therapySourceTab === 'calibrate'){
+    syncAnalyserConnection();
+    return;
+  }
+  syncAnalyserConnection();
   function frame(timestamp){
     if((!analyserL || !analyserBufL) && (!analyser || !analyserBuf)){
       stopDrawLoop();
       return;
     }
-    if(document.hidden){
+    if(document.hidden || therapyDockCollapsed || therapySourceTab === 'calibrate'){
       stopDrawLoop();
       return;
     }
@@ -4060,6 +4244,7 @@ function startDrawLoop(){
 
 function stopDrawLoop(){
   if(drawRAF){ cancelAnimationFrame(drawRAF); drawRAF = null; }
+  syncAnalyserConnection();
 }
 
 function drawLive(){
@@ -4839,13 +5024,13 @@ function initMusicAudioGraph(){
     return;
   }
 
-  // Left channel multi-stage notch cluster and gain
-  musicNotchChainL = createEarNotchChain(c, ws.confirmed.left || 7400, notchBandwidth);
+  // Left channel multi-stage notch cluster + flanking edge boost + HF compensation
+  musicNotchChainL = createEarNotchChain(c, ws.confirmed.left || 7400, notchBandwidth, true);
   musicGainL = c.createGain();
   musicGainL.gain.value = calcPlaybackGain() * earVolL;
 
-  // Right channel multi-stage notch cluster and gain
-  musicNotchChainR = createEarNotchChain(c, ws.confirmed.right || 7400, notchBandwidth);
+  // Right channel multi-stage notch cluster + flanking edge boost + HF compensation
+  musicNotchChainR = createEarNotchChain(c, ws.confirmed.right || 7400, notchBandwidth, true);
   musicGainR = c.createGain();
   musicGainR.gain.value = calcPlaybackGain() * earVolR;
 
@@ -6090,7 +6275,7 @@ function toggleRepeat(){
 }
 
 function onMusicTimeUpdate(){
-  if(!musicAudioEl) return;
+  if(document.hidden || !musicAudioEl) return;
   const cur = musicAudioEl.currentTime || 0;
   const dur = musicAudioEl.duration || 0;
 
@@ -6104,7 +6289,6 @@ function onMusicTimeUpdate(){
   if(scrubber && dur > 0){
     scrubber.value = Math.floor((cur / dur) * 100);
   }
-  syncNativeMediaSession(false);
 }
 
 function onMusicSeek(percent){
@@ -6561,8 +6745,19 @@ window.addEventListener('DOMContentLoaded', () => {
       suspendAudioIfIdle();
     } else {
       syncBatteryProtectionUI();
-      if(therapy.playing || isMusicAudioPlaying()){
+      if(timerInterval && timerEndMs > 0){
+        timerSecs = Math.max(0, Math.ceil((timerEndMs - Date.now()) / 1000));
+        const cd = document.getElementById('timer-cd');
+        if(cd) cd.textContent = fmtTimer(timerSecs);
+      }
+      if(musicAudioEl && musicAudioEl.src){
+        onMusicTimeUpdate();
+        syncNativeMediaSession(true);
+      }
+      if((therapy.playing || isMusicAudioPlaying()) && !therapyDockCollapsed && therapySourceTab !== 'calibrate'){
         startDrawLoop();
+      } else {
+        syncAnalyserConnection();
       }
     }
   });
