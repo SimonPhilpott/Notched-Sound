@@ -1487,10 +1487,13 @@ body.menu-open .m3-nav-bar {
 }
 
 /* M3 Modal Bottom Sheet */
+body.audio-sheet-open #therapy-sticky-dock-wrap {
+  z-index: 1250;
+}
 .m3-sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 15, 0.62);
+  background: rgba(5, 8, 15, 0.56);
   z-index: 1200;
   display: none;
   align-items: flex-end;
@@ -1500,7 +1503,7 @@ body.menu-open .m3-nav-bar {
 .m3-bottom-sheet {
   width: 100%;
   max-width: 480px;
-  max-height: 88vh;
+  max-height: calc(100vh - var(--therapy-dock-height, 210px) - 68px);
   overflow-y: auto;
   background: var(--surf);
   border-radius: 28px 28px 0 0;
@@ -3126,6 +3129,8 @@ let therapySourceTab = 'ambient';
 
 function openAudioControlsSheet(){
   syncNativeMediaVolume();
+  updateStickyOffsets();
+  document.body.classList.add('audio-sheet-open');
   const sheet = document.getElementById('audio-controls-sheet');
   if(sheet){
     sheet.classList.add('open');
@@ -3134,6 +3139,7 @@ function openAudioControlsSheet(){
 }
 
 function closeAudioControlsSheet(){
+  document.body.classList.remove('audio-sheet-open');
   const sheet = document.getElementById('audio-controls-sheet');
   if(sheet){
     sheet.classList.remove('open');
