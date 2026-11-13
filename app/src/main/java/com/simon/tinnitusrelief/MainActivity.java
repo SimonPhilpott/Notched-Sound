@@ -67,6 +67,8 @@ public class MainActivity extends Activity {
     private MusicIndexManager.ScanListener scanListener;
     private PermissionRequest pendingWebPermissionRequest;
     private boolean batteryPromptShownThisLaunch = false;
+    private long lastBackPressMs = 0L;
+    private static final long BACK_EXIT_WINDOW_MS = 2000L;
     private boolean isPlaybackActive = false;
     private boolean playbackServiceRunning = false;
     private String lastServiceSignature = "";
@@ -1034,6 +1036,34 @@ public class MainActivity extends Activity {
         } else {
             registerReceiver(mediaVolumeReceiver, filter);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onBackPressed() {
+        if (webView != null) {
+            webView.evaluateJavascript(
+                "(function(){ return typeof handleAndroidBackPress==='function' ? handleAndroidBackPress() : false; })()",
+                value -> {
+                    if ("true".equals(value)) {
+                        return;
+                    }
+                    handleMainScreenBackPress();
+                }
+            );
+            return;
+        }
+        handleMainScreenBackPress();
+    }
+
+    private void handleMainScreenBackPress() {
+        long now = SystemClock.elapsedRealtime();
+        if (now - lastBackPressMs <= BACK_EXIT_WINDOW_MS) {
+            finish();
+            return;
+        }
+        lastBackPressMs = now;
+        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
     }
 
     @Override
