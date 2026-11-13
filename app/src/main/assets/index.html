@@ -75,7 +75,7 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 }
 #sc-therapy {
   min-height: calc(100vh - 98px);
-  padding-bottom: 12px;
+  padding-bottom: calc(156px + env(safe-area-inset-bottom, 0px));
 }
 #th-card {
   position: relative;
@@ -1536,8 +1536,7 @@ body.menu-open .m3-nav-bar {
 }
 
 /* M3 Modal Bottom Sheet */
-body.audio-sheet-open #therapy-sticky-dock-wrap,
-body.music-sheet-open #therapy-sticky-dock-wrap {
+body.audio-sheet-open #therapy-sticky-dock-wrap {
   z-index: 1250;
 }
 .m3-sheet-backdrop {
@@ -1563,12 +1562,78 @@ body.music-sheet-open #therapy-sticky-dock-wrap {
   animation: m3SheetSlideUp .22s cubic-bezier(0.2, 0, 0, 1);
 }
 #music-library-sheet .m3-bottom-sheet {
-  height: calc(100vh - var(--therapy-dock-bottom, 290px) - 8px);
-  max-height: calc(100vh - var(--therapy-dock-bottom, 290px) - 8px);
+  height: calc(100vh - env(safe-area-inset-top, 0px) - 10px);
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 10px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+/* M3 Collapsing Extended FAB */
+.m3-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  z-index: 960;
+  height: 56px;
+  min-width: 56px;
+  max-width: calc(100vw - 32px);
+  padding: 0 20px 0 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--ac);
+  color: #051610;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.34), 0 2px 6px rgba(0,0,0,0.22);
+  -webkit-tap-highlight-color: transparent;
+  transition: padding .22s cubic-bezier(0.2, 0, 0, 1), gap .22s cubic-bezier(0.2, 0, 0, 1), background .2s, color .2s, transform .14s, opacity .18s;
+}
+.m3-fab:active {
+  transform: scale(0.96);
+}
+.m3-fab.is-playing {
+  background: var(--ac);
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.34), 0 2px 6px rgba(0,0,0,0.24);
+}
+.m3-fab.collapsed {
+  padding: 0 16px;
+  gap: 0;
+}
+.m3-fab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.m3-fab-label {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 220px;
+  opacity: 1;
+  transition: max-width .22s cubic-bezier(0.2, 0, 0, 1), opacity .16s ease;
+}
+.m3-fab.collapsed .m3-fab-label {
+  max-width: 0;
+  opacity: 0;
+}
+body.tool-modal-open .m3-fab,
+body.menu-open .m3-fab,
+body.audio-sheet-open .m3-fab,
+body.music-sheet-open .m3-fab,
+.m3-fab[hidden] {
+  display: none !important;
 }
 #music-library-sheet .music-browser-box {
   flex: 1 1 auto;
@@ -1707,9 +1772,6 @@ body.music-sheet-open #therapy-sticky-dock-wrap {
         <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
       </label>
     </div>
-
-    <!-- Play Sound Therapy Button -->
-    <button class="btn-main" id="th-btn" onclick="toggleTherapy()">▶ Start Sound Therapy</button>
 
   </div>
 
@@ -1920,6 +1982,14 @@ body.music-sheet-open #therapy-sticky-dock-wrap {
     </div>
   </div><!-- /#calibrate-card -->
 </div><!-- /#sc-therapy -->
+
+<!-- ── MATERIAL DESIGN 3 EXTENDED FAB ── -->
+<button type="button" class="m3-fab" id="m3-main-fab" onclick="onMainFabClick()" aria-label="Start Sound Therapy">
+  <span class="m3-fab-icon" id="m3-main-fab-icon" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+  </span>
+  <span class="m3-fab-label" id="m3-main-fab-label">Start Sound Therapy</span>
+</button>
 
 <!-- ── MATERIAL DESIGN 3 BOTTOM NAVIGATION BAR ── -->
 <nav class="m3-nav-bar" aria-label="Primary navigation" onkeydown="onTherapySourceTabKeydown(event)">
@@ -3224,6 +3294,64 @@ function toggleMusicLibrarySheet(forceOpen){
   }
 }
 
+let lastFabScrollY = 0;
+
+function syncMainFab(){
+  const fab = document.getElementById('m3-main-fab');
+  const icon = document.getElementById('m3-main-fab-icon');
+  const label = document.getElementById('m3-main-fab-label');
+  if(!fab || !icon || !label) return;
+
+  if(therapySourceTab === 'calibrate'){
+    fab.hidden = true;
+    return;
+  }
+
+  fab.hidden = false;
+  if(therapySourceTab === 'music'){
+    fab.classList.remove('is-playing');
+    icon.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+    label.textContent = 'Music Library';
+    fab.setAttribute('aria-label', 'Music Library');
+  } else {
+    const playing = !!(typeof therapy !== 'undefined' && therapy.playing);
+    fab.classList.toggle('is-playing', playing);
+    if(playing){
+      icon.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>';
+      label.textContent = 'Stop Sound Therapy';
+      fab.setAttribute('aria-label', 'Stop Sound Therapy');
+    } else {
+      icon.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>';
+      label.textContent = 'Start Sound Therapy';
+      fab.setAttribute('aria-label', 'Start Sound Therapy');
+    }
+  }
+}
+
+function onMainFabClick(){
+  if(therapySourceTab === 'music'){
+    openMusicLibrarySheet();
+  } else if(therapySourceTab === 'ambient'){
+    toggleTherapy();
+  }
+}
+
+function onFabScroll(){
+  const fab = document.getElementById('m3-main-fab');
+  if(!fab || fab.hidden) return;
+  const y = window.scrollY || window.pageYOffset || 0;
+  if(y <= 14){
+    fab.classList.remove('collapsed');
+  } else if(y > lastFabScrollY + 4){
+    fab.classList.add('collapsed');
+  } else if(y < lastFabScrollY - 8){
+    fab.classList.remove('collapsed');
+  }
+  lastFabScrollY = y;
+}
+
+window.addEventListener('scroll', onFabScroll, { passive: true });
+
 function setTherapySourceTab(tab, persist){
   const next = (tab === 'music' || tab === 'calibrate') ? tab : 'ambient';
   therapySourceTab = next;
@@ -3251,6 +3379,12 @@ function setTherapySourceTab(tab, persist){
   if(next !== 'music'){
     closeMusicLibrarySheet();
   }
+
+  const fab = document.getElementById('m3-main-fab');
+  if(fab && (window.scrollY || 0) <= 14){
+    fab.classList.remove('collapsed');
+  }
+  syncMainFab();
 
   if(persist !== false){
     try{ localStorage.setItem(THERAPY_SOURCE_TAB_KEY, next); }catch(e){}
@@ -3423,7 +3557,6 @@ function toggleTherapy(){
   }
   try{ if(window.AndroidBridge && window.AndroidBridge.setTherapyActive) window.AndroidBridge.setTherapyActive(therapy.playing); }catch(e){}
 
-  const tb = document.getElementById('th-btn');
   const tc = document.getElementById('th-card');
 
   if(therapy.playing){
@@ -3432,15 +3565,14 @@ function toggleTherapy(){
     buildTh();
     startTimerIfConfigured();
     if(tc) tc.style.borderColor = 'var(--ac)';
-    if(tb) tb.textContent = '■ Stop Sound Therapy';
   } else {
     stopThAudio();
     stopDrawLoop();
     stopTimerIfNoPlayback();
     drawStaticSpectrum();
     if(tc) tc.style.borderColor = 'var(--brd)';
-    if(tb) tb.textContent = '▶ Start Sound Therapy';
   }
+  syncMainFab();
   syncNativeMediaSession(true);
 }
 
@@ -3581,7 +3713,7 @@ function stopTimer(){
 function resetAll(){
   stopThAudio(); stopDrawLoop(); stopTimer();
   therapy.playing = false;
-  const tb = document.getElementById('th-btn'); if(tb) tb.textContent = '▶ Start Sound Therapy';
+  syncMainFab();
   ws.confirmed = { left: 7400, right: 7400 };
   ws.types = { left: 'sine', right: 'sine' };
   openTherapy(true);
@@ -4825,10 +4957,9 @@ function pauseForAudioFocus(){
   stopDrawLoop();
   drawStaticSpectrum();
   updateSpectrumBadge('Paused');
-  const tb = document.getElementById('th-btn');
   const tc = document.getElementById('th-card');
   if(tc) tc.style.borderColor = 'var(--brd)';
-  if(tb) tb.textContent = '▶ Start Sound Therapy';
+  syncMainFab();
   syncNativeMediaSession(true);
 }
 
