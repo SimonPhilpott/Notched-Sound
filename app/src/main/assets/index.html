@@ -2781,7 +2781,7 @@ function currentNotchQ(){
   return notchQForBandwidth(notchBandwidth);
 }
 
-// Compute staggered flat-bottom stopband + flanking edge enhancement + optional HF shelf stages.
+// Compute tightly coupled smooth U-notch + flanking edge enhancement + optional HF shelf stages.
 function computeEarFilterStages(freq, bw, sampleRate, includeHighShelf){
   const sr = sampleRate || 48000;
   const maxF = Math.max(2000, sr * 0.47);
@@ -2789,20 +2789,21 @@ function computeEarFilterStages(freq, bw, sampleRate, includeHighShelf){
   const cFreq = clampF(freq || 7400);
   const width = Number(bw) === 0.5 ? 0.5 : 1.0;
 
-  // Staggered 3-notch stopband: flat >= 30 dB floor across the band + steep skirts.
-  const qStage = notchQForBandwidth(width * 0.56);
+  // Tightly coupled 3-stage U-notch: smooth fade-out/fade-in within boundaries,
+  // >= 42 dB ripple-free silent floor across the central core around f0.
+  const qStage = notchQForBandwidth(width * 0.52);
   const stages = [
-    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, -0.28 * width)), Q: qStage, gain: 0 },
+    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, -0.075 * width)), Q: qStage, gain: 0 },
     { type: 'notch', frequency: cFreq, Q: qStage, gain: 0 },
-    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, 0.28 * width)), Q: qStage, gain: 0 }
+    { type: 'notch', frequency: clampF(cFreq * Math.pow(2, 0.075 * width)), Q: qStage, gain: 0 }
   ];
 
   // Flanking edge-enhancement peaking filters immediately outside the notch boundaries.
-  const fEdgeLo = clampF(cFreq * Math.pow(2, -0.60 * width));
-  const rawEdgeHi = cFreq * Math.pow(2, 0.60 * width);
+  const fEdgeLo = clampF(cFreq * Math.pow(2, -0.62 * width));
+  const rawEdgeHi = cFreq * Math.pow(2, 0.62 * width);
   const fEdgeHi = clampF(rawEdgeHi);
-  stages.push({ type: 'peaking', frequency: fEdgeLo, Q: 3.2, gain: 3.2 });
-  stages.push({ type: 'peaking', frequency: fEdgeHi, Q: 3.2, gain: rawEdgeHi <= maxF ? 3.2 : 0 });
+  stages.push({ type: 'peaking', frequency: fEdgeLo, Q: 2.8, gain: 2.2 });
+  stages.push({ type: 'peaking', frequency: fEdgeHi, Q: 2.8, gain: rawEdgeHi <= maxF ? 2.2 : 0 });
 
   // High-frequency spectral compensation for Music (or wide high-pitch sources).
   if(includeHighShelf){
@@ -2860,83 +2861,26 @@ function updateNotchChainFreq(chain, freq, bw){
   });
 }
 
-let notchRespCacheKey = '';
-let notchRespDbGrid = null;
-let notchRespFreqGrid = null;
-let notchRespMagScratch = null;
-let notchRespPhaseScratch = null;
-let notchRespNodes = null;
-
-function buildDigitalNotchResponseGrid(centre, bw, includeHighShelf){
+function calculateCombinedNotchDb(freq, centre, bw){
   const sr = (actx && actx.sampleRate) ? actx.sampleRate : 48000;
-  const key = sr + '|' + Math.round(centre || 0) + '|' + bw + '|' + (includeHighShelf ? 1 : 0);
-  if(notchRespCacheKey === key && notchRespDbGrid) return;
-
-  const N = 256;
-  if(!notchRespFreqGrid){
-    notchRespFreqGrid = new Float32Array(N);
-    for(let i = 0; i < N; i++){
-      notchRespFreqGrid[i] = MF * Math.pow(XF / MF, i / (N - 1));
-    }
-    notchRespMagScratch = new Float32Array(N);
-    notchRespPhaseScratch = new Float32Array(N);
-    notchRespDbGrid = new Float32Array(N);
+  const maxF = Math.max(2000, sr * 0.47);
+  const clampF = f => Math.max(40, Math.min(maxF, f));
+  const cFreq = clampF(centre || 7400);
+  const width = Number(bw) === 0.5 ? 0.5 : 1.0;
+  const qStage = notchQForBandwidth(width * 0.52);
+  const centres = [
+    clampF(cFreq * Math.pow(2, -0.075 * width)),
+    cFreq,
+    clampF(cFreq * Math.pow(2, 0.075 * width))
+  ];
+  let magTotal = 1;
+  for(let i = 0; i < 3; i++){
+    const r = freq / centres[i];
+    const diff = 1 - r * r;
+    const damping = r / qStage;
+    magTotal *= Math.abs(diff) / Math.max(1e-9, Math.hypot(diff, damping));
   }
-
-  const specs = computeEarFilterStages(centre, bw, sr, includeHighShelf);
-  notchRespDbGrid.fill(0);
-
-  if(actx && actx.state !== 'closed'){
-    if(!notchRespNodes || notchRespNodes.length < specs.length){
-      notchRespNodes = specs.map(() => actx.createBiquadFilter());
-    }
-    const accumMag = new Float32Array(N);
-    accumMag.fill(1);
-    for(let s = 0; s < specs.length; s++){
-      const spec = specs[s];
-      const node = notchRespNodes[s];
-      node.type = spec.type;
-      node.frequency.value = spec.frequency;
-      node.Q.value = spec.Q;
-      if(spec.type === 'peaking' || spec.type === 'highshelf') node.gain.value = spec.gain;
-      node.getFrequencyResponse(notchRespFreqGrid, notchRespMagScratch, notchRespPhaseScratch);
-      for(let i = 0; i < N; i++){
-        const m = isFinite(notchRespMagScratch[i]) ? Math.max(1e-4, notchRespMagScratch[i]) : 1e-4;
-        accumMag[i] *= m;
-      }
-    }
-    for(let i = 0; i < N; i++){
-      notchRespDbGrid[i] = Math.max(-60, Math.min(6, 20 * Math.log10(Math.max(1e-4, accumMag[i]))));
-    }
-  } else {
-    for(let i = 0; i < N; i++){
-      const f = notchRespFreqGrid[i];
-      let magTotal = 1;
-      for(let s = 0; s < specs.length; s++){
-        const sp = specs[s];
-        const r = f / sp.frequency;
-        const diff = 1 - r * r;
-        const d = r / sp.Q;
-        if(sp.type === 'notch'){
-          magTotal *= Math.abs(diff) / Math.max(1e-9, Math.hypot(diff, d));
-        } else if(sp.type === 'peaking' && sp.gain !== 0){
-          const A = Math.pow(10, sp.gain / 40);
-          magTotal *= Math.hypot(diff, d * A) / Math.max(1e-9, Math.hypot(diff, d / A));
-        }
-      }
-      notchRespDbGrid[i] = Math.max(-60, Math.min(6, 20 * Math.log10(Math.max(1e-4, magTotal))));
-    }
-  }
-  notchRespCacheKey = key;
-}
-
-function calculateCombinedNotchDb(freq, centre, bw, includeHighShelf){
-  buildDigitalNotchResponseGrid(centre, bw, includeHighShelf);
-  const pos = Math.max(0, Math.min(1, Math.log10(Math.max(MF, freq) / MF) / Math.log10(XF / MF))) * (notchRespDbGrid.length - 1);
-  const lo = Math.floor(pos);
-  const hi = Math.min(notchRespDbGrid.length - 1, lo + 1);
-  const frac = pos - lo;
-  return notchRespDbGrid[lo] * (1 - frac) + notchRespDbGrid[hi] * frac;
+  return Math.max(-60, Math.min(0, 20 * Math.log10(Math.max(1e-4, magTotal))));
 }
 
 function syncNotchBandwidthUI(){
@@ -4115,9 +4059,9 @@ function drawNt(ctx, W, H, dk, alpha){
       const points = [];
       for(let px = 0; px <= W; px++){
         const freq = MF * Math.pow(XF / MF, px / W);
-        const db = Math.max(-60, Math.min(6, calculateCombinedNotchDb(freq, f, notchBandwidth, isMusicMode)));
-        const level = Math.max(0, Math.min(1.06, 1 + db / 60));
-        const y = Math.max(top - 2, Math.min(bottom, bottom + curveLift - level * (bottom - top)));
+        const db = Math.max(-60, Math.min(0, calculateCombinedNotchDb(freq, f, notchBandwidth)));
+        const level = Math.max(0, Math.min(1, 1 + db / 40));
+        const y = Math.max(top, Math.min(bottom, bottom + curveLift - level * (bottom - top)));
         points.push({ x: px, y: y });
       }
       return { ear, f, col, x, bandX1, bandX2, points };
@@ -4175,9 +4119,9 @@ function drawStaticSpectrum(){
       const f = MF * Math.pow(XF / MF, x / W);
       let notchDb = 0;
       if(freq){
-        notchDb = calculateCombinedNotchDb(f, freq, notchBandwidth, isMusicMode);
+        notchDb = calculateCombinedNotchDb(f, freq, notchBandwidth);
       }
-      const notchAtten = Math.pow(10, Math.max(-48, notchDb) / 48);
+      const notchAtten = Math.max(0, Math.min(1, 1 + notchDb / 40));
       const wave = (Math.sin(x * 0.14 + phase) * 2.2 + Math.sin(x * 0.38 + phase) * 1.6) * notchAtten;
       const currentAmp = Math.max(0, baseAmp * volRatio * (0.86 * notchAtten + 0.14 * (wave / 3.8)));
       const y = Math.max(top, Math.min(bottom, bottom - currentAmp));
