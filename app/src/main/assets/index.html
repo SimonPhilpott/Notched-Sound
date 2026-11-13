@@ -1553,7 +1553,7 @@ body.music-sheet-open #therapy-sticky-dock-wrap {
 .m3-bottom-sheet {
   width: 100%;
   max-width: 480px;
-  max-height: calc(100vh - var(--therapy-dock-height, 210px) - 68px);
+  max-height: calc(100vh - var(--therapy-dock-bottom, 290px) - 8px);
   overflow-y: auto;
   background: var(--surf);
   border-radius: 28px 28px 0 0;
@@ -1563,8 +1563,8 @@ body.music-sheet-open #therapy-sticky-dock-wrap {
   animation: m3SheetSlideUp .22s cubic-bezier(0.2, 0, 0, 1);
 }
 #music-library-sheet .m3-bottom-sheet {
-  height: calc(100vh - var(--therapy-dock-height, 210px) - 8px);
-  max-height: calc(100vh - var(--therapy-dock-height, 210px) - 8px);
+  height: calc(100vh - var(--therapy-dock-bottom, 290px) - 8px);
+  max-height: calc(100vh - var(--therapy-dock-bottom, 290px) - 8px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2268,9 +2268,14 @@ let therapyScrollRAF = null;
 function updateStickyOffsets(){
   const dockWrap = document.getElementById('therapy-sticky-dock-wrap');
   if(dockWrap){
-    const wrapH = Math.ceil(dockWrap.getBoundingClientRect().height);
+    const rect = dockWrap.getBoundingClientRect();
+    const wrapH = Math.ceil(rect.height);
+    const wrapBottom = Math.ceil(rect.bottom);
     if(wrapH > 0){
       document.documentElement.style.setProperty('--therapy-dock-height', wrapH + 'px');
+    }
+    if(wrapBottom > 0){
+      document.documentElement.style.setProperty('--therapy-dock-bottom', wrapBottom + 'px');
     }
   }
   const dock = document.getElementById('docked-top-box');
