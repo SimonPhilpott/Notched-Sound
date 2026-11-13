@@ -36,8 +36,10 @@ public class TherapyPlaybackService extends Service {
         try {
             Intent intent = new Intent(context, TherapyPlaybackService.class);
             intent.setAction(ACTION_START);
-            if (title != null) intent.putExtra(EXTRA_TITLE, title);
-            if (subtitle != null) intent.putExtra(EXTRA_SUBTITLE, subtitle);
+            if (title != null)
+                intent.putExtra(EXTRA_TITLE, title);
+            if (subtitle != null)
+                intent.putExtra(EXTRA_SUBTITLE, subtitle);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent);
             } else {
@@ -52,8 +54,10 @@ public class TherapyPlaybackService extends Service {
         try {
             Intent intent = new Intent(context, TherapyPlaybackService.class);
             intent.setAction(ACTION_UPDATE);
-            if (title != null) intent.putExtra(EXTRA_TITLE, title);
-            if (subtitle != null) intent.putExtra(EXTRA_SUBTITLE, subtitle);
+            if (title != null)
+                intent.putExtra(EXTRA_TITLE, title);
+            if (subtitle != null)
+                intent.putExtra(EXTRA_SUBTITLE, subtitle);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent);
             } else {
@@ -148,8 +152,7 @@ public class TherapyPlaybackService extends Service {
                 this,
                 0,
                 launchIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
@@ -168,8 +171,7 @@ public class TherapyPlaybackService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Sound Therapy Playback",
-                    NotificationManager.IMPORTANCE_LOW
-            );
+                    NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("Maintains continuous audio playback when the screen is turned off");
             channel.enableVibration(false);
             channel.setSound(null, null);
@@ -185,8 +187,7 @@ public class TherapyPlaybackService extends Service {
             if (pm != null) {
                 serviceWakeLock = pm.newWakeLock(
                         PowerManager.PARTIAL_WAKE_LOCK,
-                        "TinnitusRelief:TherapyPlaybackServiceWakeLock"
-                );
+                        "TinnitusRelief:TherapyPlaybackServiceWakeLock");
                 serviceWakeLock.setReferenceCounted(false);
             }
         }
@@ -215,4 +216,3 @@ public class TherapyPlaybackService extends Service {
         return null;
     }
 }
-
