@@ -60,7 +60,7 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 .badge{display:inline-flex;align-items:center;background:var(--ab);color:var(--ac);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;margin-bottom:1rem}
 .prog-bar{height:4px;background:var(--surf2);border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
 .prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .5s}
-.card{background:var(--surf);border:none;border-radius:24px;padding:1.15rem;margin-bottom:12px;box-sizing:border-box;width:100%;max-width:100%;box-shadow:var(--shadow-card)}
+.card{background:var(--surf);border:none;border-radius:24px;padding:16px;margin-bottom:12px;box-sizing:border-box;width:100%;max-width:100%;box-shadow:var(--shadow-card)}
 .therapy-source-panel{box-sizing:border-box;width:100%;max-width:100%}
 .card-title{font-size:18px;font-weight:500;margin-bottom:.4rem}
 .card-sub{font-size:13px;color:var(--txt2);line-height:1.55;margin-bottom:1.25rem}
@@ -134,10 +134,10 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 .same-btn{width:100%;padding:10px;border-radius:10px;border:1px solid var(--brd);background:transparent;color:var(--txt2);cursor:pointer;font-size:13px;font-family:inherit;margin-bottom:1rem}
 .fine-freq{font-family:monospace;font-size:44px;font-weight:800;color:var(--ac);text-align:center;margin:1rem 0;letter-spacing:-1px}
 .slmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--txt2);margin-bottom:4px}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;background:var(--surf3);accent-color:var(--ac);cursor:pointer;outline:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px !important;border-radius:999px;--slider-fill:var(--ac);--slider-pct:0%;background:linear-gradient(to right,var(--slider-fill) 0%,var(--slider-fill) var(--slider-pct),var(--surf3) var(--slider-pct),var(--surf3) 100%);accent-color:var(--ac);cursor:pointer;outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--ac);border:2px solid var(--surf);box-shadow:0 2px 6px rgba(0,0,0,0.28);cursor:pointer;transition:transform .12s cubic-bezier(0.2,0,0,1),box-shadow .12s ease}
 input[type=range]:active::-webkit-slider-thumb{transform:scale(1.14);box-shadow:0 0 0 6px var(--ab)}
-.vol-slider-r,#menu-pitch-right{accent-color:var(--ear-r)}
+.vol-slider-r,#menu-pitch-right{--slider-fill:var(--ear-r);accent-color:var(--ear-r)}
 .vol-slider-r::-webkit-slider-thumb,#menu-pitch-right::-webkit-slider-thumb{background:var(--ear-r)}
 .vol-slider-r:active::-webkit-slider-thumb,#menu-pitch-right:active::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(139,92,246,0.22)}
 .plbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--brd);background:var(--surf2);color:var(--txt);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;margin:1rem auto;transition:all .2s}
@@ -366,7 +366,7 @@ body.tool-modal-open{overflow:hidden}
   background: var(--surf);
   border: none;
   border-radius: 24px;
-  padding: 14px;
+  padding: 14px 16px;
   margin-bottom: 4px;
   box-shadow: var(--shadow-card);
   transition: padding .14s ease, margin .14s ease;
@@ -497,7 +497,7 @@ body.tool-modal-open{overflow:hidden}
   margin-bottom: 8px;
 }
 .docked-vol-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--txt);
 }
@@ -524,7 +524,7 @@ body.tool-modal-open{overflow:hidden}
   gap: 8px;
 }
 .docked-ear-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--txt);
   margin-bottom: 2px;
@@ -550,7 +550,6 @@ body.tool-modal-open{overflow:hidden}
   flex: 1;
   height: 8px;
   border-radius: 999px;
-  background: var(--surf3);
 }
 .vol-slider-master {
   accent-color: var(--ac);
@@ -688,12 +687,12 @@ body.tool-modal-open{overflow:hidden}
 }
 .music-now-card {
   position: relative;
-  background: var(--surf2);
+  background: transparent;
   border: none;
-  border-radius: 20px;
-  padding: 14px 16px;
+  border-radius: 0;
+  padding: 0;
   margin-bottom: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.28);
+  box-shadow: none;
 }
 .music-track-title {
   font-size: 15px;
@@ -749,7 +748,7 @@ body.tool-modal-open{overflow:hidden}
   margin-top: 8px;
 }
 .music-ctrl-btn {
-  background: var(--surf);
+  background: var(--surf2);
   border: 1px solid var(--brd);
   color: var(--txt);
   border-radius: 50%;
@@ -1076,11 +1075,11 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin: 2px 0 10px;
-  padding: 10px 12px;
+  margin: 0;
+  padding: 0;
   border: none;
-  background: var(--surf2);
-  border-radius: 16px;
+  background: transparent;
+  border-radius: 0;
 }
 .notch-bw-copy {
   min-width: 0;
@@ -1088,7 +1087,7 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 }
 .notch-bw-label {
   display: block;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--txt);
   font-weight: 600;
   letter-spacing: -0.2px;
@@ -1698,7 +1697,7 @@ body.music-sheet-open .m3-fab,
 .m3-sheet-card {
   background: var(--surf2);
   border-radius: 20px;
-  padding: 14px;
+  padding: 14px 16px;
   margin-bottom: 12px;
 }
 
@@ -1975,28 +1974,26 @@ body.music-sheet-open .m3-fab,
 
   <!-- ── SHARED SESSION DURATION CARD (Soundscapes & Music) ── -->
   <div class="card" id="session-duration-card">
-    <div style="background:var(--surf2); border-radius:16px; padding:10px 12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span class="session-duration-heading section-heading" style="font-size:16px;">Session Duration</span>
-        <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:2px 8px; border-radius:12px;">Continuous (∞)</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
-        <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
-        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
-      </div>
-      <div id="timer-block" style="display:none; margin-top:7px; padding:6px 10px; background:var(--surf); border-radius:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="section-heading" style="font-size:13px;">Remaining</span>
-          <span class="timer-disp" id="timer-cd" style="font-size:17px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
-        </div>
-      </div>
-      <label class="custom-check-row" style="margin-top:8px;">
-        <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
-        <span class="custom-check-box"></span>
-        <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
-      </label>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span class="session-duration-heading section-heading" style="font-size:16px;">Session Duration</span>
+      <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:3px 9px; border-radius:12px;">Continuous (∞)</span>
     </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
+      <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac);">
+      <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
+    </div>
+    <div id="timer-block" style="display:none; margin-top:8px; padding:8px 12px; background:var(--surf2); border-radius:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="section-heading" style="font-size:13px;">Remaining</span>
+        <span class="timer-disp" id="timer-cd" style="font-size:17px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
+      </div>
+    </div>
+    <label class="custom-check-row" style="margin-top:10px;">
+      <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
+      <span class="custom-check-box"></span>
+      <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
+    </label>
   </div>
 
   <!-- ── UNIFIED M3 CALIBRATE & SETTINGS SCREEN ── -->
@@ -2271,7 +2268,7 @@ body.music-sheet-open .m3-fab,
 
       <div class="notch-compare-row">
         <div class="notch-bw-copy">
-          <span class="notch-bw-label section-heading" style="font-size:13px;">Compare Filter (A/B)</span>
+          <span class="notch-bw-label section-heading">Compare Filter (A/B)</span>
           <span class="notch-bw-sub">Temporarily bypass notch to hear raw audio</span>
         </div>
         <button type="button" class="notch-bypass-btn" id="notch-bypass-btn" onclick="toggleNotchBypass()" aria-pressed="false">Active (Notched)</button>
@@ -2559,6 +2556,45 @@ const geo = (a, b) => Math.round(Math.sqrt(a * b));
 const TNAMES = { sine: 'Pure Tone', sawtooth: 'Hum / Buzz', square: 'High Whistle', noise: 'Static / Hiss' };
 const RANGES = { sine: [300, 12000], sawtooth: [80, 3000], noise: [400, 10000], square: [1000, 12000] };
 const isDark = () => document.documentElement.dataset.theme === 'dark';
+
+function syncSliderFill(el){
+  if(!el || el.type !== 'range') return;
+  const min = parseFloat(el.min);
+  const max = parseFloat(el.max);
+  const val = parseFloat(el.value);
+  const lo = Number.isFinite(min) ? min : 0;
+  const hi = Number.isFinite(max) && max > lo ? max : 100;
+  const cur = Number.isFinite(val) ? Math.max(lo, Math.min(hi, val)) : lo;
+  const pct = ((cur - lo) / (hi - lo)) * 100;
+  el.style.setProperty('--slider-pct', pct.toFixed(2) + '%');
+}
+
+function syncAllSliderFills(){
+  document.querySelectorAll('input[type="range"]').forEach(syncSliderFill);
+}
+
+(function initRangeSliderFillHook(){
+  try{
+    const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    if(desc && desc.get && desc.set){
+      Object.defineProperty(HTMLInputElement.prototype, 'value', {
+        configurable: true,
+        enumerable: desc.enumerable,
+        get: function(){ return desc.get.call(this); },
+        set: function(v){
+          desc.set.call(this, v);
+          if(this.type === 'range') syncSliderFill(this);
+        }
+      });
+    }
+  }catch(e){}
+  document.addEventListener('input', e => {
+    if(e.target && e.target.type === 'range') syncSliderFill(e.target);
+  }, { passive: true });
+  document.addEventListener('change', e => {
+    if(e.target && e.target.type === 'range') syncSliderFill(e.target);
+  }, { passive: true });
+})();
 
 function applyTheme(theme, persist){
   const dark = theme === 'dark';
@@ -7214,6 +7250,7 @@ window.addEventListener('DOMContentLoaded', () => {
   ws.types.right = curR.type;
   renderProfilesUI();
   openTherapy();
+  syncAllSliderFills();
   initTherapyDock();
   syncBatteryProtectionUI();
   document.addEventListener('visibilitychange', () => {
