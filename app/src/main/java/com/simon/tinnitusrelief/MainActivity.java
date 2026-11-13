@@ -1023,6 +1023,18 @@ public class MainActivity extends Activity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent == null) return;
+                if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+                    runOnUiThread(() -> {
+                        if (isPlaybackActive || playbackDesired) {
+                            isPlaybackActive = false;
+                            resumeOnFocusGain = false;
+                            updateWakeLock(false);
+                            abandonAppAudioFocus();
+                            dispatchMediaCommand("pause", -1L);
+                        }
+                    });
+                    return;
+                }
                 int streamType = intent.getIntExtra("android.media.EXTRA_VOLUME_STREAM_TYPE", -1);
                 if (streamType == -1 || streamType == AudioManager.STREAM_MUSIC) {
                     int volPct = getMediaVolumePercent();
@@ -1035,6 +1047,7 @@ public class MainActivity extends Activity {
             }
         };
         IntentFilter filter = new IntentFilter("android.media.VOLUME_CHANGED_ACTION");
+        filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(mediaVolumeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
         } else {

@@ -1696,6 +1696,141 @@ body.music-sheet-open .m3-fab,
   padding: 14px;
   margin-bottom: 12px;
 }
+
+/* ── SETTINGS THERAPY GUIDE DROPDOWN & QUICK LINKS ── */
+.settings-guide-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 2px 0;
+  color: var(--txt);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.settings-guide-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--ab);
+  color: var(--ac);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.settings-guide-chevron {
+  color: var(--txt2);
+  flex-shrink: 0;
+  transition: transform 0.24s ease;
+}
+#settings-guide-card.open .settings-guide-chevron {
+  transform: rotate(180deg);
+}
+.settings-guide-body {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--brd);
+}
+#settings-guide-card.open .settings-guide-body {
+  display: block;
+}
+.guide-summary-box {
+  background: var(--surf2);
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--txt2);
+  margin-bottom: 10px;
+}
+.guide-summary-box strong {
+  color: var(--txt);
+}
+.guide-step-box {
+  background: var(--surf2);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.guide-step-box:last-child {
+  margin-bottom: 0;
+}
+.guide-step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt);
+  margin-bottom: 4px;
+}
+.guide-step-copy {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--txt2);
+}
+.guide-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.guide-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 222, 128, 0.28);
+  background: var(--ab);
+  color: var(--ac);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.guide-link-chip:active {
+  transform: scale(0.96);
+}
+@keyframes cardFlashHighlight {
+  0% { box-shadow: 0 0 0 2px var(--ac), var(--card-elev); }
+  70% { box-shadow: 0 0 0 2px var(--ac), var(--card-elev); }
+  100% { box-shadow: var(--card-elev); }
+}
+.card.guide-highlight {
+  animation: cardFlashHighlight 1.4s ease;
+}
+.notch-compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--brd);
+}
+.notch-bypass-btn {
+  padding: 7px 12px;
+  border-radius: 14px;
+  border: none;
+  background: var(--ab);
+  color: var(--ac);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.notch-bypass-btn.bypassed {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+}
 </style>
 </head>
 <body>
@@ -1861,8 +1996,70 @@ body.music-sheet-open .m3-fab,
 
   <!-- ── UNIFIED M3 CALIBRATE & SETTINGS SCREEN ── -->
   <div class="therapy-source-panel" id="calibrate-card" role="tabpanel" data-therapy-source-panel="calibrate" aria-labelledby="nav-tab-calibrate" hidden>
+    <!-- About Notched Therapy & How to Use Dropdown Card -->
+    <div class="card" id="settings-guide-card">
+      <button type="button" class="settings-guide-toggle" id="settings-guide-btn" onclick="toggleSettingsGuide()" aria-expanded="false" aria-controls="settings-guide-body">
+        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <span class="settings-guide-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </span>
+          <div style="min-width:0;">
+            <div class="section-heading" style="margin:0;">About Notched Therapy &amp; How to Use</div>
+            <div style="font-size:11px; color:var(--txt2); margin-top:2px;">How it helps tinnitus &amp; step-by-step quick links</div>
+          </div>
+        </div>
+        <svg class="settings-guide-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+
+      <div class="settings-guide-body" id="settings-guide-body">
+        <div class="guide-summary-box">
+          <strong>What Notched Sound does:</strong> Tailor-Made Notched Sound Therapy removes a precision frequency band (<code>0.5</code> or <code>1.0</code> octave wide) centred on each ear's calibrated tinnitus frequency while gently lifting the frequencies just outside the notch edges.<br><br>
+          <strong>How it helps tinnitus:</strong> Filtering out your tinnitus pitch rests the overactive neurons tuned to that frequency, while stimulating neighbouring healthy frequencies triggers <em>lateral inhibition</em> in the auditory cortex—gradually reducing ringing loudness over consistent daily sessions (1–2 hours/day with stereo headphones).
+        </div>
+
+        <div class="guide-step-box">
+          <div class="guide-step-title">1. Calibrate Left &amp; Right Ears (Wear Headphones)</div>
+          <div class="guide-step-copy">Match the pitch and perceived loudness separately for each ear. Use the <strong>½× / 2× Octave Check</strong> buttons in Fine Tuning to confirm you haven't matched one octave too high or low.</div>
+          <div class="guide-links-row">
+            <button type="button" class="guide-link-chip" onclick="guideJump('calibrate-both')">Calibrate Both Ears →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('pitch-matcher')">Tone Pitch Matcher →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('left-profile')">Left Ear Profile →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('right-profile')">Right Ear Profile →</button>
+          </div>
+        </div>
+
+        <div class="guide-step-box">
+          <div class="guide-step-title">2. Set Notch Width &amp; Listening Level</div>
+          <div class="guide-step-copy">Open the top-right audio controls to select <strong>1 oct</strong> (for broad/varying pitch) or <strong>0.5 oct</strong> (narrower pure-tone cut), adjust L/R balance, or temporarily bypass the notch to hear what is filtered out. Keep the solid output line near or slightly below the dotted ringing-match line.</div>
+          <div class="guide-links-row">
+            <button type="button" class="guide-link-chip" onclick="guideJump('audio-controls')">Notch &amp; Audio Controls →</button>
+          </div>
+        </div>
+
+        <div class="guide-step-box">
+          <div class="guide-step-title">3. Listen via Soundscapes or Notched Music</div>
+          <div class="guide-step-copy">Stream broadband soundscapes on <strong>Soundscapes</strong> or play your own local audio library through real-time stereo notch filters on <strong>Music</strong>.</div>
+          <div class="guide-links-row">
+            <button type="button" class="guide-link-chip" onclick="guideJump('soundscapes')">Soundscapes →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('music-player')">Music Player →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('music-library')">Open Music Library →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('music-folder')">Music Folder Setup →</button>
+          </div>
+        </div>
+
+        <div class="guide-step-box">
+          <div class="guide-step-title">4. Set Session Duration &amp; Battery Protection</div>
+          <div class="guide-step-copy">Use <strong>Session Duration</strong> with optional 5-minute gentle sleep fade-out, and disable Android battery restrictions so screen-off therapy sessions keep playing uninterrupted.</div>
+          <div class="guide-links-row">
+            <button type="button" class="guide-link-chip" onclick="guideJump('session-timer')">Session Duration →</button>
+            <button type="button" class="guide-link-chip" onclick="guideJump('battery-opt')">Battery Optimisation →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Appearance & System Card -->
-    <div class="card">
+    <div class="card" id="settings-appearance-card">
       <div class="section-heading" style="margin-bottom:10px;">Appearance &amp; System</div>
       <div class="menu-theme-row" style="background:var(--surf2); border:none; border-radius:16px; padding:12px; margin-bottom:10px;">
         <div>
@@ -1885,7 +2082,7 @@ body.music-sheet-open .m3-fab,
     </div>
 
     <!-- Calibration Actions Card -->
-    <div class="card">
+    <div class="card" id="settings-calibration-card">
       <div class="section-heading" style="margin-bottom:10px;">Calibration</div>
       <button type="button" class="btn-main" style="margin-bottom:10px;" onclick="startFullRecalibration()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
@@ -1901,7 +2098,7 @@ body.music-sheet-open .m3-fab,
     </div>
 
     <!-- Left Ear Profiles Card -->
-    <div class="card">
+    <div class="card" id="settings-left-profile-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span class="section-heading" style="color: var(--ac);">Left Ear Profiles</span>
         <span class="saved-toast" id="prof-toast-l" style="margin: 0;">✓ Saved</span>
@@ -1941,7 +2138,7 @@ body.music-sheet-open .m3-fab,
     </div>
 
     <!-- Right Ear Profiles Card -->
-    <div class="card">
+    <div class="card" id="settings-right-profile-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span class="section-heading" style="color: var(--ear-r);">Right Ear Profiles</span>
         <span class="saved-toast" id="prof-toast-r" style="margin: 0;">✓ Saved</span>
@@ -1981,7 +2178,7 @@ body.music-sheet-open .m3-fab,
     </div>
 
     <!-- Music Library & Tags Card -->
-    <div class="card">
+    <div class="card" id="settings-music-folder-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <span class="section-heading">Music Library &amp; Tags</span>
         <span class="saved-toast" id="music-scan-badge" style="margin: 0; display: none;">Indexed</span>
@@ -2065,6 +2262,14 @@ body.music-sheet-open .m3-fab,
             <span class="notch-bw-unit">oct</span>
           </button>
         </div>
+      </div>
+
+      <div class="notch-compare-row">
+        <div class="notch-bw-copy">
+          <span class="notch-bw-label section-heading" style="font-size:13px;">Compare Filter (A/B)</span>
+          <span class="notch-bw-sub">Temporarily bypass notch to hear raw audio</span>
+        </div>
+        <button type="button" class="notch-bypass-btn" id="notch-bypass-btn" onclick="toggleNotchBypass()" aria-pressed="false">Active (Notched)</button>
       </div>
     </div>
 
@@ -2781,6 +2986,8 @@ function currentNotchQ(){
   return notchQForBandwidth(notchBandwidth);
 }
 
+let notchBypassed = false;
+
 // Compute tightly coupled smooth U-notch + flanking edge enhancement + optional HF shelf stages.
 function computeEarFilterStages(freq, bw, sampleRate, includeHighShelf){
   const sr = sampleRate || 48000;
@@ -2788,6 +2995,20 @@ function computeEarFilterStages(freq, bw, sampleRate, includeHighShelf){
   const clampF = f => Math.max(40, Math.min(maxF, f));
   const cFreq = clampF(freq || 7400);
   const width = Number(bw) === 0.5 ? 0.5 : 1.0;
+
+  if(notchBypassed){
+    const bypassStages = [
+      { type: 'peaking', frequency: cFreq, Q: 1, gain: 0 },
+      { type: 'peaking', frequency: cFreq, Q: 1, gain: 0 },
+      { type: 'peaking', frequency: cFreq, Q: 1, gain: 0 },
+      { type: 'peaking', frequency: clampF(cFreq * Math.pow(2, -0.62 * width)), Q: 2.8, gain: 0 },
+      { type: 'peaking', frequency: clampF(cFreq * Math.pow(2, 0.62 * width)), Q: 2.8, gain: 0 }
+    ];
+    if(includeHighShelf){
+      bypassStages.push({ type: 'highshelf', frequency: 4200, Q: 0.707, gain: 0 });
+    }
+    return bypassStages;
+  }
 
   // Tightly coupled 3-stage U-notch: smooth fade-out/fade-in within boundaries,
   // >= 42 dB ripple-free silent floor across the central core around f0.
@@ -2853,6 +3074,7 @@ function updateNotchChainFreq(chain, freq, bw){
   specs.forEach((spec, idx) => {
     const filter = chain.filters[idx];
     if(!filter) return;
+    if(filter.type !== spec.type) filter.type = spec.type;
     setParam(filter.frequency, spec.frequency);
     setParam(filter.Q, spec.Q);
     if(spec.type === 'peaking' || spec.type === 'highshelf'){
@@ -2862,6 +3084,7 @@ function updateNotchChainFreq(chain, freq, bw){
 }
 
 function calculateCombinedNotchDb(freq, centre, bw){
+  if(notchBypassed) return 0;
   const sr = (actx && actx.sampleRate) ? actx.sampleRate : 48000;
   const maxF = Math.max(2000, sr * 0.47);
   const clampF = f => Math.max(40, Math.min(maxF, f));
@@ -2881,6 +3104,26 @@ function calculateCombinedNotchDb(freq, centre, bw){
     magTotal *= Math.abs(diff) / Math.max(1e-9, Math.hypot(diff, damping));
   }
   return Math.max(-60, Math.min(0, 20 * Math.log10(Math.max(1e-4, magTotal))));
+}
+
+function syncNotchBypassUI(){
+  const btn = document.getElementById('notch-bypass-btn');
+  if(!btn) return;
+  btn.classList.toggle('bypassed', notchBypassed);
+  btn.setAttribute('aria-pressed', notchBypassed ? 'true' : 'false');
+  btn.textContent = notchBypassed ? 'Bypassed (Raw Audio)' : 'Active (Notched)';
+}
+
+function setNotchBypass(bypass){
+  notchBypassed = !!bypass;
+  cachedNotchCurves = null;
+  syncNotchBypassUI();
+  applyNotchBandwidthToNodes();
+  drawStaticSpectrum();
+}
+
+function toggleNotchBypass(){
+  setNotchBypass(!notchBypassed);
 }
 
 function syncNotchBandwidthUI(){
@@ -2974,13 +3217,40 @@ function applyMusicGain(){
   if(musicGainR && actx) musicGainR.gain.setTargetAtTime(master * earVolR, now, 0.02);
 }
 
-// ── PROCEDURAL NOISE BUFFERS ──
-function mkNoise(pink){
-  const c = gc(), sz = c.sampleRate * 4, buf = c.createBuffer(1, sz, c.sampleRate), d = buf.getChannelData(0);
-  if(!pink){ for(let i = 0; i < sz; i++) d[i] = Math.random() * 2 - 1; }
-  else {
+// ── PROCEDURAL NOISE BUFFERS (CACHED + SEAMLESS EQUAL-POWER LOOP CROSSFADE) ──
+let cachedNoiseBuffers = { rate: 0, white: null, pink: null, brown: null };
+
+function applyLoopCrossfade(samples, tailSamples){
+  const len = samples.length;
+  const fade = Math.min(tailSamples.length, len);
+  for(let i = 0; i < fade; i++){
+    const t = i / fade;
+    const wIn = Math.sin(t * Math.PI * 0.5);
+    const wOut = Math.cos(t * Math.PI * 0.5);
+    samples[i] = samples[i] * wIn + tailSamples[i] * wOut;
+  }
+}
+
+function buildCachedNoiseBuffer(kind){
+  const c = gc();
+  const sr = c.sampleRate || 48000;
+  if(cachedNoiseBuffers.rate !== sr){
+    cachedNoiseBuffers = { rate: sr, white: null, pink: null, brown: null };
+  }
+  if(cachedNoiseBuffers[kind]) return cachedNoiseBuffers[kind];
+
+  const sz = sr * 4;
+  const fadeLen = Math.min(sz >> 1, Math.floor(sr * 0.25));
+  const buf = c.createBuffer(1, sz, sr);
+  const d = buf.getChannelData(0);
+  const tail = new Float32Array(fadeLen);
+
+  if(kind === 'white'){
+    for(let i = 0; i < sz; i++) d[i] = Math.random() * 2 - 1;
+    for(let i = 0; i < fadeLen; i++) tail[i] = Math.random() * 2 - 1;
+  } else if(kind === 'pink'){
     let p0=0, p1=0, p2=0, p3=0, p4=0, p5=0, p6=0;
-    for(let i = 0; i < sz; i++){
+    const nextPink = () => {
       const w = Math.random() * 2 - 1;
       p0 = .99886*p0 + w*.0555179;
       p1 = .99332*p1 + w*.0750759;
@@ -2988,11 +3258,30 @@ function mkNoise(pink){
       p3 = .8665*p3 + w*.3104856;
       p4 = .55*p4 + w*.5329522;
       p5 = -.7616*p5 - w*.016898;
-      d[i] = (p0+p1+p2+p3+p4+p5+p6 + w*.5362) * .11;
+      const sample = (p0+p1+p2+p3+p4+p5+p6 + w*.5362) * .11;
       p6 = w*.115926;
-    }
+      return sample;
+    };
+    for(let i = 0; i < sz; i++) d[i] = nextPink();
+    for(let i = 0; i < fadeLen; i++) tail[i] = nextPink();
+  } else {
+    let last = 0;
+    const nextBrown = () => {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      return last * 3.5;
+    };
+    for(let i = 0; i < sz; i++) d[i] = nextBrown();
+    for(let i = 0; i < fadeLen; i++) tail[i] = nextBrown();
   }
+
+  applyLoopCrossfade(d, tail);
+  cachedNoiseBuffers[kind] = buf;
   return buf;
+}
+
+function mkNoise(pink){
+  return buildCachedNoiseBuffer(pink ? 'pink' : 'white');
 }
 
 // High-frequency therapeutic shimmer layer so low-frequency nature soundscapes
@@ -3051,12 +3340,9 @@ function srcWind(c){
   return { _n: ns, output: out };
 }
 function srcBrown(c){
-  const sz = c.sampleRate * 4, buf = c.createBuffer(1, sz, c.sampleRate), d = buf.getChannelData(0);
-  let last = 0;
-  for(let i = 0; i < sz; i++){ const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
   const src = c.createBufferSource(), out = c.createGain();
   out.gain.value = 0.80;
-  src.buffer = buf; src.loop = true; src.connect(out); src.start();
+  src.buffer = buildCachedNoiseBuffer('brown'); src.loop = true; src.connect(out); src.start();
   const ns = [src, out];
   addHighFreqTherapyShimmer(c, out, ns, 0.22);
   return { _n: ns, output: out };
@@ -3374,6 +3660,7 @@ let therapySourceTab = 'ambient';
 function openAudioControlsSheet(){
   closeMusicLibrarySheet();
   syncNativeMediaVolume();
+  syncNotchBypassUI();
   updateStickyOffsets();
   document.body.classList.add('audio-sheet-open');
   const sheet = document.getElementById('audio-controls-sheet');
@@ -3384,11 +3671,78 @@ function openAudioControlsSheet(){
 }
 
 function closeAudioControlsSheet(){
+  if(notchBypassed){
+    setNotchBypass(false);
+  }
   document.body.classList.remove('audio-sheet-open');
   const sheet = document.getElementById('audio-controls-sheet');
   if(sheet){
     sheet.classList.remove('open');
     sheet.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function toggleSettingsGuide(forceOpen){
+  const card = document.getElementById('settings-guide-card');
+  const btn = document.getElementById('settings-guide-btn');
+  if(!card) return;
+  const next = typeof forceOpen === 'boolean' ? forceOpen : !card.classList.contains('open');
+  card.classList.toggle('open', next);
+  if(btn) btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+}
+
+function flashGuideTarget(el){
+  if(!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('guide-highlight');
+  void el.offsetWidth;
+  el.classList.add('guide-highlight');
+  setTimeout(() => el.classList.remove('guide-highlight'), 1500);
+}
+
+function guideJump(target){
+  if(target === 'calibrate-both'){
+    startFullRecalibration();
+    return;
+  }
+  if(target === 'pitch-matcher'){
+    openPitchMatcher();
+    return;
+  }
+  if(target === 'audio-controls'){
+    setTherapySourceTab('ambient', true);
+    requestAnimationFrame(() => openAudioControlsSheet());
+    return;
+  }
+  if(target === 'left-profile' || target === 'right-profile' || target === 'music-folder' || target === 'battery-opt'){
+    setTherapySourceTab('calibrate', true);
+    const idMap = {
+      'left-profile': 'settings-left-profile-card',
+      'right-profile': 'settings-right-profile-card',
+      'music-folder': 'settings-music-folder-card',
+      'battery-opt': 'settings-appearance-card'
+    };
+    requestAnimationFrame(() => flashGuideTarget(document.getElementById(idMap[target])));
+    return;
+  }
+  if(target === 'soundscapes'){
+    setTherapySourceTab('ambient', true);
+    requestAnimationFrame(() => flashGuideTarget(document.getElementById('th-card')));
+    return;
+  }
+  if(target === 'music-player'){
+    setTherapySourceTab('music', true);
+    requestAnimationFrame(() => flashGuideTarget(document.getElementById('music-card')));
+    return;
+  }
+  if(target === 'music-library'){
+    setTherapySourceTab('music', true);
+    requestAnimationFrame(() => openMusicLibrarySheet());
+    return;
+  }
+  if(target === 'session-timer'){
+    if(therapySourceTab === 'calibrate') setTherapySourceTab('ambient', true);
+    requestAnimationFrame(() => flashGuideTarget(document.getElementById('session-duration-card')));
   }
 }
 
@@ -3785,7 +4139,34 @@ function toggleTherapy(){
 }
 
 // ── TIMERS (SLIDER 0 - 12 HOURS) ──
+const SESSION_TIMER_PREF_KEY = 'tr_session_timer_pref_v1';
 let timerMins = 0, timerSecs = 0, timerInterval = null, timerEndMs = 0;
+
+function saveSessionTimerPrefs(){
+  try{
+    const fadeCb = document.getElementById('sleep-fade');
+    localStorage.setItem(SESSION_TIMER_PREF_KEY, JSON.stringify({
+      mins: Math.max(0, Math.min(720, parseInt(timerMins, 10) || 0)),
+      sleepFade: !!(fadeCb && fadeCb.checked)
+    }));
+  }catch(e){}
+}
+
+function loadSessionTimerPrefs(){
+  try{
+    const raw = localStorage.getItem(SESSION_TIMER_PREF_KEY);
+    if(!raw) return;
+    const pref = JSON.parse(raw);
+    if(pref && Number.isFinite(Number(pref.mins))){
+      timerMins = Math.max(0, Math.min(720, parseInt(pref.mins, 10) || 0));
+    }
+    const fadeCb = document.getElementById('sleep-fade');
+    if(fadeCb && typeof pref.sleepFade === 'boolean'){
+      fadeCb.checked = pref.sleepFade;
+    }
+    syncSessionTimerUI();
+  }catch(e){}
+}
 
 function fmtTimerDuration(mins){
   mins = parseInt(mins, 10) || 0;
@@ -3802,6 +4183,7 @@ function onSessionTimerSlider(val){
   timerMins = mins;
   const disp = document.getElementById('session-timer-disp');
   if(disp) disp.textContent = fmtTimerDuration(mins);
+  saveSessionTimerPrefs();
 
   if(isAnyPlaybackActive()){
     startTimerIfConfigured();
@@ -3859,6 +4241,7 @@ function stopTimerIfNoPlayback(){
 }
 
 function checkSleepFade(cb){
+  saveSessionTimerPrefs();
   if(!cb || !cb.checked){
     setPlaybackFade(1);
   } else if(timerInterval && timerSecs > 0 && timerSecs <= 300){
@@ -5153,6 +5536,7 @@ function pauseForAudioFocus(){
   stopEarTone();
   if(lastMediaSource === 'music' && musicAudioEl && isMusicAudioPlaying()){
     audioFocusPauseSource = 'music';
+    saveLastMusicState(true);
     try{ musicAudioEl.pause(); }catch(e){}
     isMusicPlaying = false;
     lastMediaSource = 'music';
@@ -5432,6 +5816,7 @@ function onMusicLibraryLoaded(library, folderName, isFreshScan){
   const banner = document.getElementById('music-scan-banner');
   if(banner) banner.style.display = 'none';
 
+  restoreLastMusicState();
   navToArtists();
 }
 
@@ -5993,6 +6378,85 @@ function navToAlbum(aIdx, albIdx){
   container.innerHTML = htmlStr;
 }
 
+// ── LAST TRACK PERSISTENCE & RESUME ──
+const LAST_MUSIC_STATE_KEY = 'tr_last_music_state_v1';
+let pendingResumeTrackId = null;
+let pendingResumeSeekSec = 0;
+let lastMusicSaveAtMs = 0;
+
+function updateNowPlayingArt(trackId){
+  const el = document.getElementById('now-track-art');
+  if(!el) return;
+  const svgFallback = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+  if(!trackId){
+    el.innerHTML = svgFallback;
+    return;
+  }
+  const src = 'https://tinnitus.local/album_art?uri=' + encodeURIComponent(trackId) + '&size=112';
+  el.innerHTML = svgFallback + '<img src="' + src + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.remove()">';
+  el.style.position = 'relative';
+}
+
+function saveLastMusicState(force){
+  const track = currentQueueIndex >= 0 && currentQueueIndex < musicQueue.length ? musicQueue[currentQueueIndex] : null;
+  if(!track || !track.id) return;
+  const now = Date.now();
+  if(!force && now - lastMusicSaveAtMs < 10000) return;
+  lastMusicSaveAtMs = now;
+  const posSec = (musicAudioEl && musicAudioEl.src && Number.isFinite(musicAudioEl.currentTime))
+    ? Math.max(0, Math.floor(musicAudioEl.currentTime))
+    : (pendingResumeTrackId === track.id ? pendingResumeSeekSec : 0);
+  try{
+    localStorage.setItem(LAST_MUSIC_STATE_KEY, JSON.stringify({
+      trackId: String(track.id),
+      positionSec: posSec
+    }));
+  }catch(e){}
+}
+
+function restoreLastMusicState(){
+  if(musicQueue.length > 0 || !Array.isArray(musicLibrary) || musicLibrary.length === 0) return;
+  try{
+    const raw = localStorage.getItem(LAST_MUSIC_STATE_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    if(!saved || !saved.trackId) return;
+
+    for(let a = 0; a < musicLibrary.length; a++){
+      const art = musicLibrary[a];
+      const albums = (art && art.albums) || [];
+      for(let b = 0; b < albums.length; b++){
+        const alb = albums[b];
+        const tracks = (alb && alb.tracks) || [];
+        const tIdx = tracks.findIndex(t => t && String(t.id) === String(saved.trackId));
+        if(tIdx >= 0){
+          musicQueue = [...tracks];
+          currentQueueIndex = tIdx;
+          const track = tracks[tIdx];
+          const durSec = Number(track.duration) > 10000 ? Math.floor(Number(track.duration) / 1000) : Math.floor(Number(track.duration) || 0);
+          const posSec = Math.max(0, Math.min(durSec > 2 ? durSec - 1 : 0, Math.floor(Number(saved.positionSec) || 0)));
+          pendingResumeTrackId = track.id;
+          pendingResumeSeekSec = posSec;
+
+          const tTitle = document.getElementById('now-track-title');
+          if(tTitle) tTitle.textContent = track.title || 'Unknown Title';
+          const tSub = document.getElementById('now-track-sub');
+          if(tSub) tSub.textContent = (track.artist || 'Unknown Artist') + ' • ' + (track.album || 'Unknown Album');
+          updateNowPlayingArt(track.id);
+
+          const curDisp = document.getElementById('music-time-cur');
+          if(curDisp) curDisp.textContent = fmtDuration(posSec);
+          const durDisp = document.getElementById('music-time-dur');
+          if(durDisp && durSec > 0) durDisp.textContent = fmtDuration(durSec);
+          const scrubber = document.getElementById('music-scrubber');
+          if(scrubber && durSec > 0) scrubber.value = Math.floor((posSec / durSec) * 100);
+          return;
+        }
+      }
+    }
+  }catch(e){}
+}
+
 // ── PLAYBACK TRIGGERING ──
 function playAllArtistTracks(aIdx){
   const art = musicLibrary[aIdx];
@@ -6030,6 +6494,11 @@ async function startPlayingQueueIndex(idx){
   const track = musicQueue[currentQueueIndex];
   if(!track) return;
   const loadToken = ++musicLoadToken;
+  const seekSec = (pendingResumeTrackId && String(pendingResumeTrackId) === String(track.id) && pendingResumeSeekSec > 1)
+    ? pendingResumeSeekSec
+    : 0;
+  pendingResumeTrackId = null;
+  pendingResumeSeekSec = 0;
   audioFocusPauseSource = null;
 
   initMusicAudioGraph();
@@ -6046,6 +6515,7 @@ async function startPlayingQueueIndex(idx){
 
   const tSub = document.getElementById('now-track-sub');
   if(tSub) tSub.textContent = 'Loading • ' + (track.artist || 'Unknown Artist') + ' • ' + (track.album || 'Unknown Album');
+  updateNowPlayingArt(track.id);
 
   isMusicPlaying = false;
   updateMusicPlayButton(false);
@@ -6070,6 +6540,9 @@ async function startPlayingQueueIndex(idx){
 
     await musicAudioEl.play();
     if(loadToken !== musicLoadToken) return;
+    if(seekSec > 0 && Number.isFinite(musicAudioEl.duration) && musicAudioEl.duration > seekSec + 1){
+      try{ musicAudioEl.currentTime = seekSec; }catch(e){}
+    }
 
     isMusicPlaying = true;
     lastMediaSource = 'music';
@@ -6079,6 +6552,7 @@ async function startPlayingQueueIndex(idx){
     updateSpectrumBadge('Music (Notched)');
     startTimerIfConfigured();
     if(tSub) tSub.textContent = (track.artist || 'Unknown Artist') + ' • ' + (track.album || 'Unknown Album');
+    saveLastMusicState(true);
     syncNativeMediaSession(true);
   }catch(e){
     console.warn('Audio play failed:', e);
@@ -6109,12 +6583,13 @@ function onMusicAudioError(){
 function toggleMusicPlay(){
   if(!musicAudioEl || !musicAudioEl.src){
     if(musicQueue.length > 0){
-      startPlayingQueueIndex(0);
+      const idx = currentQueueIndex >= 0 && currentQueueIndex < musicQueue.length ? currentQueueIndex : 0;
+      startPlayingQueueIndex(idx);
     } else if(musicLibrary.length > 0 && musicLibrary[0].albums && musicLibrary[0].albums[0] && musicLibrary[0].albums[0].tracks && musicLibrary[0].albums[0].tracks.length > 0){
       musicQueue = [...musicLibrary[0].albums[0].tracks];
       startPlayingQueueIndex(0);
     } else {
-      openMenu();
+      openMusicLibrarySheet();
     }
     return;
   }
@@ -6124,6 +6599,7 @@ function toggleMusicPlay(){
   if(c && c.state === 'suspended') c.resume();
 
   if(isMusicAudioPlaying()){
+    saveLastMusicState(true);
     musicAudioEl.pause();
     isMusicPlaying = false;
     lastMediaSource = 'music';
@@ -6219,6 +6695,7 @@ function toggleRepeat(){
 }
 
 function onMusicTimeUpdate(){
+  saveLastMusicState(false);
   if(document.hidden || !musicAudioEl) return;
   const cur = musicAudioEl.currentTime || 0;
   const dur = musicAudioEl.duration || 0;
@@ -6239,6 +6716,7 @@ function onMusicSeek(percent){
   if(!musicAudioEl || !musicAudioEl.duration) return;
   const target = (percent / 100) * musicAudioEl.duration;
   musicAudioEl.currentTime = target;
+  saveLastMusicState(true);
   syncNativeMediaSession(true);
 }
 
@@ -6669,6 +7147,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadSoundVols();
   loadRingingVols();
   loadTherapySettings();
+  loadSessionTimerPrefs();
   loadTherapySourceTab();
   const curL = getActiveEarProfile('left');
   const curR = getActiveEarProfile('right');
