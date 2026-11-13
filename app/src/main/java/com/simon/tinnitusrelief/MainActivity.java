@@ -890,22 +890,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (webView != null) {
+        if (webView != null && !isPlaybackActive && !playbackDesired) {
             webView.onPause();
-            if (!isPlaybackActive) {
-                webView.pauseTimers();
-            }
+            webView.pauseTimers();
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (webView != null) {
+        if (webView != null && !isPlaybackActive && !playbackDesired) {
             webView.onPause();
-            if (!isPlaybackActive) {
-                webView.pauseTimers();
-            }
+            webView.pauseTimers();
         }
     }
 

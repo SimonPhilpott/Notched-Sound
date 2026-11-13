@@ -1000,6 +1000,7 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   font-weight: normal;
   color: var(--txt);
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 .custom-check-row {
   display: flex;
@@ -1846,7 +1847,6 @@ body.music-sheet-open .m3-fab,
       <div class="ey" style="margin: 0; line-height: 1.2; text-align: left;">Tinnitus Relief</div>
       <h1 class="top-title" style="font-size:28px;">Notched Sound</h1>
     </div>
-    <span class="m3-status-chip" id="spectrum-source-badge">Idle</span>
     <button type="button" class="m3-icon-btn tonal" id="btn-open-controls-sheet" onclick="openAudioControlsSheet()" aria-label="Notch &amp; Audio Controls" title="Notch &amp; Audio Controls">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
     </button>
@@ -2992,7 +2992,8 @@ function suspendAudioIfIdle(){
     || (typeof compNode !== 'undefined' && compNode)
     || (typeof charPrevNode !== 'undefined' && charPrevNode);
   const micActive = typeof pmListening !== 'undefined' && pmListening;
-  if(therapy.playing || musicActive || fineActive || adjActive || earToneActive || previewActive || micActive){
+  const musicLoadingActive = typeof isMusicLoading !== 'undefined' && isMusicLoading;
+  if(therapy.playing || musicActive || musicLoadingActive || fineActive || adjActive || earToneActive || previewActive || micActive){
     return;
   }
   actx.suspend().catch(e => console.warn('AudioContext suspend:', e));
@@ -4198,18 +4199,6 @@ function toggleTherapy(){
   }
   therapy.playing = !therapy.playing;
   if(therapy.playing) audioFocusPauseSource = null;
-  const badge = document.getElementById('spectrum-source-badge');
-  if(badge){
-    if(therapy.playing){
-      badge.textContent = 'Therapy Soundscape';
-      badge.style.background = 'var(--ab)';
-      badge.style.color = 'var(--ac)';
-    } else {
-      badge.textContent = 'Idle';
-      badge.style.background = 'var(--surf2)';
-      badge.style.color = 'var(--txt2)';
-    }
-  }
   try{ if(window.AndroidBridge && window.AndroidBridge.setTherapyActive) window.AndroidBridge.setTherapyActive(therapy.playing); }catch(e){}
 
   const tc = document.getElementById('th-card');
@@ -4621,15 +4610,7 @@ function drawStaticSpectrum(){
   drawVolumeLines(ctx, W, H, dk);
 }
 
-function updateSpectrumBadge(text){
-  const badge = document.getElementById('spectrum-source-badge');
-  if(!badge) return;
-  const label = text || 'Idle';
-  const active = label !== 'Idle' && label !== 'Paused';
-  badge.textContent = label;
-  badge.style.background = active ? 'var(--ab)' : 'var(--surf2)';
-  badge.style.color = active ? 'var(--ac)' : 'var(--txt2)';
-}
+function updateSpectrumBadge(){}
 
 let lastSpectrumDrawMs = 0;
 function startDrawLoop(){
@@ -5399,6 +5380,7 @@ let isShuffle = false;
 let isRepeat = false;
 let musicBlobUrl = null;
 let musicLoadToken = 0;
+let isMusicLoading = false;
 let nativeMediaAvailable = false;
 let lastMediaSource = 'soundscape';
 let lastNativeMediaSyncAt = 0;
@@ -5493,6 +5475,7 @@ function isMusicAudioPlaying(){
 function onMusicPlaybackStateChanged(){
   if(!musicAudioEl) return;
   const playing = isMusicAudioPlaying();
+  if(!playing && isMusicLoading) return;
   isMusicPlaying = playing;
   updateMusicPlayButton(playing);
   if(playing){
@@ -6408,6 +6391,13 @@ function navToArtist(aIdx){
   if(scroll) scroll.scrollTop = 0;
 
   const albums = art.albums || [];
+  if(!isMusicAudioPlaying() && !isMusicLoading){
+    const artistTracks = [];
+    albums.forEach(alb => {
+      (alb.tracks || []).forEach(t => artistTracks.push(t));
+    });
+    if(artistTracks.length > 0) queueTracksForDeck(artistTracks, 0);
+  }
   let htmlStr = '<button type="button" class="music-play-header-btn" onclick="playAllArtistTracks(' + aIdx + ')">' +
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>' +
     'PLAY ALL ' + escapeHtml(art.artist).toUpperCase() + ' TRACKS</button>';
@@ -6427,7 +6417,7 @@ function navToArtist(aIdx){
   container.innerHTML = htmlStr;
 }
 
-function navToAlbum(aIdx, albIdx){
+function navToAlbum(aIdx, albIdx, keepDeck){
   currentArtistIndex = aIdx;
   currentAlbumIndex = albIdx;
   hideAlphaIndex();
@@ -6450,6 +6440,9 @@ function navToAlbum(aIdx, albIdx){
   if(scroll) scroll.scrollTop = 0;
 
   const tracks = alb.tracks || [];
+  if(!keepDeck && !isMusicAudioPlaying() && !isMusicLoading && tracks.length > 0){
+    queueTracksForDeck(tracks, 0);
+  }
   const albumArtTrackId = firstTrackIdForAlbum(alb);
   let htmlStr = '<button type="button" class="music-play-header-btn" onclick="playAlbumTracks(' + aIdx + ', ' + albIdx + ')">' +
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>' +
@@ -6551,6 +6544,40 @@ function restoreLastMusicState(){
 }
 
 // ── PLAYBACK TRIGGERING ──
+function clearLoadedMusicSource(){
+  if(musicBlobUrl){
+    try{ URL.revokeObjectURL(musicBlobUrl); }catch(e){}
+    musicBlobUrl = null;
+  }
+  if(musicAudioEl){
+    try{ musicAudioEl.pause(); }catch(e){}
+    musicAudioEl.removeAttribute('src');
+  }
+}
+
+function queueTracksForDeck(tracks, idx){
+  if(!Array.isArray(tracks) || tracks.length === 0) return;
+  musicQueue = [...tracks];
+  currentQueueIndex = (idx >= 0 && idx < musicQueue.length) ? idx : 0;
+  const track = musicQueue[currentQueueIndex];
+  if(!track) return;
+  if(!isMusicAudioPlaying()){
+    clearLoadedMusicSource();
+    const durSec = Number(track.duration) > 10000 ? Math.floor(Number(track.duration) / 1000) : Math.floor(Number(track.duration) || 0);
+    const tTitle = document.getElementById('now-track-title');
+    if(tTitle) tTitle.textContent = track.title || 'Unknown Title';
+    const tSub = document.getElementById('now-track-sub');
+    if(tSub) tSub.textContent = (track.artist || 'Unknown Artist') + ' • ' + (track.album || 'Unknown Album');
+    updateNowPlayingArt(track.id);
+    const curDisp = document.getElementById('music-time-cur');
+    if(curDisp) curDisp.textContent = '00:00';
+    const durDisp = document.getElementById('music-time-dur');
+    if(durDisp) durDisp.textContent = durSec > 0 ? fmtDuration(durSec) : '00:00';
+    const scrubber = document.getElementById('music-scrubber');
+    if(scrubber) scrubber.value = 0;
+  }
+}
+
 function playAllArtistTracks(aIdx){
   const art = musicLibrary[aIdx];
   if(!art) return;
@@ -6560,6 +6587,7 @@ function playAllArtistTracks(aIdx){
   });
   if(list.length === 0) return;
   musicQueue = list;
+  closeMusicLibrarySheet();
   startPlayingQueueIndex(0);
 }
 
@@ -6569,6 +6597,7 @@ function playAlbumTracks(aIdx, albIdx){
   const alb = (art.albums || [])[albIdx];
   if(!alb || !alb.tracks || alb.tracks.length === 0) return;
   musicQueue = [...alb.tracks];
+  closeMusicLibrarySheet();
   startPlayingQueueIndex(0);
 }
 
@@ -6578,6 +6607,7 @@ function playTrackFromAlbum(aIdx, albIdx, tIdx){
   const alb = (art.albums || [])[albIdx];
   if(!alb || !alb.tracks) return;
   musicQueue = [...alb.tracks];
+  closeMusicLibrarySheet();
   startPlayingQueueIndex(tIdx);
 }
 
@@ -6593,15 +6623,20 @@ async function startPlayingQueueIndex(idx){
   pendingResumeTrackId = null;
   pendingResumeSeekSec = 0;
   audioFocusPauseSource = null;
+  isMusicLoading = true;
 
-  initMusicAudioGraph();
-  const c = gc();
-  if(c && c.state === 'suspended') c.resume();
-
-  // If therapy is active, stop it so music takes focus
+  // Stop ambient soundscape before initialising/resuming music audio bus so
+  // stopThAudio() cannot suspend AudioContext while music loads.
   if(therapy.playing){
     toggleTherapy();
   }
+
+  initMusicAudioGraph();
+  const c = ensureMasterAudioBus();
+  if(c && c.state === 'suspended'){
+    try{ await c.resume(); }catch(e){}
+  }
+  if(loadToken !== musicLoadToken) return;
 
   const tTitle = document.getElementById('now-track-title');
   if(tTitle) tTitle.textContent = track.title || 'Unknown Title';
@@ -6619,20 +6654,36 @@ async function startPlayingQueueIndex(idx){
   // shouldInterceptRequest, while fetch() is handled reliably.
   const streamUrl = 'https://tinnitus.local/music_stream?uri=' + encodeURIComponent(track.id);
   try{
-    const response = await fetch(streamUrl, { method: 'GET', cache: 'no-store' });
-    if(!response.ok) throw new Error('HTTP ' + response.status);
-    const blob = await response.blob();
-    if(blob.size === 0) throw new Error('The audio file is empty or unreadable.');
-    if(loadToken !== musicLoadToken) return;
-
     const oldBlobUrl = musicBlobUrl;
-    musicBlobUrl = URL.createObjectURL(blob);
-    musicAudioEl.src = musicBlobUrl;
+    let nextSrc = streamUrl;
+    let nextBlobUrl = null;
+    try{
+      const response = await fetch(streamUrl, { method: 'GET', cache: 'no-store' });
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      const blob = await response.blob();
+      if(blob.size === 0) throw new Error('The audio file is empty or unreadable.');
+      if(loadToken !== musicLoadToken) return;
+      nextBlobUrl = URL.createObjectURL(blob);
+      nextSrc = nextBlobUrl;
+    }catch(fetchErr){
+      if(loadToken !== musicLoadToken) return;
+      console.warn('Music fetch fallback to direct stream:', fetchErr);
+    }
+
+    musicBlobUrl = nextBlobUrl;
+    musicAudioEl.src = nextSrc;
     musicAudioEl.load();
     if(oldBlobUrl) URL.revokeObjectURL(oldBlobUrl);
 
+    const cReady = ensureMasterAudioBus();
+    if(cReady && cReady.state === 'suspended'){
+      try{ await cReady.resume(); }catch(e){}
+    }
+    applyMusicGain();
+
     await musicAudioEl.play();
     if(loadToken !== musicLoadToken) return;
+    isMusicLoading = false;
     if(seekSec > 0 && Number.isFinite(musicAudioEl.duration) && musicAudioEl.duration > seekSec + 1){
       try{ musicAudioEl.currentTime = seekSec; }catch(e){}
     }
@@ -6650,6 +6701,7 @@ async function startPlayingQueueIndex(idx){
   }catch(e){
     console.warn('Audio play failed:', e);
     if(loadToken !== musicLoadToken) return;
+    isMusicLoading = false;
     isMusicPlaying = false;
     updateMusicPlayButton(false);
     if(tSub) tSub.textContent = 'Playback failed • ' + (e && e.message ? e.message : 'Track could not be opened');
@@ -6673,11 +6725,27 @@ function onMusicAudioError(){
   syncNativeMediaSession(true);
 }
 
+function hasLoadedMusicSource(){
+  return !!(musicAudioEl && (musicBlobUrl || musicAudioEl.getAttribute('src')) && !musicAudioEl.error);
+}
+
 function toggleMusicPlay(){
-  if(!musicAudioEl || !musicAudioEl.src){
+  if(!hasLoadedMusicSource()){
     if(musicQueue.length > 0){
       const idx = currentQueueIndex >= 0 && currentQueueIndex < musicQueue.length ? currentQueueIndex : 0;
       startPlayingQueueIndex(idx);
+    } else if(currentArtistIndex >= 0 && musicLibrary[currentArtistIndex]){
+      const art = musicLibrary[currentArtistIndex];
+      const alb = (currentAlbumIndex >= 0 && art.albums && art.albums[currentAlbumIndex]) ? art.albums[currentAlbumIndex] : null;
+      const list = alb && alb.tracks && alb.tracks.length > 0
+        ? [...alb.tracks]
+        : (art.albums || []).flatMap(a => a.tracks || []);
+      if(list.length > 0){
+        musicQueue = list;
+        startPlayingQueueIndex(0);
+      } else {
+        openMusicLibrarySheet();
+      }
     } else if(musicLibrary.length > 0 && musicLibrary[0].albums && musicLibrary[0].albums[0] && musicLibrary[0].albums[0].tracks && musicLibrary[0].albums[0].tracks.length > 0){
       musicQueue = [...musicLibrary[0].albums[0].tracks];
       startPlayingQueueIndex(0);
@@ -6686,10 +6754,6 @@ function toggleMusicPlay(){
     }
     return;
   }
-
-  initMusicAudioGraph();
-  const c = gc();
-  if(c && c.state === 'suspended') c.resume();
 
   if(isMusicAudioPlaying()){
     saveLastMusicState(true);
@@ -6706,6 +6770,13 @@ function toggleMusicPlay(){
     }
     syncNativeMediaSession(true);
   } else {
+    if(therapy.playing){
+      toggleTherapy();
+    }
+    initMusicAudioGraph();
+    const c = ensureMasterAudioBus();
+    if(c && c.state === 'suspended') c.resume().catch(e => console.warn('AudioContext resume:', e));
+    applyMusicGain();
     audioFocusPauseSource = null;
     musicAudioEl.play().then(() => {
       isMusicPlaying = true;
@@ -6718,6 +6789,11 @@ function toggleMusicPlay(){
       syncNativeMediaSession(true);
     }).catch(e => {
       console.warn('Resume music playback failed:', e);
+      if(musicQueue.length > 0){
+        const idx = currentQueueIndex >= 0 && currentQueueIndex < musicQueue.length ? currentQueueIndex : 0;
+        startPlayingQueueIndex(idx);
+        return;
+      }
       isMusicPlaying = false;
       updateMusicPlayButton(false);
       stopTimerIfNoPlayback();
@@ -6829,7 +6905,7 @@ function refreshTrackHighlight(){
   const rows = document.querySelectorAll('.music-item-row');
   rows.forEach(r => r.classList.remove('playing'));
   if(currentArtistIndex >= 0 && currentAlbumIndex >= 0){
-    navToAlbum(currentArtistIndex, currentAlbumIndex);
+    navToAlbum(currentArtistIndex, currentAlbumIndex, true);
   }
 }
 
