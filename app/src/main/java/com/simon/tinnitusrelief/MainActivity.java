@@ -55,7 +55,6 @@ public class MainActivity extends Activity {
     private static final int REQUEST_CODE_RECORD_AUDIO = 1002;
 
     private WebView webView;
-    private PowerManager.WakeLock therapyWakeLock;
     private MediaSession mediaSession;
     private String mediaMetadataSignature;
     private AudioManager audioManager;
@@ -67,6 +66,8 @@ public class MainActivity extends Activity {
     private PermissionRequest pendingWebPermissionRequest;
     private boolean batteryPromptShownThisLaunch = false;
     private boolean isPlaybackActive = false;
+    private boolean playbackServiceRunning = false;
+    private String lastServiceSignature = "";
     private String lastNotificationTitle = "Notched Sound Therapy";
     private String lastNotificationSubtitle = "Playing in background";
     private final LruCache<String, byte[]> albumArtCache = new LruCache<String, byte[]>(2 * 1024 * 1024) {
@@ -80,15 +81,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (powerManager != null) {
-            therapyWakeLock = powerManager.newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK,
-                    "TinnitusRelief:TherapyAudioWakeLock"
-            );
-            therapyWakeLock.setReferenceCounted(false);
-        }
 
         indexManager = MusicIndexManager.getInstance(this);
 
@@ -512,17 +504,27 @@ public class MainActivity extends Activity {
 
     private void updateWakeLock(boolean active) {
         isPlaybackActive = active;
-        if (active) {
-            TherapyPlaybackService.startPlaybackService(this, lastNotificationTitle, lastNotificationSubtitle);
-        } else {
-            TherapyPlaybackService.stopPlaybackService(this);
-        }
+        syncPlaybackService(active, lastNotificationTitle, lastNotificationSubtitle);
+    }
 
-        if (therapyWakeLock == null) return;
-        if (active && !therapyWakeLock.isHeld()) {
-            therapyWakeLock.acquire(12 * 60 * 60 * 1000L); // Max 12 hours safety timeout
-        } else if (!active && therapyWakeLock.isHeld()) {
-            therapyWakeLock.release();
+    private void syncPlaybackService(boolean active, String title, String subtitle) {
+        String safeTitle = cleanMediaText(title, "Notched Sound Therapy");
+        String safeSubtitle = cleanMediaText(subtitle, "Playing in background");
+        String signature = safeTitle + "\u0000" + safeSubtitle;
+
+        if (active) {
+            if (!playbackServiceRunning) {
+                playbackServiceRunning = true;
+                lastServiceSignature = signature;
+                TherapyPlaybackService.startPlaybackService(this, safeTitle, safeSubtitle);
+            } else if (!signature.equals(lastServiceSignature)) {
+                lastServiceSignature = signature;
+                TherapyPlaybackService.updatePlaybackService(this, safeTitle, safeSubtitle);
+            }
+        } else if (playbackServiceRunning) {
+            playbackServiceRunning = false;
+            lastServiceSignature = "";
+            TherapyPlaybackService.stopPlaybackService(this);
         }
     }
 
@@ -601,6 +603,10 @@ public class MainActivity extends Activity {
     private void dispatchMediaCommand(String command, long positionMs) {
         runOnUiThread(() -> {
             if (webView == null) return;
+            if ("play".equals(command) || "next".equals(command) || "previous".equals(command)) {
+                webView.onResume();
+                webView.resumeTimers();
+            }
             String script = "if(typeof onNativeMediaCommand==='function')"
                     + " onNativeMediaCommand('" + command + "', " + positionMs + ");";
             webView.evaluateJavascript(script, null);
@@ -620,8 +626,7 @@ public class MainActivity extends Activity {
         if (!activeSession) {
             mediaSession.setPlaybackState(buildPlaybackState(false, false, 0L));
             isPlaybackActive = false;
-            updateWakeLock(false);
-            TherapyPlaybackService.stopPlaybackService(this);
+            syncPlaybackService(false, lastNotificationTitle, lastNotificationSubtitle);
             return;
         }
 
@@ -638,12 +643,7 @@ public class MainActivity extends Activity {
         if (playing && !playbackDesired) {
             abandonAppAudioFocus();
         }
-        updateWakeLock(playing || playbackDesired);
-        if (playing) {
-            TherapyPlaybackService.updatePlaybackService(this, safeTitle, safeArtist);
-        } else {
-            TherapyPlaybackService.stopPlaybackService(this);
-        }
+        syncPlaybackService(playing || playbackDesired, safeTitle, safeArtist);
 
         String signature = safeTitle + "\u0000" + safeArtist + "\u0000" + safeAlbum
                 + "\u0000" + safeDuration;
@@ -876,6 +876,7 @@ public class MainActivity extends Activity {
         super.onPause();
         if (!isPlaybackActive && webView != null) {
             webView.onPause();
+            webView.pauseTimers();
         }
     }
 
@@ -884,6 +885,7 @@ public class MainActivity extends Activity {
         super.onStop();
         if (!isPlaybackActive && webView != null) {
             webView.onPause();
+            webView.pauseTimers();
         }
     }
 
@@ -892,6 +894,7 @@ public class MainActivity extends Activity {
         super.onResume();
         if (webView != null) {
             webView.onResume();
+            webView.resumeTimers();
         }
         // When returning to app from background or another app, immediately sync progress state
         if (indexManager != null && webView != null) {
@@ -970,12 +973,10 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         abandonAppAudioFocus();
+        playbackServiceRunning = false;
         TherapyPlaybackService.stopPlaybackService(this);
         if (indexManager != null && scanListener != null) {
             indexManager.removeListener(scanListener);
-        }
-        if (therapyWakeLock != null && therapyWakeLock.isHeld()) {
-            therapyWakeLock.release();
         }
         if (mediaSession != null) {
             mediaSession.setActive(false);

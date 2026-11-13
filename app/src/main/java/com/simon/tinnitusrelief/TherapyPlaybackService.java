@@ -28,6 +28,7 @@ public class TherapyPlaybackService extends Service {
 
     private NotificationManager notificationManager;
     private PowerManager.WakeLock serviceWakeLock;
+    private boolean isForeground = false;
     private String currentTitle = "Notched Sound Therapy";
     private String currentSubtitle = "Playing in background";
 
@@ -78,25 +79,42 @@ public class TherapyPlaybackService extends Service {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
-        acquireServiceWakeLock();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            String action = intent.getAction();
-            if (ACTION_STOP.equals(action)) {
-                stopPlayback();
-                return START_NOT_STICKY;
+        if (intent == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        String action = intent.getAction();
+        if (ACTION_STOP.equals(action)) {
+            stopPlayback();
+            return START_NOT_STICKY;
+        }
+
+        boolean metadataChanged = false;
+        if (intent.hasExtra(EXTRA_TITLE)) {
+            String t = intent.getStringExtra(EXTRA_TITLE);
+            if (t != null && !t.trim().isEmpty() && !t.trim().equals(currentTitle)) {
+                currentTitle = t.trim();
+                metadataChanged = true;
             }
-            if (intent.hasExtra(EXTRA_TITLE)) {
-                String t = intent.getStringExtra(EXTRA_TITLE);
-                if (t != null && !t.trim().isEmpty()) currentTitle = t.trim();
+        }
+        if (intent.hasExtra(EXTRA_SUBTITLE)) {
+            String s = intent.getStringExtra(EXTRA_SUBTITLE);
+            if (s != null && !s.trim().isEmpty() && !s.trim().equals(currentSubtitle)) {
+                currentSubtitle = s.trim();
+                metadataChanged = true;
             }
-            if (intent.hasExtra(EXTRA_SUBTITLE)) {
-                String s = intent.getStringExtra(EXTRA_SUBTITLE);
-                if (s != null && !s.trim().isEmpty()) currentSubtitle = s.trim();
+        }
+
+        if (isForeground && ACTION_UPDATE.equals(action)) {
+            if (metadataChanged && notificationManager != null) {
+                notificationManager.notify(NOTIFICATION_ID, buildPlaybackNotification(currentTitle, currentSubtitle));
             }
+            return START_NOT_STICKY;
         }
 
         Notification notification = buildPlaybackNotification(currentTitle, currentSubtitle);
@@ -107,15 +125,17 @@ public class TherapyPlaybackService extends Service {
             } else {
                 startForeground(NOTIFICATION_ID, notification);
             }
+            isForeground = true;
         } catch (Exception e) {
             Log.e(TAG, "Error starting foreground service for mediaPlayback", e);
         }
 
         acquireServiceWakeLock();
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void stopPlayback() {
+        isForeground = false;
         releaseServiceWakeLock();
         stopForeground(true);
         stopSelf();

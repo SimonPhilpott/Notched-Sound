@@ -1211,8 +1211,7 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   flex-direction: column;
   align-items: center;
   border-radius: 13px;
-  background: rgba(18, 22, 34, 0.78);
-  backdrop-filter: blur(10px);
+  background: rgba(18, 22, 34, 0.92);
   box-shadow: 0 4px 16px rgba(0,0,0,0.45), inset 0 0 0 1px var(--brd);
   touch-action: none;
   user-select: none;
@@ -1279,7 +1278,6 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   font-size: 54px;
   line-height: 1;
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(12px);
   opacity: 0;
   transform: translate(-50%, -50%) scale(.88);
   pointer-events: none;
@@ -2318,6 +2316,22 @@ function ensureMasterAudioBus(){
   return c;
 }
 
+function suspendAudioIfIdle(){
+  if(!actx || actx.state !== 'running') return;
+  const musicActive = typeof isMusicAudioPlaying === 'function' && isMusicAudioPlaying();
+  const fineActive = typeof ws !== 'undefined' && ws.finePlaying;
+  const adjActive = typeof adjPlaying !== 'undefined' && adjPlaying;
+  const earToneActive = typeof earTonePlaying !== 'undefined' && earTonePlaying;
+  const previewActive = (typeof prevNode !== 'undefined' && prevNode)
+    || (typeof compNode !== 'undefined' && compNode)
+    || (typeof charPrevNode !== 'undefined' && charPrevNode);
+  const micActive = typeof pmListening !== 'undefined' && pmListening;
+  if(therapy.playing || musicActive || fineActive || adjActive || earToneActive || previewActive || micActive){
+    return;
+  }
+  actx.suspend().catch(e => console.warn('AudioContext suspend:', e));
+}
+
 function calcPlaybackGain(){
   // Perceptual taper plus a dedicated top-end boost. The limiter in the master
   // chain keeps the new 2.5x maximum from producing hard digital clipping.
@@ -2950,7 +2964,11 @@ function buildTh(){
     const src = (builders[therapy.sound] || srcWhite)(c);
     const notchChain = createEarNotchChain(c, f, notchBandwidth);
     const evol = s === 'left' ? earVolL : earVolR;
-    const gain = c.createGain(); gain.gain.value = master * evol;
+    const gain = c.createGain();
+    const targetGain = Math.max(0.0001, master * evol);
+    const now = c.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(targetGain, now + 0.15);
     const pan = c.createStereoPanner(); pan.pan.value = s === 'left' ? -1 : 1;
     src.output.connect(notchChain.input);
     notchChain.output.connect(gain);
@@ -2973,7 +2991,7 @@ function stopThAudio(){
   kn(thNodes.left); kn(thNodes.right);
   thNodes = { left: null, right: null };
   thGainL = null; thGainR = null;
-  // masterBus and masterAnalyser remain alive for music playback and spectrum visualisations
+  suspendAudioIfIdle();
 }
 
 function toggleTherapy(){
@@ -3968,6 +3986,7 @@ function hideCalibrationModal(){
   const modal = document.getElementById('calibration-modal');
   if(modal) modal.classList.remove('open');
   document.body.classList.remove('tool-modal-open');
+  suspendAudioIfIdle();
 }
 
 function closeCalibrationModal(){
@@ -4030,6 +4049,7 @@ function setAdjChar(ch){
 
 function closeAdjustModal(){
   kn(adjNode); adjNode = null; adjPlaying = false;
+  suspendAudioIfIdle();
   const m = document.getElementById('adjust-modal');
   if(m) m.classList.remove('open');
 }
@@ -4085,6 +4105,7 @@ function toggleAdjTestAudio(){
     if(btn){ btn.textContent = '■ Stop Live Tone'; btn.style.color = '#ef4444'; }
   } else {
     kn(adjNode); adjNode = null;
+    suspendAudioIfIdle();
     if(btn){ btn.textContent = '▶ Test Live Tone'; btn.style.color = 'inherit'; }
   }
 }
@@ -4230,6 +4251,9 @@ function onMusicPlaybackStateChanged(){
   isMusicPlaying = playing;
   updateMusicPlayButton(playing);
   if(playing){
+    if(actx && actx.state === 'suspended'){
+      actx.resume().catch(e => console.warn('AudioContext resume:', e));
+    }
     lastMediaSource = 'music';
     nativeMediaAvailable = true;
     startDrawLoop();
@@ -4239,6 +4263,7 @@ function onMusicPlaybackStateChanged(){
     drawStaticSpectrum();
     if(!audioFocusPauseSource) updateSpectrumBadge('Idle');
     stopTimerIfNoPlayback();
+    suspendAudioIfIdle();
   }
   syncNativeMediaSession(true);
 }
@@ -5845,6 +5870,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if(typeof pmListening !== 'undefined' && pmListening){
         pmStopListening();
       }
+      suspendAudioIfIdle();
     } else {
       syncBatteryProtectionUI();
       if(therapy.playing || isMusicAudioPlaying()){
