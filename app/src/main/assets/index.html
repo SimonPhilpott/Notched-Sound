@@ -1596,9 +1596,6 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
 <!-- ── SCREEN 1: THERAPY (DEFAULT MAIN SCREEN) ── -->
 <div class="screen active" id="sc-therapy">
   <div class="m3-top-app-bar">
-    <button type="button" class="m3-icon-btn" onclick="openMenu()" aria-label="Open Settings" title="Settings">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
     <div style="flex: 1; min-width: 0;">
       <div class="ey" style="margin: 0; line-height: 1.2; text-align: left;">Tinnitus Relief</div>
       <h1 class="top-title" style="font-size:28px;">Notched Sound</h1>
@@ -1788,6 +1785,154 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
       </div>
     </div>
   </div><!-- /#music-card -->
+
+  <!-- ── UNIFIED M3 CALIBRATE & SETTINGS SCREEN ── -->
+  <div class="therapy-source-panel" id="calibrate-card" role="tabpanel" data-therapy-source-panel="calibrate" aria-labelledby="nav-tab-calibrate" hidden>
+    <!-- Calibration Actions Card -->
+    <div class="card">
+      <div class="section-heading" style="margin-bottom:10px;">Calibration</div>
+      <button type="button" class="btn-main" style="margin-bottom:10px;" onclick="startFullRecalibration()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        <span>Calibrate Both Ears</span>
+      </button>
+      <button type="button" class="menu-action-btn" style="background:var(--surf2); border:none; border-radius:16px; padding:12px 14px;" onclick="openPitchMatcher()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+        <div style="text-align: left;">
+          <div style="font-weight: 700; font-size: 13px;">Tone Pitch Matcher</div>
+          <div style="font-size: 11px; color: var(--txt2); margin-top: 1px;">Whistle or hum to set the calibration pitch</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Left Ear Profiles Card -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="section-heading" style="color: var(--ac);">Left Ear Profiles</span>
+        <span class="saved-toast" id="prof-toast-l" style="margin: 0;">✓ Saved</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <strong id="menu-freq-left" style="font-family:monospace; font-size:20px; color:var(--ac);">7,400 Hz</strong>
+        <span id="menu-type-left" style="font-size:11px; color:var(--txt2);">Pure Tone</span>
+      </div>
+      <select id="menu-sel-left" class="p-select" aria-label="Active Left Profile" onchange="switchEarProfile('left', this.value)" style="margin-bottom: 10px; border-radius: 12px; border: none; background: var(--surf2);"></select>
+
+      <div class="ear-tune-box" style="background:var(--surf2); border:none; border-radius:16px; padding:12px;">
+        <div class="ear-tune-head">
+          <span class="ear-tune-label">Pitch</span>
+          <span class="ear-tune-value" id="menu-pitch-val-left" style="color:var(--ac);">7,400 Hz</span>
+        </div>
+        <input type="range" id="menu-pitch-left" min="80" max="14000" step="10" value="7400" oninput="previewEarPitch('left',this.value)" onchange="commitEarPitch('left',this.value)" style="width:100%; accent-color:var(--ac); height:6px;">
+        <div class="char-pills">
+          <div class="char-pill sel" id="menu-ch-left-sine" onclick="setEarProfileType('left','sine')">Tone</div>
+          <div class="char-pill" id="menu-ch-left-sawtooth" onclick="setEarProfileType('left','sawtooth')">Hum</div>
+          <div class="char-pill" id="menu-ch-left-noise" onclick="setEarProfileType('left','noise')">Noise</div>
+          <div class="char-pill" id="menu-ch-left-square" onclick="setEarProfileType('left','square')">Whistle</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+        <button type="button" class="e-btn e-btn-play" id="menu-play-left" onclick="toggleEarTone('left')">Play</button>
+        <button type="button" class="e-btn" onclick="openAdjustModal('left')">Nudge</button>
+        <button type="button" class="e-btn" onclick="startSingleEarMatch('left')">Re-Match</button>
+      </div>
+
+      <div class="profile-actions-grid" style="margin-top: 8px;">
+        <button type="button" class="p-btn" onclick="newEarProfilePrompt('left')">+ New</button>
+        <button type="button" class="p-btn" onclick="duplicateEarProfile('left')">Clone</button>
+        <button type="button" class="p-btn" onclick="renameEarProfile('left')">Rename</button>
+      </div>
+      <button type="button" class="p-btn" id="btn-del-left" onclick="deleteEarProfile('left')" style="width:100%; margin-top:6px; color:#ef4444;">Delete Active Left Profile</button>
+    </div>
+
+    <!-- Right Ear Profiles Card -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="section-heading" style="color: var(--ear-r);">Right Ear Profiles</span>
+        <span class="saved-toast" id="prof-toast-r" style="margin: 0;">✓ Saved</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+        <strong id="menu-freq-right" style="font-family:monospace; font-size:20px; color:var(--ear-r);">7,400 Hz</strong>
+        <span id="menu-type-right" style="font-size:11px; color:var(--txt2);">Pure Tone</span>
+      </div>
+      <select id="menu-sel-right" class="p-select" aria-label="Active Right Profile" onchange="switchEarProfile('right', this.value)" style="margin-bottom: 10px; border-radius: 12px; border: none; background: var(--surf2);"></select>
+
+      <div class="ear-tune-box" style="background:var(--surf2); border:none; border-radius:16px; padding:12px;">
+        <div class="ear-tune-head">
+          <span class="ear-tune-label">Pitch</span>
+          <span class="ear-tune-value" id="menu-pitch-val-right" style="color:var(--ear-r);">7,400 Hz</span>
+        </div>
+        <input type="range" id="menu-pitch-right" min="80" max="14000" step="10" value="7400" oninput="previewEarPitch('right',this.value)" onchange="commitEarPitch('right',this.value)" style="width:100%; accent-color:var(--ear-r); height:6px;">
+        <div class="char-pills">
+          <div class="char-pill sel" id="menu-ch-right-sine" onclick="setEarProfileType('right','sine')">Tone</div>
+          <div class="char-pill" id="menu-ch-right-sawtooth" onclick="setEarProfileType('right','sawtooth')">Hum</div>
+          <div class="char-pill" id="menu-ch-right-noise" onclick="setEarProfileType('right','noise')">Noise</div>
+          <div class="char-pill" id="menu-ch-right-square" onclick="setEarProfileType('right','square')">Whistle</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;">
+        <button type="button" class="e-btn e-btn-play" id="menu-play-right" onclick="toggleEarTone('right')">Play</button>
+        <button type="button" class="e-btn" onclick="openAdjustModal('right')">Nudge</button>
+        <button type="button" class="e-btn" onclick="startSingleEarMatch('right')">Re-Match</button>
+      </div>
+
+      <div class="profile-actions-grid" style="margin-top: 8px;">
+        <button type="button" class="p-btn" onclick="newEarProfilePrompt('right')">+ New</button>
+        <button type="button" class="p-btn" onclick="duplicateEarProfile('right')">Clone</button>
+        <button type="button" class="p-btn" onclick="renameEarProfile('right')">Rename</button>
+      </div>
+      <button type="button" class="p-btn" id="btn-del-right" onclick="deleteEarProfile('right')" style="width:100%; margin-top:6px; color:#ef4444;">Delete Active Right Profile</button>
+    </div>
+
+    <!-- Music Library & Tags Card -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <span class="section-heading">Music Library &amp; Tags</span>
+        <span class="saved-toast" id="music-scan-badge" style="margin: 0; display: none;">Indexed</span>
+      </div>
+      <div style="background: var(--surf2); border-radius: 16px; padding: 12px; margin-bottom: 10px;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt2); font-weight: 700;">Active Folder</div>
+        <div id="menu-music-folder-name" style="font-size: 13px; font-weight: 600; color: var(--ac); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No Folder Selected</div>
+        <div id="menu-music-stats" style="font-size: 11px; color: var(--txt2); margin-top: 4px;">Select your music folder to index Poweramp tags.</div>
+        <div id="menu-scan-bar-wrap" style="display: none; margin-top: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--txt2); margin-bottom: 4px;">
+            <span id="menu-scan-status-text">Indexing tags...</span>
+            <span id="menu-scan-count-text">0 tracks</span>
+          </div>
+          <div style="height: 4px; background: var(--surf); border-radius: 2px; overflow: hidden; position: relative;">
+            <div id="menu-scan-progress-bar" style="height: 100%; width: 35%; background: var(--ac); border-radius: 2px; animation: scanPulse 1.2s infinite ease-in-out;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <button type="button" class="btn-menu-action primary" style="border-radius:14px;" onclick="pickMusicFolder()">Choose Folder</button>
+        <button type="button" class="btn-menu-action secondary" style="border-radius:14px; margin-top:0;" onclick="rescanMusicFolder()">Rescan Tags</button>
+      </div>
+    </div>
+
+    <!-- Appearance & System Card -->
+    <div class="card">
+      <div class="section-heading" style="margin-bottom:10px;">Appearance &amp; System</div>
+      <div class="menu-theme-row" style="background:var(--surf2); border:none; border-radius:16px; padding:12px; margin-bottom:10px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">Theme</div>
+          <div class="menu-theme-copy">Light or dark surface palette</div>
+        </div>
+        <div class="theme-choice-group" role="group" aria-label="Appearance theme">
+          <button type="button" class="theme-choice-btn" data-theme-choice="light" onclick="applyTheme('light', true)" aria-pressed="false">Light</button>
+          <button type="button" class="theme-choice-btn" data-theme-choice="dark" onclick="applyTheme('dark', true)" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+      <div class="battery-status-box" style="background:var(--surf2); border:none; border-radius:16px; padding:12px;">
+        <div class="battery-status-line">
+          <span class="battery-status-dot" id="battery-status-dot"></span>
+          <span id="battery-status-text">Checking battery protection...</span>
+        </div>
+        <div class="battery-status-copy" id="battery-status-copy">Android battery optimisation can pause long therapy sessions when the screen is off.</div>
+      </div>
+      <button type="button" class="btn-menu-action secondary" style="border-radius:14px; margin-top:10px;" onclick="openBatteryOptimizationPrompt()">Battery Optimisation Settings</button>
+    </div>
+  </div><!-- /#calibrate-card -->
 </div><!-- /#sc-therapy -->
 
 <!-- ── MATERIAL DESIGN 3 BOTTOM NAVIGATION BAR ── -->
@@ -1804,7 +1949,7 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
     </span>
     <span>Music</span>
   </button>
-  <button type="button" class="m3-nav-item" id="nav-tab-calibrate" onclick="openCalibrationFromNav()">
+  <button type="button" class="m3-nav-item" id="nav-tab-calibrate" data-therapy-source-tab="calibrate" role="tab" aria-selected="false" aria-controls="calibrate-card" tabindex="-1" onclick="setTherapySourceTab('calibrate')">
     <span class="m3-nav-pill">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </span>
@@ -1812,16 +1957,10 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
   </button>
 </nav>
 
-<!-- ── MATERIAL DESIGN 3 MODAL BOTTOM SHEET: NOTCH & AUDIO CONTROLS ── -->
+<!-- ── MATERIAL DESIGN 3 MODAL BOTTOM SHEET: AUDIO CONTROLS ── -->
 <div class="m3-sheet-backdrop" id="audio-controls-sheet" onclick="if(event.target===this)closeAudioControlsSheet()" aria-hidden="true">
-  <div class="m3-bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="m3-sheet-title-el">
+  <div class="m3-bottom-sheet" role="dialog" aria-modal="true" aria-label="Notch and audio controls">
     <div class="m3-sheet-handle"></div>
-    <div class="m3-sheet-header">
-      <h2 class="m3-sheet-title section-heading" id="m3-sheet-title-el">Notch &amp; Audio Controls</h2>
-      <button type="button" class="m3-icon-btn" onclick="closeAudioControlsSheet()" aria-label="Close controls">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
 
     <div class="m3-sheet-card">
       <div class="notch-bw-row" style="margin:0;">
@@ -2026,188 +2165,6 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
 </div>
 
 <!-- ── HAMBURGER MENU / TONE PROFILE DRAWER ── -->
-<div class="menu-overlay" id="menu-overlay" onclick="closeMenu()"></div>
-<div class="menu-drawer" id="menu-drawer">
-  <div class="menu-header">
-    <div class="menu-header-title" style="font-size: 22px;">Settings</div>
-    <button type="button" onclick="closeMenu()" style="background: none; border: none; cursor: pointer; color: var(--txt2); padding: 4px; display: flex; align-items: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-  </div>
-  <div class="menu-content">
-    <div class="menu-section">
-      <div class="menu-section-title">Appearance</div>
-      <div class="menu-theme-row">
-        <div>
-          <div style="font-size: 13px; font-weight: 700;">Light / Dark</div>
-          <div class="menu-theme-copy">Switch the interface theme.</div>
-        </div>
-        <div class="theme-choice-group" role="group" aria-label="Appearance theme">
-          <button type="button" class="theme-choice-btn" data-theme-choice="light" onclick="applyTheme('light', true)" aria-pressed="false">Light</button>
-          <button type="button" class="theme-choice-btn" data-theme-choice="dark" onclick="applyTheme('dark', true)" aria-pressed="false">Dark</button>
-        </div>
-      </div>
-    </div>
-
-        <!-- Calibration Options -->
-    <div class="menu-section">
-      <div class="menu-section-title">Calibration</div>
-      <button type="button" class="menu-action-btn primary" onclick="closeMenu(); startFullRecalibration();">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-        <div style="text-align: left;">
-          <div style="font-weight: 700; font-size: 13px;">Calibrate Both Ears</div>
-          <div style="font-size: 11px; opacity: 0.88; margin-top: 1px;">Full test from scratch (Left then Right)</div>
-        </div>
-      </button>
-
-      <button type="button" class="menu-action-btn" onclick="closeMenu(); openPitchMatcher();" style="margin-top: 8px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
-        <div style="text-align: left;">
-          <div style="font-weight: 700; font-size: 13px;">Tone Pitch Matcher</div>
-          <div style="font-size: 11px; color: var(--txt2); margin-top: 1px;">Whistle or hum to set the calibration pitch</div>
-        </div>
-      </button>
-    </div>
-
-    <!-- Left Ear Profiles Section -->
-    <div class="menu-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span class="menu-section-title" style="margin: 0; color: var(--ac);">Left Ear Profiles</span>
-        <span class="saved-toast" id="prof-toast-l" style="margin: 0;">✓ Saved</span>
-      </div>
-      
-      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-        <strong id="menu-freq-left" style="font-family:monospace; font-size:20px; color:var(--ac);">7,400 Hz</strong>
-        <span id="menu-type-left" style="font-size:11px; color:var(--txt2);">Pure Tone</span>
-      </div>
-      <label style="font-size: 11px; color: var(--txt2); margin-bottom: 4px; display: block;">Active Left Profile:</label>
-      <select id="menu-sel-left" class="p-select" onchange="switchEarProfile('left', this.value)" style="margin-bottom: 8px;">
-      </select>
-
-      <div class="ear-tune-box">
-        <div class="ear-tune-head">
-          <span class="ear-tune-label">Pitch</span>
-          <span class="ear-tune-value" id="menu-pitch-val-left" style="color:var(--ac);">7,400 Hz</span>
-        </div>
-        <input type="range" id="menu-pitch-left" min="80" max="14000" step="10" value="7400" oninput="previewEarPitch('left',this.value)" onchange="commitEarPitch('left',this.value)" style="width:100%; accent-color:var(--ac); height:5px;">
-        <div class="char-pills">
-          <div class="char-pill sel" id="menu-ch-left-sine" onclick="setEarProfileType('left','sine')">Tone</div>
-          <div class="char-pill" id="menu-ch-left-sawtooth" onclick="setEarProfileType('left','sawtooth')">Hum</div>
-          <div class="char-pill" id="menu-ch-left-noise" onclick="setEarProfileType('left','noise')">Noise</div>
-          <div class="char-pill" id="menu-ch-left-square" onclick="setEarProfileType('left','square')">Whistle</div>
-        </div>
-      </div>
-
-      <button type="button" class="menu-clone-btn" onclick="duplicateEarProfile('left')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Clone Active Left Profile</button>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
-        <button type="button" class="e-btn e-btn-play" id="menu-play-left" onclick="toggleEarTone('left')">Play</button>
-        <button type="button" class="e-btn" onclick="closeMenu(); openAdjustModal('left')">Nudge</button>
-        <button type="button" class="e-btn" onclick="closeMenu(); startSingleEarMatch('left')">Re-Match</button>
-      </div>
-
-      <div class="profile-actions-grid" style="margin-top: 4px;">
-        <button type="button" class="p-btn" onclick="newEarProfilePrompt('left')">+ New</button>
-        <button type="button" class="p-btn" onclick="renameEarProfile('left')">Rename</button>
-        <button type="button" class="p-btn" id="btn-del-left" onclick="deleteEarProfile('left')" style="color: #ef4444;">Delete</button>
-      </div>
-    </div>
-
-    <!-- Right Ear Profiles Section -->
-    <div class="menu-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span class="menu-section-title" style="margin: 0; color: var(--ear-r);">Right Ear Profiles</span>
-        <span class="saved-toast" id="prof-toast-r" style="margin: 0;">✓ Saved</span>
-      </div>
-      
-      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-        <strong id="menu-freq-right" style="font-family:monospace; font-size:20px; color:var(--ear-r);">7,400 Hz</strong>
-        <span id="menu-type-right" style="font-size:11px; color:var(--txt2);">Pure Tone</span>
-      </div>
-      <label style="font-size: 11px; color: var(--txt2); margin-bottom: 4px; display: block;">Active Right Profile:</label>
-      <select id="menu-sel-right" class="p-select" onchange="switchEarProfile('right', this.value)" style="margin-bottom: 8px;">
-      </select>
-
-      <div class="ear-tune-box">
-        <div class="ear-tune-head">
-          <span class="ear-tune-label">Pitch</span>
-          <span class="ear-tune-value" id="menu-pitch-val-right" style="color:var(--ear-r);">7,400 Hz</span>
-        </div>
-        <input type="range" id="menu-pitch-right" min="80" max="14000" step="10" value="7400" oninput="previewEarPitch('right',this.value)" onchange="commitEarPitch('right',this.value)" style="width:100%; accent-color:var(--ear-r); height:5px;">
-        <div class="char-pills">
-          <div class="char-pill sel" id="menu-ch-right-sine" onclick="setEarProfileType('right','sine')">Tone</div>
-          <div class="char-pill" id="menu-ch-right-sawtooth" onclick="setEarProfileType('right','sawtooth')">Hum</div>
-          <div class="char-pill" id="menu-ch-right-noise" onclick="setEarProfileType('right','noise')">Noise</div>
-          <div class="char-pill" id="menu-ch-right-square" onclick="setEarProfileType('right','square')">Whistle</div>
-        </div>
-      </div>
-
-      <button type="button" class="menu-clone-btn" onclick="duplicateEarProfile('right')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Clone Active Right Profile</button>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px;">
-        <button type="button" class="e-btn e-btn-play" id="menu-play-right" onclick="toggleEarTone('right')">Play</button>
-        <button type="button" class="e-btn" onclick="closeMenu(); openAdjustModal('right')">Nudge</button>
-        <button type="button" class="e-btn" onclick="closeMenu(); startSingleEarMatch('right')">Re-Match</button>
-      </div>
-
-      <div class="profile-actions-grid" style="margin-top: 4px;">
-        <button type="button" class="p-btn" onclick="newEarProfilePrompt('right')">+ New</button>
-        <button type="button" class="p-btn" onclick="renameEarProfile('right')">Rename</button>
-        <button type="button" class="p-btn" id="btn-del-right" onclick="deleteEarProfile('right')" style="color: #ef4444;">Delete</button>
-      </div>
-    </div>
-    
-    <!-- Music Library & Folder Section -->
-    <div class="menu-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span class="menu-section-title" style="margin: 0;">Music Library & Tags</span>
-        <span class="saved-toast" id="music-scan-badge" style="margin: 0; display: none;">Indexed</span>
-      </div>
-      
-      <div style="background: var(--surf); border: 1px solid var(--brd); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;">
-        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt2); font-weight: 700;">Active Folder</div>
-        <div id="menu-music-folder-name" style="font-size: 13px; font-weight: 600; color: var(--ac); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No Folder Selected</div>
-        <div id="menu-music-stats" style="font-size: 11px; color: var(--txt2); margin-top: 4px;">Select your music folder to index Poweramp tags.</div>
-        
-        <!-- Live scan progress bar -->
-        <div id="menu-scan-bar-wrap" style="display: none; margin-top: 8px;">
-          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--txt2); margin-bottom: 4px;">
-            <span id="menu-scan-status-text">Indexing tags...</span>
-            <span id="menu-scan-count-text">0 tracks</span>
-          </div>
-          <div style="height: 4px; background: var(--surf2); border-radius: 2px; overflow: hidden; position: relative;">
-            <div id="menu-scan-progress-bar" style="height: 100%; width: 35%; background: var(--ac); border-radius: 2px; animation: scanPulse 1.2s infinite ease-in-out;"></div>
-          </div>
-        </div>
-      </div>
-
-      <button type="button" class="btn-menu-action primary" onclick="pickMusicFolder()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-        Choose Music Folder
-      </button>
-
-      <button type="button" class="btn-menu-action secondary" onclick="rescanMusicFolder()" style="margin-top: 6px;">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-        Rescan Library Tags
-      </button>
-    </div>
-
-    <!-- System / playback reliability -->
-    <div class="menu-section">
-      <div class="menu-section-title">System & Playback</div>
-      <div class="battery-status-box">
-        <div class="battery-status-line">
-          <span class="battery-status-dot" id="battery-status-dot"></span>
-          <span id="battery-status-text">Checking battery protection...</span>
-        </div>
-        <div class="battery-status-copy" id="battery-status-copy">Android battery optimisation can pause long therapy sessions when the screen is off.</div>
-      </div>
-      <button type="button" class="btn-menu-action secondary" onclick="openBatteryOptimizationPrompt()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="18" height="10" rx="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line><path d="M6 10l4 4M10 10l-4 4"></path></svg>
-        Battery Optimisation Settings
-      </button>
-    </div>
-</div>
-  </div>
-
 <!-- ── QUICK FREQUENCY ADJUST MODAL ── -->
 <div class="modal-bg" id="adjust-modal">
   <div class="modal" style="max-width: 360px;">
@@ -3232,7 +3189,7 @@ function toggleMusicLibraryDrawer(forceOpen){
 }
 
 function setTherapySourceTab(tab, persist){
-  const next = tab === 'music' ? 'music' : 'ambient';
+  const next = (tab === 'music' || tab === 'calibrate') ? tab : 'ambient';
   therapySourceTab = next;
 
   document.querySelectorAll('[data-therapy-source-tab]').forEach(button => {
@@ -3245,6 +3202,11 @@ function setTherapySourceTab(tab, persist){
   document.querySelectorAll('[data-therapy-source-panel]').forEach(panel => {
     panel.hidden = panel.dataset.therapySourcePanel !== next;
   });
+
+  const dockWrap = document.getElementById('therapy-sticky-dock-wrap');
+  if(dockWrap){
+    dockWrap.style.display = (next === 'calibrate') ? 'none' : '';
+  }
 
   if(persist !== false){
     try{ localStorage.setItem(THERAPY_SOURCE_TAB_KEY, next); }catch(e){}
@@ -3260,8 +3222,11 @@ function setTherapySourceTab(tab, persist){
       }
       syncMusicBrowserDockHeight();
       positionAlphaIndex();
+    } else if(next === 'calibrate'){
+      if(typeof syncMenuUI === 'function') syncMenuUI();
+      if(typeof syncBatteryProtectionUI === 'function') syncBatteryProtectionUI();
     }
-    if(!drawRAF) drawStaticSpectrum();
+    if(!drawRAF && next !== 'calibrate') drawStaticSpectrum();
   });
 }
 
@@ -3966,24 +3931,15 @@ function testStereo(){
 
 // ── HAMBURGER MENU DRAWER CONTROLS ──
 function openMenu(){
-  const ov = document.getElementById('menu-overlay');
-  const dw = document.getElementById('menu-drawer');
-  if(ov) ov.classList.add('open');
-  if(dw) dw.classList.add('open');
-  syncBatteryProtectionUI();
+  setTherapySourceTab('calibrate');
 }
 
 function closeMenu(){
-  const ov = document.getElementById('menu-overlay');
-  const dw = document.getElementById('menu-drawer');
-  if(ov) ov.classList.remove('open');
-  if(dw) dw.classList.remove('open');
+  // Hamburger drawer removed; settings & calibration live in the Calibrate tab.
 }
 
 function toggleMenu(){
-  const dw = document.getElementById('menu-drawer');
-  if(dw && dw.classList.contains('open')) closeMenu();
-  else openMenu();
+  setTherapySourceTab(therapySourceTab === 'calibrate' ? 'ambient' : 'calibrate');
 }
 
 function syncBatteryProtectionUI(){
