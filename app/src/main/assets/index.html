@@ -3354,6 +3354,8 @@ function toggleMusicLibrarySheet(forceOpen){
 }
 
 let lastFabScrollY = 0;
+let fabScrollAnchorY = 0;
+let fabScrollDir = 0;
 
 function syncMainFab(){
   const fab = document.getElementById('m3-main-fab');
@@ -3398,18 +3400,41 @@ function onMainFabClick(){
 function onFabScroll(){
   const fab = document.getElementById('m3-main-fab');
   if(!fab || fab.hidden) return;
-  const y = window.scrollY || window.pageYOffset || 0;
-  if(y <= 14){
+  const y = Math.max(
+    window.scrollY || 0,
+    window.pageYOffset || 0,
+    document.documentElement ? document.documentElement.scrollTop : 0,
+    document.body ? document.body.scrollTop : 0
+  );
+  if(y <= 10){
     fab.classList.remove('collapsed');
-  } else if(y > lastFabScrollY + 4){
-    fab.classList.add('collapsed');
-  } else if(y < lastFabScrollY - 8){
-    fab.classList.remove('collapsed');
+    fabScrollDir = 0;
+    fabScrollAnchorY = y;
+    lastFabScrollY = y;
+    return;
+  }
+  if(y > lastFabScrollY){
+    if(fabScrollDir !== 1){
+      fabScrollDir = 1;
+      fabScrollAnchorY = lastFabScrollY;
+    }
+    if(y - fabScrollAnchorY >= 10){
+      fab.classList.add('collapsed');
+    }
+  } else if(y < lastFabScrollY){
+    if(fabScrollDir !== -1){
+      fabScrollDir = -1;
+      fabScrollAnchorY = lastFabScrollY;
+    }
+    if(fabScrollAnchorY - y >= 14){
+      fab.classList.remove('collapsed');
+    }
   }
   lastFabScrollY = y;
 }
 
 window.addEventListener('scroll', onFabScroll, { passive: true });
+document.addEventListener('scroll', onFabScroll, { passive: true });
 
 function setTherapySourceTab(tab, persist){
   const next = (tab === 'music' || tab === 'calibrate') ? tab : 'ambient';
@@ -3441,7 +3466,11 @@ function setTherapySourceTab(tab, persist){
   }
 
   const fab = document.getElementById('m3-main-fab');
-  if(fab && (window.scrollY || 0) <= 14){
+  const curY = window.scrollY || window.pageYOffset || 0;
+  lastFabScrollY = curY;
+  fabScrollAnchorY = curY;
+  fabScrollDir = 0;
+  if(fab && curY <= 10){
     fab.classList.remove('collapsed');
   }
   syncMainFab();
