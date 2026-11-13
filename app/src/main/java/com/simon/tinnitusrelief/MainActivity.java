@@ -5,8 +5,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -68,6 +70,7 @@ public class MainActivity extends Activity {
     private boolean isPlaybackActive = false;
     private boolean playbackServiceRunning = false;
     private String lastServiceSignature = "";
+    private BroadcastReceiver mediaVolumeReceiver;
     private String lastNotificationTitle = "Notched Sound Therapy";
     private String lastNotificationSubtitle = "Playing in background";
     private final LruCache<String, byte[]> albumArtCache = new LruCache<String, byte[]>(2 * 1024 * 1024) {
@@ -381,6 +384,16 @@ public class MainActivity extends Activity {
             }
 
             @JavascriptInterface
+            public int getMediaVolume() {
+                return getMediaVolumePercent();
+            }
+
+            @JavascriptInterface
+            public void setMediaVolume(int percent) {
+                setMediaVolumePercent(percent);
+            }
+
+            @JavascriptInterface
             public String getAppVersion() {
                 return "1.0.7-pro-unlocked";
             }
@@ -388,6 +401,7 @@ public class MainActivity extends Activity {
 
         setupAudioFocus();
         setupMediaSession();
+        registerMediaVolumeReceiver();
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -895,6 +909,8 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.onResume();
             webView.resumeTimers();
+            int volPct = getMediaVolumePercent();
+            webView.evaluateJavascript("if(typeof onNativeMediaVolumeChanged==='function') onNativeMediaVolumeChanged(" + volPct + ");", null);
         }
         // When returning to app from background or another app, immediately sync progress state
         if (indexManager != null && webView != null) {
@@ -969,9 +985,67 @@ public class MainActivity extends Activity {
         }
     }
 
+    private int getMediaVolumePercent() {
+        if (audioManager == null) {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        }
+        if (audioManager == null) return 80;
+        int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int cur = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        if (max <= 0) return 80;
+        return Math.max(0, Math.min(100, Math.round((cur * 100f) / max)));
+    }
+
+    private void setMediaVolumePercent(int percent) {
+        if (audioManager == null) {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        }
+        if (audioManager == null) return;
+        int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        if (max <= 0) return;
+        int clamped = Math.max(0, Math.min(100, percent));
+        int target = Math.round((clamped * max) / 100f);
+        int current = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        if (target != current) {
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0);
+        }
+    }
+
+    private void registerMediaVolumeReceiver() {
+        if (mediaVolumeReceiver != null) return;
+        mediaVolumeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null) return;
+                int streamType = intent.getIntExtra("android.media.EXTRA_VOLUME_STREAM_TYPE", -1);
+                if (streamType == -1 || streamType == AudioManager.STREAM_MUSIC) {
+                    int volPct = getMediaVolumePercent();
+                    runOnUiThread(() -> {
+                        if (webView != null) {
+                            webView.evaluateJavascript("if(typeof onNativeMediaVolumeChanged==='function') onNativeMediaVolumeChanged(" + volPct + ");", null);
+                        }
+                    });
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter("android.media.VOLUME_CHANGED_ACTION");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(mediaVolumeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(mediaVolumeReceiver, filter);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mediaVolumeReceiver != null) {
+            try {
+                unregisterReceiver(mediaVolumeReceiver);
+            } catch (Exception ignored) {
+            }
+            mediaVolumeReceiver = null;
+        }
         abandonAppAudioFocus();
         playbackServiceRunning = false;
         TherapyPlaybackService.stopPlaybackService(this);

@@ -35,32 +35,32 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   color-scheme:light;
-  --ac:#899981;--ab:#E4E9DF;--bg:#F1EFE9;--surf:#F8F7F3;--surf2:#EDE5D8;
-  --txt:#2E2B27;--txt2:#6A645D;--brd:#D8CFC1;--ctxt:#FFFFFF;
-  --pro:#D97706;--prob:#F7E7C9;--ear-r:#4F46E5;
+  --ac:#4D7C5D;--ab:#DCECE1;--bg:#F4F5F0;--surf:#ECEEE7;--surf2:#E2E5DC;--surf3:#D7DBD0;
+  --txt:#1B1D19;--txt2:#5A5E56;--brd:rgba(27,29,25,0.10);--ctxt:#FFFFFF;
+  --pro:#D97706;--prob:#F7E7C9;--ear-r:#6D28D9;
   --heading-font:'HB Rustic Delight','Rustic Delight',Georgia,serif;
-  --shadow-card:0 8px 28px rgba(46,43,39,0.10);
-  --music-thumb-size:34px;
+  --shadow-card:0 4px 16px rgba(27,29,25,0.08);
+  --music-thumb-size:44px;
 }
 [data-theme="dark"]{
   color-scheme:dark;
-  --ac:#5DCAA5;--ab:#04342C;--bg:#0a0e1a;--surf:#111827;--surf2:#1a2035;
-  --txt:#f0f2f8;--txt2:#9ca3bf;--brd:#2b3553;--ctxt:#07110d;
+  --ac:#4ADE80;--ab:rgba(74,222,128,0.14);--bg:#0B0F17;--surf:#141A26;--surf2:#1E2738;--surf3:#283347;
+  --txt:#F1F5F9;--txt2:#94A3B8;--brd:rgba(148,163,184,0.14);--ctxt:#052E16;
   --pro:#FBBF24;--prob:#2D2000;--ear-r:#8B5CF6;
-  --shadow-card:0 8px 28px rgba(0,0,0,0.45);
+  --shadow-card:0 6px 24px rgba(0,0,0,0.40);
 }
 html{
   scrollbar-gutter: stable;
   overflow-y: scroll;
 }
-body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 60px;transition:background-color .25s ease,color .25s ease}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px 14px 98px;transition:background-color .25s ease,color .25s ease}
 .wrap{width:100%;max-width:480px;box-sizing:border-box}
 .screen{display:none;width:100%;box-sizing:border-box}.screen.active{display:block}
-.ey{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ac);text-align:center;margin-bottom:6px}
+.ey{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:var(--ac);text-align:center;margin-bottom:4px;font-weight:700}
 .badge{display:inline-flex;align-items:center;background:var(--ab);color:var(--ac);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;margin-bottom:1rem}
-.prog-bar{height:3px;background:var(--surf2);border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
+.prog-bar{height:4px;background:var(--surf2);border-radius:2px;overflow:hidden;margin-bottom:1.5rem}
 .prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width .5s}
-.card{background:var(--surf);border:1px solid var(--brd);border-radius:16px;padding:1.25rem;margin-bottom:1rem;box-sizing:border-box;width:100%;max-width:100%}
+.card{background:var(--surf);border:none;border-radius:24px;padding:1.15rem;margin-bottom:12px;box-sizing:border-box;width:100%;max-width:100%;box-shadow:var(--shadow-card)}
 .therapy-source-panel{box-sizing:border-box;width:100%;max-width:100%}
 .card-title{font-size:18px;font-weight:500;margin-bottom:.4rem}
 .card-sub{font-size:13px;color:var(--txt2);line-height:1.55;margin-bottom:1.25rem}
@@ -70,27 +70,15 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
   z-index: 800;
   background: var(--bg);
   padding-top: 2px;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
   margin-bottom: 8px;
 }
-.therapy-source-tabs {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: 100%;
-  margin-bottom: 0;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 0 0 1px var(--brd);
-  border-radius: 14px;
-  background: var(--surf);
-  overflow: hidden;
-}
 #sc-therapy {
-  min-height: 100vh;
-  padding-bottom: 16px;
+  min-height: calc(100vh - 98px);
+  padding-bottom: 12px;
 }
 #th-card {
-  position: sticky;
-  top: calc(var(--therapy-dock-height, 240px) + 6px);
+  position: relative;
   z-index: 700;
 }
 .therapy-source-tab {
@@ -149,14 +137,20 @@ body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSys
 input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer}
 .plbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--brd);background:var(--surf2);color:var(--txt);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;margin:1rem auto;transition:all .2s}
 .plbtn.on{background:var(--ab);color:var(--ac);border-color:var(--ac)}
-.btn-main{width:100%;padding:14px;border-radius:12px;background:var(--ac);color:var(--ctxt);border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+.btn-main{width:100%;min-height:54px;padding:14px 20px;border-radius:28px;background:var(--ac);color:var(--ctxt);border:none;font-size:15px;font-weight:700;letter-spacing:0.1px;cursor:pointer;font-family:inherit;margin-bottom:.25rem;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s ease,opacity .15s ease}
+.btn-main:active{transform:scale(0.985)}
 .btn-main:disabled{opacity:.35;cursor:not-allowed}
 .btn-sec{width:100%;padding:11px;border-radius:12px;border:1px solid var(--brd);background:transparent;color:var(--txt2);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
-.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
-.snd-btn{padding:10px 8px;border-radius:10px;border:1px solid var(--brd);background:var(--surf2);color:var(--txt2);cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s;position:relative;text-align:left}
-.snd-btn.sel{border-color:var(--ac);background:var(--ab);color:var(--ac)}
-.snd-btn .sname{font-weight:500;display:block;margin-bottom:2px}
-.snd-btn .sdesc{font-size:10px;opacity:.7;display:block}
+.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.snd-btn{padding:14px 12px;border-radius:18px;border:1.5px solid transparent;background:var(--surf2);color:var(--txt);cursor:pointer;font-size:13px;font-family:inherit;transition:background .18s,border-color .18s,color .18s,transform .12s;position:relative;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:66px}
+.snd-btn:active{transform:scale(0.98)}
+.snd-btn.sel{border-color:var(--ac);background:var(--ab);color:var(--txt);box-shadow:0 0 0 1px rgba(74,222,128,0.18)}
+.snd-btn.sel .sname{color:var(--ac)}
+.snd-btn.sel .snd-ico{color:var(--ac)}
+.snd-copy{min-width:0;flex:1}
+.snd-btn .sname{font-weight:600;font-size:14px;display:block;margin-bottom:2px;color:var(--txt)}
+.snd-btn .sdesc{font-size:11px;color:var(--txt2);display:block}
+.snd-ico{width:22px;height:22px;flex-shrink:0;color:var(--txt2);opacity:0.85}
 .snd-btn .lock{position:absolute;top:7px;right:8px;font-size:12px}
 .snd-btn.pro-locked{opacity:.6}
 .pro-tag{display:inline-block;background:var(--pro);color:#fff;border-radius:4px;font-size:10px;font-weight:700;padding:1px 5px;vertical-align:middle;margin-left:4px}
@@ -365,12 +359,11 @@ body.tool-modal-open{overflow:hidden}
   --dock-scroll-p: 0;
   position: relative;
   background: var(--surf);
-  border: 1px solid var(--brd);
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 24px;
+  padding: 14px;
+  margin-bottom: 4px;
+  box-shadow: var(--shadow-card);
   transition: padding .14s ease, margin .14s ease;
 }
 .docked-top-box canvas {
@@ -661,13 +654,13 @@ body.tool-modal-open{overflow:hidden}
 /* ── NOTCHED MUSIC PLAYER ── */
 .music-sticky-header-dock {
   position: sticky;
-  top: calc(var(--therapy-dock-height, 195px) + 8px);
+  top: calc(var(--therapy-dock-height, 140px) + 6px);
   z-index: 750;
   background: var(--surf);
-  margin: 0 -1.25rem 0 -1.25rem;
-  padding: 4px 1.25rem 4px 1.25rem;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  margin: 0 -1.15rem 0 -1.15rem;
+  padding: 2px 1.15rem 6px 1.15rem;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
   border-bottom: none;
   box-shadow: none;
 }
@@ -691,11 +684,11 @@ body.tool-modal-open{overflow:hidden}
 .music-now-card {
   position: relative;
   background: var(--surf2);
-  border: 1px solid var(--brd);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 16px;
   margin-bottom: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.28);
 }
 .music-track-title {
   font-size: 15px;
@@ -983,12 +976,13 @@ body.tool-modal-open{overflow:hidden}
 
 /* ── SHARED HEADING TYPOGRAPHY ── */
 h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
-.section-heading, .menu-header-title, .modal-title {
+.section-heading, .menu-header-title, .modal-title,
+.docked-vol-title, .docked-ear-title, .notch-bw-label, .session-duration-heading, .m3-sheet-title {
   font-family: var(--heading-font);
   font-weight: normal;
   letter-spacing: 0.1px;
 }
-.section-heading {
+.section-heading, .docked-vol-title, .docked-ear-title, .notch-bw-label, .session-duration-heading {
   display: block;
   font-size: 17px;
   line-height: 1.2;
@@ -1186,11 +1180,11 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 }
 .music-browser-scroll {
   position: relative;
-  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 24px);
+  max-height: calc(100vh - var(--therapy-dock-height, 140px) - var(--music-deck-height, 150px) - 146px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 12px 24px;
-  border-radius: 12px;
+  padding: 0 10px 24px;
+  border-radius: 16px;
   border: none;
   --music-breadcrumb-sticky-height: 31px;
 }
@@ -1200,19 +1194,19 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 .alphanumeric-index {
   display: none;
   position: fixed;
-  top: calc(var(--therapy-dock-height, 195px) + var(--music-deck-height, 140px) + 12px);
-  right: 5px;
-  bottom: 8px;
+  top: calc(var(--therapy-dock-height, 140px) + var(--music-deck-height, 150px) + 56px);
+  right: 6px;
+  bottom: 92px;
   width: 26px;
   height: auto;
-  max-height: calc(100vh - var(--therapy-dock-height, 195px) - var(--music-deck-height, 140px) - 24px);
+  max-height: calc(100vh - var(--therapy-dock-height, 140px) - var(--music-deck-height, 150px) - 148px);
   padding: 10px 2px;
   z-index: 850;
   flex-direction: column;
   align-items: center;
   border-radius: 13px;
-  background: rgba(18, 22, 34, 0.92);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45), inset 0 0 0 1px var(--brd);
+  background: var(--surf2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.38), inset 0 0 0 1px var(--brd);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -1324,7 +1318,225 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 }
 .pm-stability-track { background: var(--brd); }
 @media (prefers-reduced-motion: reduce) {
-  .docked-top-box, .docked-spectrum-settings, .docked-chevron { transition: none; }
+  .docked-top-box, .docked-spectrum-settings, .docked-chevron, .m3-bottom-sheet { transition: none; }
+}
+
+/* ── MATERIAL DESIGN 3 COMPONENTS ── */
+.m3-top-app-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  margin-bottom: 10px;
+}
+.m3-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: var(--surf);
+  color: var(--txt);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .16s ease, transform .12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.m3-icon-btn:active { transform: scale(0.94); background: var(--surf2); }
+.m3-icon-btn.tonal { background: var(--surf2); color: var(--ac); }
+.m3-status-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 16px;
+  background: var(--surf2);
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  white-space: nowrap;
+}
+
+.docked-top-box.music-compact-mode #spec-canvas {
+  height: 76px !important;
+}
+
+/* M3 Expressive Now Playing & Search Bar */
+.music-now-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.music-now-art {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(74,222,128,0.22), rgba(139,92,246,0.24));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ac);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.music-now-meta { min-width: 0; flex: 1; }
+.music-play-main {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  background: var(--ac) !important;
+  color: var(--ctxt) !important;
+  box-shadow: 0 4px 14px rgba(74,222,128,0.28);
+}
+.m3-search-wrap {
+  position: relative;
+  margin: 10px 0 8px;
+}
+.m3-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--txt2);
+  pointer-events: none;
+}
+.m3-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 38px 0 40px;
+  border-radius: 22px;
+  border: none;
+  background: var(--surf2);
+  color: var(--txt);
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+}
+.m3-search-input::placeholder { color: var(--txt2); }
+.m3-search-input:focus { box-shadow: inset 0 0 0 1.5px var(--ac); }
+.m3-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--txt2);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.m3-search-clear.visible { display: inline-flex; }
+
+/* M3 Bottom Navigation Bar */
+.m3-nav-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 78px;
+  padding: 6px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: var(--surf);
+  border-top: 1px solid var(--brd);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  z-index: 950;
+  box-sizing: border-box;
+}
+body.tool-modal-open .m3-nav-bar,
+body.menu-open .m3-nav-bar {
+  display: none;
+}
+.m3-nav-item {
+  border: none;
+  background: transparent;
+  color: var(--txt2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.m3-nav-pill {
+  width: 60px;
+  height: 30px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s ease, color .18s ease;
+}
+.m3-nav-item.active { color: var(--txt); font-weight: 700; }
+.m3-nav-item.active .m3-nav-pill {
+  background: var(--ac);
+  color: var(--ctxt);
+}
+
+/* M3 Modal Bottom Sheet */
+.m3-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 15, 0.62);
+  z-index: 1200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.m3-sheet-backdrop.open { display: flex; }
+.m3-bottom-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--surf);
+  border-radius: 28px 28px 0 0;
+  padding: 10px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 36px rgba(0,0,0,0.55);
+  box-sizing: border-box;
+  animation: m3SheetSlideUp .22s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes m3SheetSlideUp {
+  from { transform: translateY(48px); opacity: 0.6; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.m3-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--txt2);
+  opacity: 0.45;
+  margin: 2px auto 12px;
+}
+.m3-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.m3-sheet-title {
+  font-size: 20px;
+  color: var(--txt);
+  margin: 0;
+}
+.m3-sheet-card {
+  background: var(--surf2);
+  border-radius: 20px;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 </style>
 </head>
@@ -1332,143 +1544,77 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 
 <!-- ── SCREEN 1: THERAPY (DEFAULT MAIN SCREEN) ── -->
 <div class="screen active" id="sc-therapy">
-  <div class="top-nav-bar" style="display:flex; align-items:center; gap: 14px; margin-bottom: 1.25rem;">
-    <button type="button" class="hamburger-btn" onclick="openMenu()" aria-label="Open Settings" title="Settings" style="flex-shrink:0;">
+  <div class="m3-top-app-bar">
+    <button type="button" class="m3-icon-btn" onclick="openMenu()" aria-label="Open Settings" title="Settings">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
     <div style="flex: 1; min-width: 0;">
       <div class="ey" style="margin: 0; line-height: 1.2; text-align: left;">Tinnitus Relief</div>
-      <h1 class="top-title">Notched Sound</h1>
+      <h1 class="top-title" style="font-size:28px;">Notched Sound</h1>
     </div>
+    <span class="m3-status-chip" id="spectrum-source-badge">Idle</span>
+    <button type="button" class="m3-icon-btn tonal" id="btn-open-controls-sheet" onclick="openAudioControlsSheet()" aria-label="Notch &amp; Audio Controls" title="Notch &amp; Audio Controls">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+    </button>
   </div>
 
   <div id="docked-spectrum-sentinel" aria-hidden="true" style="height:1px; margin-top:-1px;"></div>
-  <!-- ── UNIFIED STICKY DOCK WRAPPER: SPECTRUM + TABS ALWAYS DOCKED TOGETHER ── -->
+  <!-- ── DOCKED TOP BOX: FREQUENCY NOTCH SPECTRUM ── -->
   <div class="therapy-sticky-dock-wrap" id="therapy-sticky-dock-wrap">
-    <!-- ── DOCKED TOP BOX: FREQUENCY NOTCH SPECTRUM + INDEPENDENT EAR VOLUMES ── -->
     <div class="docked-top-box" id="docked-top-box">
       <div class="docked-top-header">
-        <button type="button" class="docked-collapse-toggle" id="docked-collapse-toggle" onclick="toggleTherapyDockSettings()" aria-expanded="true" aria-controls="docked-spectrum-settings">
+        <button type="button" class="docked-collapse-toggle" id="docked-collapse-toggle" onclick="toggleTherapyDockSettings()" aria-expanded="true" aria-controls="docked-spectrum-legend">
           <span class="section-heading">Frequency Notch Spectrum</span>
           <svg class="docked-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
-        <span id="spectrum-source-badge" style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--ab);color:var(--ac);text-transform:uppercase;">Idle</span>
+        <span id="docked-compact-summary" style="font-size:11px;font-family:monospace;color:var(--txt2);"></span>
       </div>
 
       <div class="docked-spectrum-visual" id="docked-spectrum-visual">
-        <canvas id="spec-canvas" height="120" style="width:100%;height:120px;background:var(--surf2);border-radius:8px"></canvas>
+        <canvas id="spec-canvas" height="120" style="width:100%;height:120px;background:var(--surf2);border-radius:14px"></canvas>
       
         <div class="docked-spectrum-legend" id="docked-spectrum-legend">
-          <div class="notch-legend" style="margin-top:5px; margin-bottom:2px;">
+          <div class="notch-legend" style="margin-top:6px; margin-bottom:2px;">
             <span><svg width="12" height="2" style="vertical-align:middle"><line x1="0" y1="1" x2="12" y2="1" stroke="var(--ac)" stroke-width="2.2"/></svg> Left: <strong id="spec-lf" style="color:var(--ac)">7,400 Hz</strong> <span class="legend-tone" id="spec-lt">· Pure Tone</span></span>
             <span><svg width="12" height="2" style="vertical-align:middle"><line x1="0" y1="1" x2="12" y2="1" stroke="var(--ear-r)" stroke-width="2.2"/></svg> Right: <strong id="spec-rf" style="color:var(--ear-r)">7,400 Hz</strong> <span class="legend-tone" id="spec-rt">· Pure Tone</span></span>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--txt2); font-family:monospace; margin-top:2px; padding:0 2px;">
             <span>— Solid: Sound Output</span>
+            <span>··· Dotted: Ringing Match</span>
           </div>
         </div>
       </div>
-
-      <div class="docked-spectrum-settings" id="docked-spectrum-settings">
-        <div class="docked-settings-inner" id="docked-settings-inner">
-      <div class="notch-bw-row">
-        <div class="notch-bw-copy">
-          <span class="notch-bw-label">Notch Width</span>
-          <span class="notch-bw-sub">Width of the removed tinnitus band</span>
-        </div>
-        <div class="notch-bw-toggle" role="group" aria-label="Notch bandwidth">
-          <button type="button" class="notch-bw-opt" id="notch-bw-05" onclick="setNotchBandwidth(0.5)" aria-pressed="false">
-            <span class="notch-bw-num">0.5</span>
-            <span class="notch-bw-unit">oct</span>
-          </button>
-          <button type="button" class="notch-bw-opt active" id="notch-bw-10" onclick="setNotchBandwidth(1)" aria-pressed="true">
-            <span class="notch-bw-num">1</span>
-            <span class="notch-bw-unit">oct</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Combined Master Volume & Ear Outputs Card matching user layout -->
-      <div class="docked-volume-card">
-        <!-- Master Volume -->
-        <div class="docked-vol-section">
-          <div class="docked-vol-header">
-            <span class="docked-vol-title">Master Volume</span>
-            <span class="docked-vol-val-text" id="th-vl">80%</span>
-          </div>
-          <div class="docked-vol-slider-row">
-            <svg class="docked-vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
-            <input type="range" id="th-vol-sl" min="0" max="100" step="1" value="80" oninput="onPlaybackVol(this.value)" class="docked-slider vol-slider-master">
-            <svg class="docked-vol-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-          </div>
-        </div>
-
-        <!-- Ear Outputs -->
-        <div class="docked-ear-section">
-          <div class="docked-ear-title">Ear Outputs</div>
-          <div class="docked-ear-row">
-            <span class="docked-ear-letter docked-ear-l">L</span>
-            <input type="range" min="0" max="100" id="vol-l-sl" value="100" oninput="setEarVol('left',this.value)" class="docked-slider vol-slider-l">
-            <span class="docked-ear-val-text" id="vol-l-val">100%</span>
-          </div>
-          <div class="docked-ear-row">
-            <span class="docked-ear-letter docked-ear-r">R</span>
-            <input type="range" min="0" max="100" id="vol-r-sl" value="100" oninput="setEarVol('right',this.value)" class="docked-slider vol-slider-r">
-            <span class="docked-ear-val-text" id="vol-r-val">100%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Shared session duration for soundscapes and music -->
-      <div style="margin-top:10px; padding-top:9px; border-top:1px solid var(--brd);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Session Duration</span>
-          <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:2px 7px; border-radius:10px; border:1px solid var(--ac);">Continuous (∞)</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
-          <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
-          <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
-        </div>
-        <div id="timer-block" style="display:none; margin-top:7px; padding:6px 10px; background:var(--surf2); border:1px solid var(--brd); border-radius:8px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt2);font-weight:700;">Remaining</span>
-            <span class="timer-disp" id="timer-cd" style="font-size:18px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
-          </div>
-        </div>
-        <label class="custom-check-row" style="margin-top: 8px;">
-          <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
-          <span class="custom-check-box"></span>
-          <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
-        </label>
-      </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sound source tabs -->
-    <div class="therapy-source-tabs" role="tablist" aria-label="Therapy sound source" onkeydown="onTherapySourceTabKeydown(event)">
-      <button type="button" class="therapy-source-tab active" id="therapy-source-tab-ambient" data-therapy-source-tab="ambient" role="tab" aria-selected="true" aria-controls="th-card" tabindex="0" onclick="setTherapySourceTab('ambient')">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h2l2-5 3 10 3-14 3 13 2-4h5"></path></svg>
-        <span>Ambient soundscapes</span>
-      </button>
-      <button type="button" class="therapy-source-tab" id="therapy-source-tab-music" data-therapy-source-tab="music" role="tab" aria-selected="false" aria-controls="music-card" tabindex="-1" onclick="setTherapySourceTab('music')">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-        <span>Music player</span>
-      </button>
     </div>
   </div>
 
     <!-- Backdrop Soundscape Box -->
   <div class="card therapy-source-panel" id="th-card" role="tabpanel" data-therapy-source-panel="ambient" aria-labelledby="therapy-source-tab-ambient">
-    <div class="section-heading" style="margin-bottom:10px;">Ambient soundscapes</div>
-    <div class="snd-grid" style="grid-template-columns:1fr 1fr; margin-bottom:12px;">
-      <button class="snd-btn" id="snd-rain" onclick="trySound('rain')"><span class="sname">Rainfall</span><span class="sdesc">Gentle drops</span></button>
-      <button class="snd-btn" id="snd-ocean" onclick="trySound('ocean')"><span class="sname">Ocean Surf</span><span class="sdesc">Slow waves</span></button>
-      <button class="snd-btn" id="snd-wind" onclick="trySound('wind')"><span class="sname">Wind</span><span class="sdesc">Soft breeze</span></button>
-      <button class="snd-btn" id="snd-pink" onclick="trySound('pink')"><span class="sname">Pink Noise</span><span class="sdesc">Balanced -3dB</span></button>
-      <button class="snd-btn" id="snd-brown" onclick="trySound('brown')"><span class="sname">Brown Noise</span><span class="sdesc">Deep low rumble</span></button>
-      <button class="snd-btn sel" id="snd-white" onclick="trySound('white')"><span class="sname">White Noise</span><span class="sdesc">Full spectrum</span></button>
+    <div class="section-heading" style="margin-bottom:12px;">Ambient soundscapes</div>
+    <div class="snd-grid">
+      <button class="snd-btn" id="snd-rain" onclick="trySound('rain')">
+        <span class="snd-copy"><span class="sname">Rainfall</span><span class="sdesc">Gentle drops</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path><line x1="8" y1="19" x2="8" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><line x1="16" y1="19" x2="16" y2="21"></line></svg>
+      </button>
+      <button class="snd-btn" id="snd-ocean" onclick="trySound('ocean')">
+        <span class="snd-copy"><span class="sname">Ocean Surf</span><span class="sdesc">Slow waves</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"></path></svg>
+      </button>
+      <button class="snd-btn" id="snd-wind" onclick="trySound('wind')">
+        <span class="snd-copy"><span class="sname">Wind</span><span class="sdesc">Soft breeze</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+      </button>
+      <button class="snd-btn" id="snd-pink" onclick="trySound('pink')">
+        <span class="snd-copy"><span class="sname">Pink Noise</span><span class="sdesc">Balanced -3dB</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="10" x2="4" y2="14"></line><line x1="8" y1="7" x2="8" y2="17"></line><line x1="12" y1="4" x2="12" y2="20"></line><line x1="16" y1="7" x2="16" y2="17"></line><line x1="20" y1="10" x2="20" y2="14"></line></svg>
+      </button>
+      <button class="snd-btn" id="snd-brown" onclick="trySound('brown')">
+        <span class="snd-copy"><span class="sname">Brown Noise</span><span class="sdesc">Deep low rumble</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="12" x2="4" y2="16"></line><line x1="8" y1="9" x2="8" y2="18"></line><line x1="12" y1="6" x2="12" y2="20"></line><line x1="16" y1="9" x2="16" y2="18"></line><line x1="20" y1="12" x2="20" y2="16"></line></svg>
+      </button>
+      <button class="snd-btn sel" id="snd-white" onclick="trySound('white')">
+        <span class="snd-copy"><span class="sname">White Noise</span><span class="sdesc">Full spectrum</span></span>
+        <svg class="snd-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" y1="5" x2="4" y2="19"></line><line x1="8" y1="5" x2="8" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="16" y1="5" x2="16" y2="19"></line><line x1="20" y1="5" x2="20" y2="19"></line></svg>
+      </button>
     </div>
 
     <!-- Play Sound Therapy Button -->
@@ -1502,8 +1648,15 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 
       <!-- Now Playing Deck -->
       <div class="music-now-card" id="music-now-deck">
-        <div class="music-track-title" id="now-track-title">No Track Selected</div>
-        <div class="music-track-sub" id="now-track-sub">Select an artist or album below to begin</div>
+        <div class="music-now-header">
+          <div class="music-now-art" id="now-track-art">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          </div>
+          <div class="music-now-meta">
+            <div class="music-track-title" id="now-track-title">No Track Selected</div>
+            <div class="music-track-sub" id="now-track-sub">Select an artist or album below to begin</div>
+          </div>
+        </div>
 
         <!-- Scrubber -->
         <div class="music-scrub-row">
@@ -1521,8 +1674,8 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
           </button>
           <button type="button" class="music-play-main" id="btn-music-play" onclick="toggleMusicPlay()" title="Play / Pause" aria-label="Play / Pause">
-            <svg id="svg-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
-            <svg id="svg-pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+            <svg id="svg-play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+            <svg id="svg-pause-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
           </button>
           <button type="button" class="music-ctrl-btn" onclick="nextMusicTrack()" title="Next Track" aria-label="Next Track">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line></svg>
@@ -1531,6 +1684,15 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
           </button>
         </div>
+      </div>
+
+      <!-- M3 Search Bar -->
+      <div class="m3-search-wrap">
+        <svg class="m3-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="music-search-input" class="m3-search-input" placeholder="Search artists, albums, or tracks" oninput="onMusicSearchInput(this.value)" aria-label="Search music library">
+        <button type="button" id="music-search-clear" class="m3-search-clear" onclick="clearMusicSearch()" aria-label="Clear search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
     </div>
 
@@ -1549,6 +1711,115 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   </div>
 </div><!-- /#music-card -->
 </div><!-- /#sc-therapy -->
+
+<!-- ── MATERIAL DESIGN 3 BOTTOM NAVIGATION BAR ── -->
+<nav class="m3-nav-bar" aria-label="Primary navigation" onkeydown="onTherapySourceTabKeydown(event)">
+  <button type="button" class="m3-nav-item active" id="therapy-source-tab-ambient" data-therapy-source-tab="ambient" role="tab" aria-selected="true" aria-controls="th-card" tabindex="0" onclick="setTherapySourceTab('ambient')">
+    <span class="m3-nav-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h2l2-5 3 10 3-14 3 13 2-4h5"></path></svg>
+    </span>
+    <span>Soundscapes</span>
+  </button>
+  <button type="button" class="m3-nav-item" id="therapy-source-tab-music" data-therapy-source-tab="music" role="tab" aria-selected="false" aria-controls="music-card" tabindex="-1" onclick="setTherapySourceTab('music')">
+    <span class="m3-nav-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    </span>
+    <span>Music</span>
+  </button>
+  <button type="button" class="m3-nav-item" id="nav-tab-calibrate" onclick="openCalibrationFromNav()">
+    <span class="m3-nav-pill">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </span>
+    <span>Calibrate</span>
+  </button>
+</nav>
+
+<!-- ── MATERIAL DESIGN 3 MODAL BOTTOM SHEET: NOTCH & AUDIO CONTROLS ── -->
+<div class="m3-sheet-backdrop" id="audio-controls-sheet" onclick="if(event.target===this)closeAudioControlsSheet()" aria-hidden="true">
+  <div class="m3-bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="m3-sheet-title-el">
+    <div class="m3-sheet-handle"></div>
+    <div class="m3-sheet-header">
+      <h2 class="m3-sheet-title section-heading" id="m3-sheet-title-el">Notch &amp; Audio Controls</h2>
+      <button type="button" class="m3-icon-btn" onclick="closeAudioControlsSheet()" aria-label="Close controls">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="m3-sheet-card">
+      <div class="notch-bw-row" style="margin:0;">
+        <div class="notch-bw-copy">
+          <span class="notch-bw-label section-heading">Notch Width</span>
+          <span class="notch-bw-sub">Width of the removed tinnitus band</span>
+        </div>
+        <div class="notch-bw-toggle" role="group" aria-label="Notch bandwidth">
+          <button type="button" class="notch-bw-opt" id="notch-bw-05" onclick="setNotchBandwidth(0.5)" aria-pressed="false">
+            <span class="notch-bw-num">0.5</span>
+            <span class="notch-bw-unit">oct</span>
+          </button>
+          <button type="button" class="notch-bw-opt active" id="notch-bw-10" onclick="setNotchBandwidth(1)" aria-pressed="true">
+            <span class="notch-bw-num">1</span>
+            <span class="notch-bw-unit">oct</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combined Master Volume (Phone Media Volume) & Ear Outputs -->
+    <div class="m3-sheet-card">
+      <div class="docked-vol-section" style="margin-bottom:14px;">
+        <div class="docked-vol-header">
+          <span class="docked-vol-title section-heading">Master Volume</span>
+          <span class="docked-vol-val-text" id="th-vl">80%</span>
+        </div>
+        <div class="docked-vol-slider-row">
+          <svg class="docked-vol-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+          <input type="range" id="th-vol-sl" min="0" max="100" step="1" value="80" oninput="onPlaybackVol(this.value)" class="docked-slider vol-slider-master">
+          <svg class="docked-vol-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        </div>
+      </div>
+
+      <div class="docked-ear-section">
+        <div class="docked-ear-title section-heading">Ear Outputs</div>
+        <div class="docked-ear-row">
+          <span class="docked-ear-letter docked-ear-l">L</span>
+          <input type="range" min="0" max="100" id="vol-l-sl" value="100" oninput="setEarVol('left',this.value)" class="docked-slider vol-slider-l">
+          <span class="docked-ear-val-text" id="vol-l-val">100%</span>
+        </div>
+        <div class="docked-ear-row">
+          <span class="docked-ear-letter docked-ear-r">R</span>
+          <input type="range" min="0" max="100" id="vol-r-sl" value="100" oninput="setEarVol('right',this.value)" class="docked-slider vol-slider-r">
+          <span class="docked-ear-val-text" id="vol-r-val">100%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared Session Duration -->
+    <div class="m3-sheet-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span class="session-duration-heading section-heading">Session Duration</span>
+        <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:3px 9px; border-radius:12px;">Continuous (∞)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
+        <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
+      </div>
+      <div id="timer-block" style="display:none; margin-top:8px; padding:8px 12px; background:var(--surf); border-radius:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="section-heading" style="font-size:14px;">Remaining</span>
+          <span class="timer-disp" id="timer-cd" style="font-size:18px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
+        </div>
+      </div>
+      <label class="custom-check-row" style="margin-top: 12px;">
+        <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
+        <span class="custom-check-box"></span>
+        <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
+      </label>
+    </div>
+
+    <button type="button" class="btn-main" style="margin-top:4px;" onclick="closeAudioControlsSheet()">Done</button>
+  </div>
+</div>
 
 <!-- Hidden HTML5 Audio element for Music Playback -->
 <audio id="music-audio" preload="auto"></audio>
@@ -2026,22 +2297,8 @@ function onTherapyScroll(){
       }
     }
 
-    // Strict scroll boundary clamping:
-    // 1. Ambient soundscapes: clamp scroll so content never scrolls under tabs (Screenshot 1)
-    // 2. Music player: clamp scroll so player deck docks flush under tabs with an 8px gap (Screenshot 2)
-    if(therapySourceTab === 'ambient'){
-      const wrap = document.getElementById('therapy-sticky-dock-wrap');
-      const card = document.getElementById('th-card');
-      if(wrap && card){
-        const wrapBottom = wrap.getBoundingClientRect().bottom;
-        const cardTop = card.getBoundingClientRect().top;
-        const diff = cardTop - wrapBottom;
-        const maxScroll = Math.max(0, scrollY + diff - 8);
-        if(scrollY > maxScroll + 1){
-          window.scrollTo({ top: maxScroll, behavior: 'auto' });
-        }
-      }
-    } else if(therapySourceTab === 'music'){
+    // Clean boundary clamping for music dock when scrolled
+    if(therapySourceTab === 'music'){
       const wrap = document.getElementById('therapy-sticky-dock-wrap');
       const deck = document.getElementById('music-now-deck');
       if(wrap && deck){
@@ -2154,6 +2411,7 @@ function initTherapyDock(){
     }catch(err){}
   }
   updateStickyOffsets();
+  syncNativeMediaVolume();
   onTherapyScroll();
 }
 
@@ -2333,8 +2591,11 @@ function suspendAudioIfIdle(){
 }
 
 function calcPlaybackGain(){
-  // Perceptual taper plus a dedicated top-end boost. The limiter in the master
-  // chain keeps the new 2.5x maximum from producing hard digital clipping.
+  // On Android, Master Volume controls the hardware STREAM_MUSIC volume directly
+  // so WebAudio stays at nominal unity gain to avoid double attenuation.
+  if(window.AndroidBridge && typeof window.AndroidBridge.setMediaVolume === 'function'){
+    return 1.0;
+  }
   const norm = Math.max(0, Math.min(100, playbackVol)) / 100;
   const taper = Math.pow(norm, 1.8);
   const boostProgress = Math.max(0, Math.min(1, (norm - 0.72) / 0.28));
@@ -2456,10 +2717,38 @@ function setNotchBandwidth(value){
   drawStaticSpectrum();
 }
 
+function syncNativeMediaVolume(){
+  if(window.AndroidBridge && typeof window.AndroidBridge.getMediaVolume === 'function'){
+    try{
+      const pct = Math.max(0, Math.min(100, parseInt(window.AndroidBridge.getMediaVolume(), 10) || 0));
+      playbackVol = pct;
+      const sl = document.getElementById('th-vol-sl');
+      if(sl) sl.value = pct;
+      const el = document.getElementById('th-vl');
+      if(el) el.textContent = pct + '%';
+      drawStaticSpectrum();
+    }catch(e){}
+  }
+}
+
+function onNativeMediaVolumeChanged(pct){
+  const next = Math.max(0, Math.min(100, parseInt(pct, 10) || 0));
+  if(next === playbackVol) return;
+  playbackVol = next;
+  const sl = document.getElementById('th-vol-sl');
+  if(sl) sl.value = next;
+  const el = document.getElementById('th-vl');
+  if(el) el.textContent = next + '%';
+  drawStaticSpectrum();
+}
+
 function onPlaybackVol(v){
   playbackVol = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
   const el = document.getElementById('th-vl');
   if(el) el.textContent = playbackVol + '%';
+  if(window.AndroidBridge && typeof window.AndroidBridge.setMediaVolume === 'function'){
+    try{ window.AndroidBridge.setMediaVolume(playbackVol); }catch(e){}
+  }
   applyThGain();
   applyMusicGain();
   saveActiveProfileState(false);
@@ -2835,6 +3124,31 @@ function restartEar(){
 const THERAPY_SOURCE_TAB_KEY = 'tr_therapy_source_tab_v1';
 let therapySourceTab = 'ambient';
 
+function openAudioControlsSheet(){
+  syncNativeMediaVolume();
+  const sheet = document.getElementById('audio-controls-sheet');
+  if(sheet){
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeAudioControlsSheet(){
+  const sheet = document.getElementById('audio-controls-sheet');
+  if(sheet){
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function openCalibrationFromNav(){
+  if(typeof startFullRecalibration === 'function'){
+    startFullRecalibration();
+  } else if(typeof openCalibrationModal === 'function'){
+    openCalibrationModal();
+  }
+}
+
 function setTherapySourceTab(tab, persist){
   const next = tab === 'music' ? 'music' : 'ambient';
   therapySourceTab = next;
@@ -2850,6 +3164,11 @@ function setTherapySourceTab(tab, persist){
     panel.hidden = panel.dataset.therapySourcePanel !== next;
   });
 
+  const dock = document.getElementById('docked-top-box');
+  if(dock){
+    dock.classList.toggle('music-compact-mode', next === 'music');
+  }
+
   if(persist !== false){
     try{ localStorage.setItem(THERAPY_SOURCE_TAB_KEY, next); }catch(e){}
   }
@@ -2860,6 +3179,7 @@ function setTherapySourceTab(tab, persist){
       syncMusicBrowserDockHeight();
       positionAlphaIndex();
     }
+    if(!drawRAF) drawStaticSpectrum();
   });
 }
 
@@ -3251,6 +3571,28 @@ function drawVolumeLines(ctx, W, H, dk){
   ctx.beginPath();
   ctx.moveTo(0, yOutR);
   ctx.lineTo(W, yOutR);
+  ctx.stroke();
+
+  // Calibrated Ringing Match Lines (Dotted) for Left & Right ears
+  const ringL = Math.max(0, Math.min(100, (ws.ringingVol && ws.ringingVol.left !== undefined) ? ws.ringingVol.left : 50));
+  const ringR = Math.max(0, Math.min(100, (ws.ringingVol && ws.ringingVol.right !== undefined) ? ws.ringingVol.right : 50));
+  const yRingL = bottom - (ringL / 100) * usable;
+  const yRingR = bottom - (ringR / 100) * usable;
+
+  ctx.lineWidth = 1.8;
+  ctx.setLineDash([2, 4]);
+  ctx.globalAlpha = 0.85;
+
+  ctx.strokeStyle = colors[0];
+  ctx.beginPath();
+  ctx.moveTo(0, yRingL);
+  ctx.lineTo(W, yRingL);
+  ctx.stroke();
+
+  ctx.strokeStyle = colors[1];
+  ctx.beginPath();
+  ctx.moveTo(0, yRingR);
+  ctx.lineTo(W, yRingR);
   ctx.stroke();
 
   ctx.restore();
@@ -5031,6 +5373,24 @@ function musicThumbHtml(trackId){
     '</div>';
 }
 
+let musicSearchQuery = '';
+
+function onMusicSearchInput(val){
+  musicSearchQuery = String(val || '').trim().toLowerCase();
+  const clearBtn = document.getElementById('music-search-clear');
+  if(clearBtn) clearBtn.classList.toggle('visible', musicSearchQuery.length > 0);
+  navToArtists();
+}
+
+function clearMusicSearch(){
+  musicSearchQuery = '';
+  const input = document.getElementById('music-search-input');
+  if(input) input.value = '';
+  const clearBtn = document.getElementById('music-search-clear');
+  if(clearBtn) clearBtn.classList.remove('visible');
+  navToArtists();
+}
+
 // ── BROWSER NAVIGATION (Artists -> Albums -> Tracks) ──
 function navToArtists(){
   currentArtistIndex = -1;
@@ -5039,7 +5399,7 @@ function navToArtists(){
   stopAlphaMomentum();
 
   const bc = document.getElementById('music-breadcrumb');
-  if(bc) bc.innerHTML = '<span class="music-bc-item">All Artists (' + musicLibrary.length + ')</span>';
+  if(bc) bc.innerHTML = '<span class="music-bc-item">' + (musicSearchQuery ? 'Search Results' : 'All Artists (' + musicLibrary.length + ')') + '</span>';
   syncMusicBrowserDockHeight();
 
   const container = document.getElementById('music-browser-content');
@@ -5051,6 +5411,41 @@ function navToArtists(){
   if(musicLibrary.length === 0){
     box.classList.remove('show-index');
     container.innerHTML = '<div style="text-align:center;padding:24px 16px;font-size:12px;color:var(--txt2);">No artists loaded.<br>Select a music folder in Tone Settings menu.</div>';
+    return;
+  }
+
+  if(musicSearchQuery){
+    box.classList.remove('show-index');
+    hideAlphaIndex();
+    const matchedArtists = [];
+    for(let aIdx = 0; aIdx < musicLibrary.length; aIdx++){
+      const art = musicLibrary[aIdx];
+      const artMatch = (art.artist || '').toLowerCase().includes(musicSearchQuery);
+      const albumMatch = (art.albums || []).some(al =>
+        (al.album || '').toLowerCase().includes(musicSearchQuery) ||
+        (al.tracks || []).some(tr => (tr.title || '').toLowerCase().includes(musicSearchQuery))
+      );
+      if(artMatch || albumMatch) matchedArtists.push({ aIdx, art });
+    }
+    if(matchedArtists.length === 0){
+      container.innerHTML = '<div style="text-align:center;padding:24px 16px;font-size:12px;color:var(--txt2);">No artists, albums, or tracks match "' + escapeHtml(musicSearchQuery) + '".</div>';
+    } else {
+      container.innerHTML = matchedArtists.map(entry => {
+        const art = entry.art;
+        const albCount = (art.albums || []).length;
+        let trkCount = 0;
+        (art.albums || []).forEach(a => trkCount += (a.tracks || []).length);
+        return '<div class="music-item-row" onclick="navToArtist(' + entry.aIdx + ')">' +
+          musicThumbHtml(artistArtworkTrackId(art)) +
+          '<div class="music-item-main">' +
+            '<div class="music-item-title">' + escapeHtml(art.artist) + '</div>' +
+            '<div class="music-item-sub">' + albCount + ' album' + (albCount === 1 ? '' : 's') + ' • ' + trkCount + ' tracks</div>' +
+          '</div>' +
+          '<div style="color:var(--txt2);font-size:13px;font-weight:700;">›</div>' +
+        '</div>';
+      }).join('');
+    }
+    if(scroll) scroll.scrollTop = 0;
     return;
   }
 
