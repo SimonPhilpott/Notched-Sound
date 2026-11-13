@@ -1173,40 +1173,45 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 
 .music-browser-box {
   position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
   padding: 0;
   border: none !important;
   overflow: hidden;
-  max-height: none;
+  height: calc(100vh - var(--therapy-dock-height, 210px) - 218px);
+  min-height: 250px;
 }
 .music-browser-scroll {
   position: relative;
-  max-height: calc(100vh - var(--therapy-dock-height, 140px) - var(--music-deck-height, 150px) - 146px);
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  max-height: none;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 10px 24px;
-  border-radius: 16px;
+  padding: 0 4px 16px 0;
+  border-radius: 14px;
   border: none;
   --music-breadcrumb-sticky-height: 31px;
 }
-.music-browser-box.show-index .music-browser-scroll { padding-right: 34px; }
-.music-browser-scroll::-webkit-scrollbar { width: 5px; }
+.music-browser-box.show-index .music-browser-scroll { padding-right: 2px; }
+.music-browser-scroll::-webkit-scrollbar { width: 4px; }
 .music-browser-scroll::-webkit-scrollbar-thumb { background: var(--brd); border-radius: 4px; }
 .alphanumeric-index {
   display: none;
-  position: fixed;
-  top: calc(var(--therapy-dock-height, 140px) + var(--music-deck-height, 150px) + 56px);
-  right: 6px;
-  bottom: 92px;
-  width: 26px;
-  height: auto;
-  max-height: calc(100vh - var(--therapy-dock-height, 140px) - var(--music-deck-height, 150px) - 148px);
-  padding: 10px 2px;
-  z-index: 850;
+  position: relative;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 100%;
+  padding: 4px 1px;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: center;
-  border-radius: 13px;
+  justify-content: space-between;
+  border-radius: 12px;
   background: var(--surf2);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.38), inset 0 0 0 1px var(--brd);
+  box-shadow: inset 0 0 0 1px var(--brd);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -1215,13 +1220,13 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
 .alpha-letter {
   flex: 1 1 0;
   width: 20px;
-  min-height: 11px;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
   color: var(--txt2);
-  font: 800 9.5px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font: 800 9px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   pointer-events: auto;
   cursor: pointer;
   touch-action: none;
@@ -1358,8 +1363,51 @@ h1, h2, h3, h4, .top-title, .card-title, .menu-section-title,
   white-space: nowrap;
 }
 
-.docked-top-box.music-compact-mode #spec-canvas {
-  height: 76px !important;
+/* Collapsible Music Library Drawer */
+.music-library-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 16px;
+  background: var(--surf2);
+  color: var(--txt);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.music-library-toggle:active { background: var(--surf3); }
+.music-library-toggle-meta {
+  font-size: 11px;
+  color: var(--txt2);
+  font-family: monospace;
+}
+.music-library-chevron {
+  color: var(--txt2);
+  transition: transform .2s cubic-bezier(0.2, 0, 0, 1);
+  flex-shrink: 0;
+}
+#music-card.library-open .music-library-toggle {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+#music-card.library-open .music-library-chevron {
+  transform: rotate(180deg);
+}
+#music-card.library-open #music-now-deck {
+  display: none;
+}
+.music-library-drawer-body {
+  display: none;
+}
+#music-card.library-open .music-library-drawer-body {
+  display: block;
 }
 
 /* M3 Expressive Now Playing & Search Bar */
@@ -1651,24 +1699,16 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
 
     <!-- ── NOTCHED MUSIC PLAYER CARD ── -->
   <div class="card therapy-source-panel" id="music-card" role="tabpanel" data-therapy-source-panel="music" aria-labelledby="therapy-source-tab-music" hidden>
-    <div class="music-sticky-header-dock" id="music-sticky-header-dock">
-      <div class="music-header-row" id="music-header-row">
-        <div>
-          <span class="section-heading">Music player</span>
-          <div id="music-card-folder-sub" style="font-size:11px;color:var(--txt2);margin-top:2px;">Poweramp Tag Engine</div>
-        </div>
-        <span class="music-notch-pill" id="music-active-pill">Notch Active</span>
-      </div>
-
+    <div class="music-sticky-header-dock" id="music-sticky-header-dock" style="position:relative; top:auto; margin:0; padding:0; background:transparent;">
       <!-- Empty state when no folder chosen -->
-      <div id="music-empty-deck" style="text-align:center; padding: 22px 14px; background: var(--surf2); border: 1px solid var(--brd); border-radius: 12px; margin-bottom: 12px; display: none;">
+      <div id="music-empty-deck" style="text-align:center; padding: 22px 14px; background: var(--surf2); border-radius: 16px; margin-bottom: 12px; display: none;">
         <div style="font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 4px;">No Music Folder Configured</div>
         <div style="font-size: 11px; color: var(--txt2); margin-bottom: 14px; line-height: 1.5;">Select your music folder in Tone Settings menu or tap below to index your Poweramp-tagged collection.</div>
         <button type="button" class="btn-deck-action" onclick="pickMusicFolder()">Choose Music Folder</button>
       </div>
 
       <!-- Scanning status banner -->
-      <div id="music-scan-banner" style="display: none; align-items: center; justify-content: space-between; background: var(--ab); border: 1px solid var(--ac); border-radius: 8px; padding: 7px 12px; margin-bottom: 10px; font-size: 11px; color: var(--ac); font-weight: 600;">
+      <div id="music-scan-banner" style="display: none; align-items: center; justify-content: space-between; background: var(--ab); border-radius: 12px; padding: 7px 12px; margin-bottom: 10px; font-size: 11px; color: var(--ac); font-weight: 600;">
         <span id="music-banner-text">Indexing tags in background...</span>
         <span class="music-scan-pulse"></span>
       </div>
@@ -1681,7 +1721,7 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
           </div>
           <div class="music-now-meta">
             <div class="music-track-title" id="now-track-title">No Track Selected</div>
-            <div class="music-track-sub" id="now-track-sub">Select an artist or album below to begin</div>
+            <div class="music-track-sub" id="now-track-sub">Open Music Library below to select a track</div>
           </div>
         </div>
 
@@ -1713,30 +1753,41 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
         </div>
       </div>
 
-      <!-- M3 Search Bar -->
-      <div class="m3-search-wrap">
+      <!-- Collapsible Library Drawer Toggle -->
+      <button type="button" class="music-library-toggle" id="music-library-toggle" onclick="toggleMusicLibraryDrawer()" aria-expanded="false" aria-controls="music-library-drawer-body">
+        <span class="section-heading" style="font-size:16px;">Music Library</span>
+        <span style="display:flex; align-items:center; gap:8px;">
+          <span class="music-library-toggle-meta" id="music-library-drawer-label">Browse</span>
+          <svg class="music-library-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Collapsible Library Drawer Body (Search + Artist/Album/Track List + Integrated A-Z Scroller) -->
+    <div class="music-library-drawer-body" id="music-library-drawer-body">
+      <div class="m3-search-wrap" style="margin:0 0 8px;">
         <svg class="m3-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="search" id="music-search-input" class="m3-search-input" placeholder="Search artists, albums, or tracks" oninput="onMusicSearchInput(this.value)" aria-label="Search music library">
         <button type="button" id="music-search-clear" class="m3-search-clear" onclick="clearMusicSearch()" aria-label="Clear search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
-    </div>
 
-    <!-- Poweramp Tag Browser (Artist -> Album -> Tracks) -->
-    <div class="music-browser-box" id="music-browser-box">
-      <div class="music-browser-scroll" id="music-browser-scroll">
-        <div class="music-breadcrumb" id="music-breadcrumb">
-          <span class="music-bc-item" onclick="navToArtists()">All Artists</span>
+      <!-- Poweramp Tag Browser (Artist -> Album -> Tracks) -->
+      <div class="music-browser-box" id="music-browser-box">
+        <div class="music-browser-scroll" id="music-browser-scroll">
+          <div class="music-breadcrumb" id="music-breadcrumb">
+            <span class="music-bc-item" onclick="navToArtists()">All Artists</span>
+          </div>
+          <div id="music-browser-content">
+            <!-- Rendered dynamically -->
+          </div>
         </div>
-        <div id="music-browser-content">
-          <!-- Rendered dynamically -->
-        </div>
+        <div class="alphanumeric-index" id="alphanumeric-index" aria-label="Jump to artist letter"></div>
+        <div class="alpha-preview" id="alpha-preview" aria-hidden="true"></div>
+      </div>
     </div>
-      <div class="alphanumeric-index" id="alphanumeric-index" aria-label="Jump to artist letter"></div>
-    <div class="alpha-preview" id="alpha-preview" aria-hidden="true"></div>
-  </div>
-</div><!-- /#music-card -->
+  </div><!-- /#music-card -->
 </div><!-- /#sc-therapy -->
 
 <!-- ── MATERIAL DESIGN 3 BOTTOM NAVIGATION BAR ── -->
@@ -3155,6 +3206,31 @@ function openCalibrationFromNav(){
   }
 }
 
+function toggleMusicLibraryDrawer(forceOpen){
+  const card = document.getElementById('music-card');
+  const toggle = document.getElementById('music-library-toggle');
+  const label = document.getElementById('music-library-drawer-label');
+  if(!card) return;
+  const open = typeof forceOpen === 'boolean' ? forceOpen : !card.classList.contains('library-open');
+  card.classList.toggle('library-open', open);
+  if(toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if(label){
+    if(open){
+      label.textContent = 'Back to Player';
+    } else {
+      label.textContent = musicLibrary && musicLibrary.length ? ('Browse (' + musicLibrary.length + ')') : 'Browse';
+    }
+  }
+  if(open){
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  requestAnimationFrame(() => {
+    updateStickyOffsets();
+    syncMusicBrowserDockHeight();
+    positionAlphaIndex();
+  });
+}
+
 function setTherapySourceTab(tab, persist){
   const next = tab === 'music' ? 'music' : 'ambient';
   therapySourceTab = next;
@@ -3170,11 +3246,6 @@ function setTherapySourceTab(tab, persist){
     panel.hidden = panel.dataset.therapySourcePanel !== next;
   });
 
-  const dock = document.getElementById('docked-top-box');
-  if(dock){
-    dock.classList.toggle('music-compact-mode', next === 'music');
-  }
-
   if(persist !== false){
     try{ localStorage.setItem(THERAPY_SOURCE_TAB_KEY, next); }catch(e){}
   }
@@ -3182,6 +3253,11 @@ function setTherapySourceTab(tab, persist){
   requestAnimationFrame(() => {
     updateStickyOffsets();
     if(next === 'music'){
+      const card = document.getElementById('music-card');
+      const label = document.getElementById('music-library-drawer-label');
+      if(label && card && !card.classList.contains('library-open')){
+        label.textContent = musicLibrary && musicLibrary.length ? ('Browse (' + musicLibrary.length + ')') : 'Browse';
+      }
       syncMusicBrowserDockHeight();
       positionAlphaIndex();
     }
@@ -5340,13 +5416,9 @@ function hideAlphaIndex(){
 function positionAlphaIndex(){
   const box = document.getElementById('music-browser-box');
   const index = document.getElementById('alphanumeric-index');
+  const card = document.getElementById('music-card');
   if(!box || !index) return;
-  if(!box.classList.contains('show-index')){
-    index.classList.remove('index-visible');
-    return;
-  }
-  const boxRect = box.getBoundingClientRect();
-  if(boxRect.bottom <= 0 || boxRect.top >= window.innerHeight){
+  if(!box.classList.contains('show-index') || (card && !card.classList.contains('library-open'))){
     index.classList.remove('index-visible');
     return;
   }
