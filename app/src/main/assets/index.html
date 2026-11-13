@@ -801,7 +801,8 @@ body.tool-modal-open{overflow:hidden}
   top: 0;
   z-index: 9;
   margin: 0 0 4px;
-  padding: 12px 0 8px;
+  padding: 10px 12px 8px;
+  border-radius: 12px 12px 0 0;
   border-bottom: 1px solid var(--brd);
   background: var(--surf2);
   overflow-x: auto;
@@ -1535,7 +1536,8 @@ body.menu-open .m3-nav-bar {
 }
 
 /* M3 Modal Bottom Sheet */
-body.audio-sheet-open #therapy-sticky-dock-wrap {
+body.audio-sheet-open #therapy-sticky-dock-wrap,
+body.music-sheet-open #therapy-sticky-dock-wrap {
   z-index: 1250;
 }
 .m3-sheet-backdrop {
@@ -1559,6 +1561,20 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
   box-shadow: 0 -10px 36px rgba(0,0,0,0.55);
   box-sizing: border-box;
   animation: m3SheetSlideUp .22s cubic-bezier(0.2, 0, 0, 1);
+}
+#music-library-sheet .m3-bottom-sheet {
+  height: calc(100vh - var(--therapy-dock-height, 210px) - 8px);
+  max-height: calc(100vh - var(--therapy-dock-height, 210px) - 8px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+#music-library-sheet .music-browser-box {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  margin-top: 0;
 }
 @keyframes m3SheetSlideUp {
   from { transform: translateY(48px); opacity: 0.6; }
@@ -1601,6 +1617,9 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
       <h1 class="top-title" style="font-size:28px;">Notched Sound</h1>
     </div>
     <span class="m3-status-chip" id="spectrum-source-badge">Idle</span>
+    <button type="button" class="m3-icon-btn tonal" id="btn-music-library-sheet" onclick="toggleMusicLibrarySheet()" aria-label="Music Library" title="Music Library" aria-expanded="false" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+    </button>
     <button type="button" class="m3-icon-btn tonal" id="btn-open-controls-sheet" onclick="openAudioControlsSheet()" aria-label="Notch &amp; Audio Controls" title="Notch &amp; Audio Controls">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
     </button>
@@ -1750,44 +1769,34 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
         </div>
       </div>
 
-      <!-- Collapsible Library Drawer Toggle -->
-      <button type="button" class="music-library-toggle" id="music-library-toggle" onclick="toggleMusicLibraryDrawer()" aria-expanded="false" aria-controls="music-library-drawer-body">
-        <span class="section-heading" style="font-size:16px;">Music Library</span>
-        <span style="display:flex; align-items:center; gap:8px;">
-          <span class="music-library-toggle-meta" id="music-library-drawer-label">Browse</span>
-          <svg class="music-library-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </span>
-      </button>
-    </div>
-
-    <!-- Collapsible Library Drawer Body (Search + Artist/Album/Track List + Integrated A-Z Scroller) -->
-    <div class="music-library-drawer-body" id="music-library-drawer-body">
-      <div class="m3-search-wrap" style="margin:0 0 8px;">
-        <svg class="m3-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="search" id="music-search-input" class="m3-search-input" placeholder="Search artists, albums, or tracks" oninput="onMusicSearchInput(this.value)" aria-label="Search music library">
-        <button type="button" id="music-search-clear" class="m3-search-clear" onclick="clearMusicSearch()" aria-label="Clear search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <!-- Poweramp Tag Browser (Artist -> Album -> Tracks) -->
-      <div class="music-browser-box" id="music-browser-box">
-        <div class="music-browser-scroll" id="music-browser-scroll">
-          <div class="music-breadcrumb" id="music-breadcrumb">
-            <span class="music-bc-item" onclick="navToArtists()">All Artists</span>
-          </div>
-          <div id="music-browser-content">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-        <div class="alphanumeric-index" id="alphanumeric-index" aria-label="Jump to artist letter"></div>
-        <div class="alpha-preview" id="alpha-preview" aria-hidden="true"></div>
-      </div>
     </div>
   </div><!-- /#music-card -->
 
   <!-- ── UNIFIED M3 CALIBRATE & SETTINGS SCREEN ── -->
   <div class="therapy-source-panel" id="calibrate-card" role="tabpanel" data-therapy-source-panel="calibrate" aria-labelledby="nav-tab-calibrate" hidden>
+    <!-- Appearance & System Card -->
+    <div class="card">
+      <div class="section-heading" style="margin-bottom:10px;">Appearance &amp; System</div>
+      <div class="menu-theme-row" style="background:var(--surf2); border:none; border-radius:16px; padding:12px; margin-bottom:10px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 700;">Theme</div>
+          <div class="menu-theme-copy">Light or dark surface palette</div>
+        </div>
+        <div class="theme-choice-group" role="group" aria-label="Appearance theme">
+          <button type="button" class="theme-choice-btn" data-theme-choice="light" onclick="applyTheme('light', true)" aria-pressed="false">Light</button>
+          <button type="button" class="theme-choice-btn" data-theme-choice="dark" onclick="applyTheme('dark', true)" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+      <div class="battery-status-box" style="background:var(--surf2); border:none; border-radius:16px; padding:12px;">
+        <div class="battery-status-line">
+          <span class="battery-status-dot" id="battery-status-dot"></span>
+          <span id="battery-status-text">Checking battery protection...</span>
+        </div>
+        <div class="battery-status-copy" id="battery-status-copy">Android battery optimisation can pause long therapy sessions when the screen is off.</div>
+      </div>
+      <button type="button" class="btn-menu-action secondary" style="border-radius:14px; margin-top:10px;" onclick="openBatteryOptimizationPrompt()">Battery Optimisation Settings</button>
+    </div>
+
     <!-- Calibration Actions Card -->
     <div class="card">
       <div class="section-heading" style="margin-bottom:10px;">Calibration</div>
@@ -1909,29 +1918,6 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
         <button type="button" class="btn-menu-action secondary" style="border-radius:14px; margin-top:0;" onclick="rescanMusicFolder()">Rescan Tags</button>
       </div>
     </div>
-
-    <!-- Appearance & System Card -->
-    <div class="card">
-      <div class="section-heading" style="margin-bottom:10px;">Appearance &amp; System</div>
-      <div class="menu-theme-row" style="background:var(--surf2); border:none; border-radius:16px; padding:12px; margin-bottom:10px;">
-        <div>
-          <div style="font-size: 13px; font-weight: 700;">Theme</div>
-          <div class="menu-theme-copy">Light or dark surface palette</div>
-        </div>
-        <div class="theme-choice-group" role="group" aria-label="Appearance theme">
-          <button type="button" class="theme-choice-btn" data-theme-choice="light" onclick="applyTheme('light', true)" aria-pressed="false">Light</button>
-          <button type="button" class="theme-choice-btn" data-theme-choice="dark" onclick="applyTheme('dark', true)" aria-pressed="false">Dark</button>
-        </div>
-      </div>
-      <div class="battery-status-box" style="background:var(--surf2); border:none; border-radius:16px; padding:12px;">
-        <div class="battery-status-line">
-          <span class="battery-status-dot" id="battery-status-dot"></span>
-          <span id="battery-status-text">Checking battery protection...</span>
-        </div>
-        <div class="battery-status-copy" id="battery-status-copy">Android battery optimisation can pause long therapy sessions when the screen is off.</div>
-      </div>
-      <button type="button" class="btn-menu-action secondary" style="border-radius:14px; margin-top:10px;" onclick="openBatteryOptimizationPrompt()">Battery Optimisation Settings</button>
-    </div>
   </div><!-- /#calibrate-card -->
 </div><!-- /#sc-therapy -->
 
@@ -1953,7 +1939,7 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
     <span class="m3-nav-pill">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </span>
-    <span>Calibrate</span>
+    <span>Settings</span>
   </button>
 </nav>
 
@@ -2011,6 +1997,35 @@ body.audio-sheet-open #therapy-sticky-dock-wrap {
     </div>
 
     <button type="button" class="btn-main" style="margin-top:4px;" onclick="closeAudioControlsSheet()">Done</button>
+  </div>
+</div>
+
+<!-- ── MATERIAL DESIGN 3 MODAL BOTTOM SHEET: MUSIC LIBRARY ── -->
+<div class="m3-sheet-backdrop" id="music-library-sheet" onclick="if(event.target===this)closeMusicLibrarySheet()" aria-hidden="true">
+  <div class="m3-bottom-sheet" role="dialog" aria-modal="true" aria-label="Music library">
+    <div class="m3-sheet-handle"></div>
+
+    <div class="m3-search-wrap" style="margin:0 0 8px;">
+      <svg class="m3-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="search" id="music-search-input" class="m3-search-input" placeholder="Search artists, albums, or tracks" oninput="onMusicSearchInput(this.value)" aria-label="Search music library">
+      <button type="button" id="music-search-clear" class="m3-search-clear" onclick="clearMusicSearch()" aria-label="Clear search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <!-- Poweramp Tag Browser (Artist -> Album -> Tracks) -->
+    <div class="music-browser-box" id="music-browser-box">
+      <div class="music-browser-scroll" id="music-browser-scroll">
+        <div class="music-breadcrumb" id="music-breadcrumb">
+          <span class="music-bc-item" onclick="navToArtists()">All Artists</span>
+        </div>
+        <div id="music-browser-content">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+      <div class="alphanumeric-index" id="alphanumeric-index" aria-label="Jump to artist letter"></div>
+      <div class="alpha-preview" id="alpha-preview" aria-hidden="true"></div>
+    </div>
   </div>
 </div>
 
@@ -3136,6 +3151,7 @@ const THERAPY_SOURCE_TAB_KEY = 'tr_therapy_source_tab_v1';
 let therapySourceTab = 'ambient';
 
 function openAudioControlsSheet(){
+  closeMusicLibrarySheet();
   syncNativeMediaVolume();
   updateStickyOffsets();
   document.body.classList.add('audio-sheet-open');
@@ -3163,29 +3179,44 @@ function openCalibrationFromNav(){
   }
 }
 
-function toggleMusicLibraryDrawer(forceOpen){
-  const card = document.getElementById('music-card');
-  const toggle = document.getElementById('music-library-toggle');
-  const label = document.getElementById('music-library-drawer-label');
-  if(!card) return;
-  const open = typeof forceOpen === 'boolean' ? forceOpen : !card.classList.contains('library-open');
-  card.classList.toggle('library-open', open);
-  if(toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  if(label){
-    if(open){
-      label.textContent = 'Back to Player';
-    } else {
-      label.textContent = musicLibrary && musicLibrary.length ? ('Browse (' + musicLibrary.length + ')') : 'Browse';
-    }
+function openMusicLibrarySheet(){
+  closeAudioControlsSheet();
+  updateStickyOffsets();
+  document.body.classList.add('music-sheet-open');
+  const sheet = document.getElementById('music-library-sheet');
+  const btn = document.getElementById('btn-music-library-sheet');
+  if(sheet){
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
   }
-  if(open){
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }
+  if(btn) btn.setAttribute('aria-expanded', 'true');
   requestAnimationFrame(() => {
-    updateStickyOffsets();
     syncMusicBrowserDockHeight();
     positionAlphaIndex();
   });
+}
+
+function closeMusicLibrarySheet(){
+  document.body.classList.remove('music-sheet-open');
+  const sheet = document.getElementById('music-library-sheet');
+  const btn = document.getElementById('btn-music-library-sheet');
+  if(sheet){
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+  }
+  if(btn) btn.setAttribute('aria-expanded', 'false');
+  positionAlphaIndex();
+}
+
+function toggleMusicLibrarySheet(forceOpen){
+  const sheet = document.getElementById('music-library-sheet');
+  const isOpen = sheet ? sheet.classList.contains('open') : false;
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+  if(shouldOpen){
+    openMusicLibrarySheet();
+  } else {
+    closeMusicLibrarySheet();
+  }
 }
 
 function setTherapySourceTab(tab, persist){
@@ -3208,6 +3239,14 @@ function setTherapySourceTab(tab, persist){
     dockWrap.style.display = (next === 'calibrate') ? 'none' : '';
   }
 
+  const libBtn = document.getElementById('btn-music-library-sheet');
+  if(libBtn){
+    libBtn.style.display = (next === 'music') ? 'inline-flex' : 'none';
+  }
+  if(next !== 'music'){
+    closeMusicLibrarySheet();
+  }
+
   if(persist !== false){
     try{ localStorage.setItem(THERAPY_SOURCE_TAB_KEY, next); }catch(e){}
   }
@@ -3215,11 +3254,6 @@ function setTherapySourceTab(tab, persist){
   requestAnimationFrame(() => {
     updateStickyOffsets();
     if(next === 'music'){
-      const card = document.getElementById('music-card');
-      const label = document.getElementById('music-library-drawer-label');
-      if(label && card && !card.classList.contains('library-open')){
-        label.textContent = musicLibrary && musicLibrary.length ? ('Browse (' + musicLibrary.length + ')') : 'Browse';
-      }
       syncMusicBrowserDockHeight();
       positionAlphaIndex();
     } else if(next === 'calibrate'){
@@ -5372,9 +5406,9 @@ function hideAlphaIndex(){
 function positionAlphaIndex(){
   const box = document.getElementById('music-browser-box');
   const index = document.getElementById('alphanumeric-index');
-  const card = document.getElementById('music-card');
+  const sheet = document.getElementById('music-library-sheet');
   if(!box || !index) return;
-  if(!box.classList.contains('show-index') || (card && !card.classList.contains('library-open'))){
+  if(!box.classList.contains('show-index') || (sheet && !sheet.classList.contains('open'))){
     index.classList.remove('index-visible');
     return;
   }
