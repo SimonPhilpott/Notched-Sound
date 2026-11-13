@@ -141,16 +141,16 @@ input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer}
 .btn-main:active{transform:scale(0.985)}
 .btn-main:disabled{opacity:.35;cursor:not-allowed}
 .btn-sec{width:100%;padding:11px;border-radius:12px;border:1px solid var(--brd);background:transparent;color:var(--txt2);font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
-.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.snd-btn{padding:14px 12px;border-radius:18px;border:1.5px solid transparent;background:var(--surf2);color:var(--txt);cursor:pointer;font-size:13px;font-family:inherit;transition:background .18s,border-color .18s,color .18s,transform .12s;position:relative;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:66px}
+.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.snd-btn{padding:8px 10px;border-radius:14px;border:1.5px solid transparent;background:var(--surf2);color:var(--txt);cursor:pointer;font-size:12px;font-family:inherit;transition:background .18s,border-color .18s,color .18s,transform .12s;position:relative;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:46px}
 .snd-btn:active{transform:scale(0.98)}
 .snd-btn.sel{border-color:var(--ac);background:var(--ab);color:var(--txt);box-shadow:0 0 0 1px rgba(74,222,128,0.18)}
 .snd-btn.sel .sname{color:var(--ac)}
 .snd-btn.sel .snd-ico{color:var(--ac)}
 .snd-copy{min-width:0;flex:1}
-.snd-btn .sname{font-weight:600;font-size:14px;display:block;margin-bottom:2px;color:var(--txt)}
-.snd-btn .sdesc{font-size:11px;color:var(--txt2);display:block}
-.snd-ico{width:22px;height:22px;flex-shrink:0;color:var(--txt2);opacity:0.85}
+.snd-btn .sname{font-weight:600;font-size:13px;line-height:1.15;display:block;margin-bottom:1px;color:var(--txt)}
+.snd-btn .sdesc{font-size:10px;line-height:1.15;color:var(--txt2);display:block}
+.snd-ico{width:18px;height:18px;flex-shrink:0;color:var(--txt2);opacity:0.85}
 .snd-btn .lock{position:absolute;top:7px;right:8px;font-size:12px}
 .snd-btn.pro-locked{opacity:.6}
 .pro-tag{display:inline-block;background:var(--pro);color:#fff;border-radius:4px;font-size:10px;font-weight:700;padding:1px 5px;vertical-align:middle;margin-left:4px}
@@ -1617,6 +1617,30 @@ body.menu-open .m3-nav-bar {
       </button>
     </div>
 
+    <!-- Session Duration Slider on Main Screen -->
+    <div style="background:var(--surf2); border-radius:16px; padding:10px 12px; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span class="session-duration-heading section-heading" style="font-size:16px;">Session Duration</span>
+        <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:2px 8px; border-radius:12px;">Continuous (∞)</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
+        <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
+        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
+      </div>
+      <div id="timer-block" style="display:none; margin-top:7px; padding:6px 10px; background:var(--surf); border-radius:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="section-heading" style="font-size:13px;">Remaining</span>
+          <span class="timer-disp" id="timer-cd" style="font-size:17px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
+        </div>
+      </div>
+      <label class="custom-check-row" style="margin-top:8px;">
+        <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
+        <span class="custom-check-box"></span>
+        <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
+      </label>
+    </div>
+
     <!-- Play Sound Therapy Button -->
     <button class="btn-main" id="th-btn" onclick="toggleTherapy()">▶ Start Sound Therapy</button>
 
@@ -1791,30 +1815,6 @@ body.menu-open .m3-nav-bar {
           <span class="docked-ear-val-text" id="vol-r-val">100%</span>
         </div>
       </div>
-    </div>
-
-    <!-- Shared Session Duration -->
-    <div class="m3-sheet-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span class="session-duration-heading section-heading">Session Duration</span>
-        <span id="session-timer-disp" style="font-family:monospace; font-size:11px; font-weight:700; color:var(--ac); background:var(--ab); padding:3px 9px; border-radius:12px;">Continuous (∞)</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:14px;">∞</span>
-        <input type="range" id="session-timer-slider" min="0" max="720" step="15" value="0" oninput="onSessionTimerSlider(this.value)" style="flex:1; accent-color:var(--ac); height:6px;">
-        <span style="font-size:11px; font-family:monospace; color:var(--txt2); min-width:28px; text-align:right;">12h</span>
-      </div>
-      <div id="timer-block" style="display:none; margin-top:8px; padding:8px 12px; background:var(--surf); border-radius:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="section-heading" style="font-size:14px;">Remaining</span>
-          <span class="timer-disp" id="timer-cd" style="font-size:18px; font-weight:800; color:var(--ac); font-family:monospace; letter-spacing:1px;">30:00</span>
-        </div>
-      </div>
-      <label class="custom-check-row" style="margin-top: 12px;">
-        <input type="checkbox" id="sleep-fade" onchange="checkSleepFade(this)" class="custom-checkbox">
-        <span class="custom-check-box"></span>
-        <span class="custom-check-text">Gentle sleep fade out (last 5 min)</span>
-      </label>
     </div>
 
     <button type="button" class="btn-main" style="margin-top:4px;" onclick="closeAudioControlsSheet()">Done</button>
