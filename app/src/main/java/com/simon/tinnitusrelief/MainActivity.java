@@ -27,8 +27,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.util.Log;
@@ -48,7 +50,9 @@ import android.widget.Toast;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends Activity {
@@ -101,7 +105,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
 
@@ -178,30 +182,43 @@ public class MainActivity extends Activity {
                     }
                     if ("/music_stream".equalsIgnoreCase(reqUri.getPath())) {
                         String docUriStr = reqUri.getQueryParameter("uri");
-                        if (docUriStr != null) {
-                            try {
-                                Uri docUri = Uri.parse(docUriStr);
-                                InputStream is = getContentResolver().openInputStream(docUri);
-                                if (is == null) {
-                                    throw new IllegalStateException("Content resolver returned no audio stream");
-                                }
-                                String mime = resolveAudioMimeType(docUri);
-                                long contentLength = resolveContentLength(docUri);
+                        Map<String, String> headers = new HashMap<>();
+                        headers.put("Access-Control-Allow-Origin", "*");
+                        headers.put("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+                        headers.put("Access-Control-Allow-Headers", "Range");
+                        headers.put("Cache-Control", "no-store");
+                        headers.put("Accept-Ranges", "none");
 
-                                Map<String, String> headers = new HashMap<>();
-                                headers.put("Access-Control-Allow-Origin", "*");
-                                headers.put("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-                                headers.put("Access-Control-Allow-Headers", "Range");
-                                headers.put("Cache-Control", "no-store");
-                                headers.put("Accept-Ranges", "none");
-                                if (contentLength > 0) {
-                                    headers.put("Content-Length", String.valueOf(contentLength));
-                                }
-
-                                return new WebResourceResponse(mime, null, 200, "OK", headers, is);
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error streaming local music: " + docUriStr, e);
+                        if (docUriStr == null || docUriStr.trim().isEmpty()) {
+                            return new WebResourceResponse(
+                                    "text/plain",
+                                    "UTF-8",
+                                    400,
+                                    "Bad Request",
+                                    headers,
+                                    new ByteArrayInputStream("Missing music URI parameter".getBytes(StandardCharsets.UTF_8))
+                            );
+                        }
+                        try {
+                            Uri docUri = Uri.parse(docUriStr);
+                            InputStream is = openMusicInputStream(docUri);
+                            if (is == null) {
+                                throw new IllegalStateException("Content resolver returned no audio stream");
                             }
+                            String mime = resolveAudioMimeType(docUri);
+                            return new WebResourceResponse(mime, null, 200, "OK", headers, is);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error streaming local music: " + docUriStr, e);
+                            String msg = e.getClass().getSimpleName() + ": "
+                                    + (e.getMessage() != null ? e.getMessage() : "Unable to open audio stream");
+                            return new WebResourceResponse(
+                                    "text/plain",
+                                    "UTF-8",
+                                    404,
+                                    "Not Found",
+                                    headers,
+                                    new ByteArrayInputStream(msg.getBytes(StandardCharsets.UTF_8))
+                            );
                         }
                     }
                 }
@@ -404,6 +421,7 @@ public class MainActivity extends Activity {
         setupAudioFocus();
         setupMediaSession();
         registerMediaVolumeReceiver();
+        webView.clearCache(true);
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -850,18 +868,95 @@ public class MainActivity extends Activity {
         }
     }
 
+    private InputStream openMusicInputStream(Uri docUri) throws Exception {
+        Exception primaryError = null;
+        try {
+            InputStream direct = getContentResolver().openInputStream(docUri);
+            if (direct != null) {
+                return direct;
+            }
+        } catch (Exception e) {
+            primaryError = e;
+        }
+
+        try {
+            ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(docUri, "r");
+            if (pfd != null) {
+                return new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            }
+        } catch (Exception e) {
+            if (primaryError == null) primaryError = e;
+        }
+
+        SharedPreferences sp = getSharedPreferences(MusicIndexManager.PREF_NAME, Context.MODE_PRIVATE);
+        String savedTreeUri = sp.getString(MusicIndexManager.KEY_FOLDER_URI, null);
+        if (savedTreeUri != null && DocumentsContract.isDocumentUri(this, docUri)) {
+            Uri treeUri = Uri.parse(savedTreeUri);
+            Uri rebuiltUri = DocumentsContract.buildDocumentUriUsingTree(
+                    treeUri,
+                    DocumentsContract.getDocumentId(docUri)
+            );
+            InputStream treeStream = getContentResolver().openInputStream(rebuiltUri);
+            if (treeStream != null) {
+                return treeStream;
+            }
+        }
+
+        if (primaryError != null) {
+            throw primaryError;
+        }
+        return null;
+    }
+
+    private String normaliseAudioMime(String mime) {
+        if (mime == null) return null;
+        String lower = mime.trim().toLowerCase(Locale.ROOT);
+        if (lower.equals("audio/x-flac") || lower.equals("application/flac") || lower.equals("application/x-flac")) {
+            return "audio/flac";
+        }
+        if (lower.equals("audio/x-m4a") || lower.equals("audio/mp4a-latm")) {
+            return "audio/mp4";
+        }
+        if (lower.equals("audio/x-wav") || lower.equals("audio/vnd.wave")) {
+            return "audio/wav";
+        }
+        if (lower.equals("audio/x-mpeg") || lower.equals("audio/mp3")) {
+            return "audio/mpeg";
+        }
+        if (lower.equals("application/ogg") || lower.equals("audio/x-ogg")) {
+            return "audio/ogg";
+        }
+        return lower.startsWith("audio/") ? lower : null;
+    }
+
     private String resolveAudioMimeType(Uri uri) {
-        String mime = getContentResolver().getType(uri);
-        if (mime != null && mime.startsWith("audio/")) {
+        String mime = normaliseAudioMime(getContentResolver().getType(uri));
+        if (mime != null) {
             return mime;
         }
 
         String name = uri.getLastPathSegment();
         if (name != null && name.contains(".")) {
-            String extension = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
-            String guessed = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            if (guessed != null && guessed.startsWith("audio/")) {
+            String extension = name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+            String guessed = normaliseAudioMime(MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+            if (guessed != null) {
                 return guessed;
+            }
+            switch (extension) {
+                case "flac":
+                    return "audio/flac";
+                case "m4a":
+                case "mp4":
+                    return "audio/mp4";
+                case "ogg":
+                case "opus":
+                    return "audio/ogg";
+                case "wav":
+                    return "audio/wav";
+                case "aac":
+                    return "audio/aac";
+                default:
+                    break;
             }
         }
         return "audio/mpeg";
